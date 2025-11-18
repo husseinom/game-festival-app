@@ -1,0 +1,23 @@
+<div class="admin-container">
+    <h2>Liste des utilisateurs</h2>
+
+    @if (users().length === 0) {
+        <p>Pas d'utilisateurs</p>
+    }
+    <div class="users-grid">
+    @for (user of users(); track user.id) {
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>{{ user.login }}</mat-card-title>
+          <mat-card-subtitle>ID: {{ user.id }}</mat-card-subtitle>
+          <mat-card-subtitle>
+            <span class="role-badge" [class]="'role-' + user.role">
+              {{ user.role }}
+            </span>
+          </mat-card-subtitle>
+        </mat-card-header>
+      </mat-card>
+    }
+  </div>
+</div>
+

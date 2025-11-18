@@ -1,0 +1,71 @@
+<div class="login-container">
+    <!-- Message de chargement -->
+    <div class="loading-message">
+        @if(isLoading()){
+            <div class="spinner"></div>
+            ⏳ Connexion en cours, veuillez patienter...
+        }
+    </div>
+
+    <!-- Message d'erreur -->
+    <div class="error-message global-error">
+        @if (error() && !isLoading()) {
+            ❌ {{ error() }}
+        }
+    </div>
+
+    <!-- Message de succès -->
+    <div class="success-message">
+        @if (LoggedIn()) {
+           ✅ Connexion réussie ! Redirection vers l'accueil... 
+        }
+    </div>
+
+    <!-- Formulaire -->
+    @if (!isLoading() && !LoggedIn()) {
+        <form [formGroup]="form" (ngSubmit)="OnSubmit($event)" class="login-form">
+            <h2>Connexion</h2>
+
+            <!-- Champ Login -->
+            <div class="form-group">
+                <input 
+                    type="text" 
+                    formControlName="login"
+                    placeholder="Username"
+                    [class.error]="form.controls.login.invalid && form.controls.login.touched"
+                    required
+                />
+                @if(form.controls.login.invalid && form.controls.login.touched) {
+                    <div class="error-message">
+                        @if (form.controls.login.errors?.['required']) {
+                            Valid Username is required
+                        }
+                    </div>
+                }
+            </div>
+
+            <!-- Champ Password -->
+            <div class="form-group">
+                <input 
+                    type="password" 
+                    formControlName="password"
+                    placeholder="Password"
+                    [class.error]="form.controls.password.invalid && form.controls.password.touched"
+                    required
+                />
+                @if(form.controls.password.invalid && form.controls.password.touched) {
+                    <div class="error-message">
+                        @if (form.controls.password.errors?.['required']) {
+                            Password is required
+                        }
+                    </div>
+                }
+            </div>
+
+            <!-- Bouton Submit -->
+            <button type="submit" class="btn-primary" [disabled]="form.invalid">
+                Se connecter
+            </button>
+        </form>
+    }
+</div>

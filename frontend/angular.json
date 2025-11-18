@@ -25,6 +25,7 @@
               }
             ],
             "styles": [
+              "src/custom-theme.scss",
               "src/styles.css"
             ]
           },
@@ -62,7 +63,12 @@
               "buildTarget": "frontend:build:development"
             }
           },
-          "defaultConfiguration": "development"
+          "defaultConfiguration": "development",    
+          "options": {
+              "ssl": true,
+              "sslKey": "../../../backend/certs/localhost-key.pem",
+              "sslCert": "../../../backend/certs/localhost.pem"
+          }
         },
         "extract-i18n": {
           "builder": "@angular/build:extract-i18n"
