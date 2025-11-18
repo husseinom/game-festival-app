@@ -66,8 +66,8 @@
           "defaultConfiguration": "development",    
           "options": {
               "ssl": true,
-              "sslKey": "../../../backend/certs/localhost-key.pem",
-              "sslCert": "../../../backend/certs/localhost.pem"
+              "sslKey": "../backend/certs/localhost-key.pem",
+              "sslCert": "../backend/certs/localhost.pem"
           }
         },
         "extract-i18n": {
@@ -94,5 +94,8 @@
         }
       }
     }
+  },
+  "cli": {
+    "analytics": false
   }
 }
