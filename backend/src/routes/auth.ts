@@ -1,5 +1,4 @@
 import { Router } from 'express'
-import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
 import {pool} from '../db/database.js'
 import { verifyToken, createAccessToken, createRefreshToken } from '../midlleware/token-management.js'
@@ -24,11 +23,13 @@ router.post('/login', async (req, res) => { // --- LOGIN ---
     })
     res.json({ message: 'Authentification réussie', user: { login: user.login, role: user.role } })//connexion successful
 })
+
 router.post('/logout', (_req, res) => { // --- LOGOUT ---
     res.clearCookie('access_token')
     res.clearCookie('refresh_token')
     res.json({ message: 'Déconnexion réussie' })
 })
+
 // ------ Exemple de route accessible uniquement avec un JWT valide ------
 router.get('/me', verifyToken, (req: Express.Request, res) => {
     res.json({ message: 'Utilisateur authentifié', user: req.user, }) // req typée automatiquement => pas d'erreur dans VSCode
@@ -37,4 +38,5 @@ router.get('/me', verifyToken, (req: Express.Request, res) => {
 router.get('/whoami', verifyToken, (req, res) => {
     res.json({ user: req.user })
 })
+
 export default router

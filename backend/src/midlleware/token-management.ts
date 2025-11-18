@@ -7,9 +7,11 @@ import { JWT_SECRET, JWT_EXPIRATION, REFRESH_EXPIRATION } from '../config/env.js
 export function createAccessToken(user: UserToken) {
     return jwt.sign(user, JWT_SECRET, { expiresIn: JWT_EXPIRATION })
 }
+
 export function createRefreshToken(user: UserToken) {
     return jwt.sign(user, JWT_SECRET, { expiresIn: REFRESH_EXPIRATION })
 }
+
 export function verifyToken(req: Request, res: Response, next:NextFunction) {
     const token = req.cookies?.access_token
     if (!token) { return res.status(401).json({ error: 'Token manquant' }) }
