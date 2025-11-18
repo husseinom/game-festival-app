@@ -21,3 +21,22 @@ export const register = async (req: Request, res: Response) => {
     }
   }
 };
+
+export const login = async (req: Request, res: Response) => {
+  try {
+    const result = await userService.login(req.body);
+    
+    res.status(200).json({
+      message: 'Connexion réussie',
+      token: result.token,
+      user: result.user
+    });
+  } catch (error: any) {
+    if (error.message === 'Email ou mot de passe incorrect') {
+      res.status(401).json({ error: error.message });
+    } else {
+      console.error(error);
+      res.status(500).json({ error: 'Erreur serveur interne' });
+    }
+  }
+};
