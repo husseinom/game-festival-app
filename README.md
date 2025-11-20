@@ -3,8 +3,8 @@ FullStack web application to manage and organize game festivals
 
 curl:
 
-// Register
-curl -X POST http://localhost:4000/api/users/register \
+// register
+curl -X POST https://localhost:4000/api/users/register \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Admin",
@@ -14,7 +14,7 @@ curl -X POST http://localhost:4000/api/users/register \
   }'
 
 
-// Connection
+// login
 curl -k -X POST https://localhost:4000/api/users/login \
   -H "Content-Type: application/json" \
   -d '{
@@ -24,7 +24,11 @@ curl -k -X POST https://localhost:4000/api/users/login \
 
 --> Renvoie un token : "12345678"
 
-// Me
+// me
 curl -k -X GET https://localhost:4000/api/users/me \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer 12345678"
+
+// admin/all
+curl -k -X GET https://localhost:4000/api/users/admin/all \
+  -H "Authorization: Bearer TON_TOKEN_ADMIN"

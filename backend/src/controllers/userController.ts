@@ -65,3 +65,20 @@ export const getProfile = async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Erreur serveur' });
   }
 };
+
+export const getAllUsers = async (req: Request, res: Response) => {
+  try {
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+     }
+    });
+    
+    res.status(200).json(users);
+  } catch (error) {
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+};
