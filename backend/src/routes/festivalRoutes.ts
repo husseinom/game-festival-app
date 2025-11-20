@@ -10,6 +10,9 @@ router.post(
     '/add',
     authMiddleware,
     requireRole(['ADMIN', 'SUPER_ORGANISATOR']),
-    festivalController.add);
+    festivalController.add
+);
+
+router.get('/all', festivalController.getAllFestivals);
 
 export default router;
