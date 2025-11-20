@@ -21,12 +21,12 @@ export class AuthService {
   readonly error = this._error.asReadonly()
 
   // --- Connexion ---
-  login(login: string, password: string) {
+  login(email: string, password: string) {
     this._isLoading.set(true)
     this._error.set(null)
     this.http.post<{ user: UserDto }>(
       `${environment.apiUrl}/auth/login`,
-      { login, password },
+      { email, password },
       { withCredentials: true }
     ).pipe(
     tap(res => {

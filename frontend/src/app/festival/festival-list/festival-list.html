@@ -1,0 +1,14 @@
+<div class="festival-list-container">
+  <!-- Header Section -->
+  
+
+ <!-- Festival Cards Grid -->
+  <div class="festivals-grid">
+    @for (festivals of svc.festivals(); track festivals.id){
+      <app-festival-card
+          [festivals]="festivals"
+          (remove)="remove($event)">
+      </app-festival-card>
+    }
+  </div>
+</div>
