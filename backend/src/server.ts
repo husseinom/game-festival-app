@@ -8,6 +8,7 @@ import 'dotenv/config'
 
 // routes
 import userRoutes from './routes/userRoutes.js';
+import festivalRoutes from './routes/festivalRoutes.js'
 
 // Création de l’application Express
 const app = express()
@@ -46,6 +47,7 @@ const key = fs.readFileSync('./certs/localhost-key.pem')
 const cert = fs.readFileSync('./certs/localhost.pem')
 
 app.use('/api/users', userRoutes)
+app.use('/api/festivals', festivalRoutes)
 
 // Lancement du serveur HTTPS
 https.createServer({ key, cert }, app).listen(4000, () => {

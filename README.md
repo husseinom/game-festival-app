@@ -32,3 +32,16 @@ curl -k -X GET https://localhost:4000/api/users/me \
 // admin/all
 curl -k -X GET https://localhost:4000/api/users/admin/all \
   -H "Authorization: Bearer TON_TOKEN_ADMIN"
+
+// festivals/add
+curl -k -X POST https://localhost:4000/api/festivals/add \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc2MzY1MTczNSwiZXhwIjoxNzYzNzM4MTM1fQ.CJS35rAB3tJGQ7-Me5T6ZNkeAae1tzSmWSTkcR9d-PE" \
+  -d '{
+    "name": "Barathon",
+    "logo": "image.png",
+    "location": "10 rue machin",
+    "total_tables": 100,
+    "startDate": "2025-06-20T18:00:00.000Z",
+    "endDate": "2025-06-21T02:00:00.000Z"
+  }'

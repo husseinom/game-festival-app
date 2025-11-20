@@ -9,8 +9,6 @@ interface DecodedToken {
   exp: number;
 }
 
-// On étend l'interface Request d'Express pour qu'elle accepte "user"
-// (Sinon TypeScript va râler en disant que req.user n'existe pas)
 export interface AuthRequest extends Request {
   user?: {
     id: number;
