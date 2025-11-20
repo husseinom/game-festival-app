@@ -1,0 +1,75 @@
+<mat-card>
+	<mat-card-header>
+		<mat-card-title>
+			{{ isEditing ? 'Modifier le jeu' : 'Ajouter un jeu' }}
+		</mat-card-title>
+	</mat-card-header>
+
+	<mat-card-content>
+		<form [formGroup]="form" (submit)="submit()">
+
+			<mat-form-field appearance="outline" style="width:100%">
+				<mat-label>Nom</mat-label>
+				<input matInput formControlName="name" placeholder="Saisissez le nom du jeu">
+				@if (form.controls.name.errors?.['required'] && form.controls.name.touched){
+					<mat-error>Le nom est requis</mat-error>
+				}
+				@if (form.controls.name.errors?.['minlength'] && form.controls.name.touched){
+					<mat-error>Le nom doit contenir au moins 2 caractères</mat-error>
+				}
+				@if (form.controls.name.errors?.['maxlength'] && form.controls.name.touched){
+					<mat-error>Le nom ne peut pas dépasser 50 caractères</mat-error>
+				}
+			</mat-form-field>
+
+			<mat-form-field appearance="outline" style="width:100%">
+				<mat-label>Type</mat-label>
+				<input matInput formControlName="type" placeholder="Saisissez le type de jeu">
+				@if (form.controls.type.errors?.['required'] && form.controls.type.touched){
+					<mat-error>Le type est requis</mat-error>
+				}
+			</mat-form-field>
+
+			<mat-form-field appearance="outline" style="width:100%">
+				<mat-label>Âge minimum</mat-label>
+				<input matInput type="number" formControlName="ageMin" placeholder="Âge minimum">
+				@if (form.controls.ageMin.errors?.['required'] && form.controls.ageMin.touched){
+					<mat-error>L'âge minimum est requis</mat-error>
+				}
+				@if (form.controls.ageMin.errors?.['min'] && form.controls.ageMin.touched){
+					<mat-error>L'âge minimum doit être positif</mat-error>
+				}
+			</mat-form-field>
+
+			<mat-form-field appearance="outline" style="width:100%">
+				<mat-label>Édition (éditeur)</mat-label>
+				<mat-select formControlName="edition" placeholder="Sélectionnez un éditeur">
+					@for (pub of publishers()) { track pub.id }
+						<mat-option [value]="pub.name">{{ pub.name }}</mat-option>
+				</mat-select>
+				@if (form.controls.edition.errors?.['required'] && form.controls.edition.touched){
+					<mat-error>L'édition est requise</mat-error>
+				}
+			</mat-form-field>
+
+			<mat-form-field appearance="outline" style="width:100%">
+				<mat-label>Nombre max de joueurs</mat-label>
+				<input matInput type="number" formControlName="MaxPlayers" placeholder="Nombre maximum de joueurs">
+				@if (form.controls.MaxPlayers.errors?.['required'] && form.controls.MaxPlayers.touched){
+					<mat-error>Le nombre maximum de joueurs est requis</mat-error>
+				}
+				@if (form.controls.MaxPlayers.errors?.['min'] && form.controls.MaxPlayers.touched){
+					<mat-error>Doit être au moins 1</mat-error>
+				}
+			</mat-form-field>
+
+			<mat-card-actions>
+				<button mat-raised-button color="primary" [disabled]="form.invalid" type="submit">
+					{{ isEditing ? 'Mettre à jour' : 'Ajouter' }}
+				</button>
+			</mat-card-actions>
+
+		</form>
+	</mat-card-content>
+
+</mat-card>
