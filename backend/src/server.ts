@@ -5,8 +5,6 @@ import cors from 'cors'
 import morgan from 'morgan'
 import cookieParser from 'cookie-parser'
 import 'dotenv/config'
-import { verifyToken } from './midlleware/token-management.js'
-import { requireAdmin } from './midlleware/auth-admin.js'
 
 // routes
 import userRoutes from './routes/userRoutes.js';
@@ -48,11 +46,6 @@ const key = fs.readFileSync('./certs/localhost-key.pem')
 const cert = fs.readFileSync('./certs/localhost.pem')
 
 app.use('/api/users', userRoutes)
-
-// app.use('/api/users', verifyToken, usersRouter); // protégé
-app.use('/api/admin', verifyToken, requireAdmin, (req, res) => {
-    res.json({ message: 'Bienvenue admin' });
-})
 
 // Lancement du serveur HTTPS
 https.createServer({ key, cert }, app).listen(4000, () => {

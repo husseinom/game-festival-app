@@ -1,5 +1,7 @@
 import type { Request, Response } from 'express';
 import * as userService from '../services/userService.js';
+import type { AuthRequest } from '../middlewares/authMiddleware.js';
+import prisma from '../config/prisma.js';
 
 export const register = async (req: Request, res: Response) => {
   try {
@@ -38,5 +40,28 @@ export const login = async (req: Request, res: Response) => {
       console.error(error);
       res.status(500).json({ error: 'Erreur serveur interne' });
     }
+  }
+};
+
+export const getProfile = async (req: Request, res: Response) => {
+  // On utilise l'ID qui a été mis dans req.user par le middleware
+  const userId = (req as AuthRequest).user?.id;
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+       res.status(404).json({ error: 'Utilisateur introuvable' });
+       return;
+    }
+
+    const { password: _, ...userWithoutPassword } = user;
+
+    res.status(200).json(userWithoutPassword);
+
+  } catch (error) {
+    res.status(500).json({ error: 'Erreur serveur' });
   }
 };
