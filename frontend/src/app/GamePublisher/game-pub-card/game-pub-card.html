@@ -1,0 +1,14 @@
+@if (gamePub()) {
+    @let gp = gamePub()!;
+	<mat-card>
+		<mat-card-header>
+			<mat-card-title>{{ gp.name }}</mat-card-title>
+			<mat-card-subtitle>{{ gameCount() }} jeux</mat-card-subtitle>
+		</mat-card-header>
+		<mat-card-actions>
+			<button (click)="onRemove();"><mat-icon>delete</mat-icon></button>
+            <button (click)="onCardClick();"><mat-icon>get_app</mat-icon></button>
+		</mat-card-actions>
+	</mat-card>
+}
+

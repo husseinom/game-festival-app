@@ -3,11 +3,13 @@ import { inject, signal, computed, effect } from '@angular/core';
 import { Router } from '@angular/router';
 import { GamePubListService } from '../service/game-pub-list-service';
 import { GamePublisherDto } from '../../types/game-publisher-dto';
+import { PublisherForm } from '../Form/publisher-form/publisher-form';
+import { GamePubCard } from '../game-pub-card/game-pub-card';
 
 @Component({
   selector: 'app-game-pub-list',
   standalone: true,
-  imports: [],
+  imports: [PublisherForm, GamePubCard],
   templateUrl: './game-pub-list.html',
   styleUrl: './game-pub-list.css'
 })
@@ -69,7 +71,7 @@ export class GamePubList {
   }
 
   goToGames(id: number){
-    this.router.navigate(['/game', id])
+    this.router.navigate(['/publisher', id])
   }
   
 }

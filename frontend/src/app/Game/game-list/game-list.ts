@@ -3,17 +3,22 @@ import { inject, signal, computed, effect } from '@angular/core';
 import { Router } from '@angular/router';
 import { GameListService } from '../service/game-list-service';
 import { GameDto } from '../../types/game-dto';
+import { GameForm } from '../Form/game-form/game-form';
+import { GameCard } from '../game-card/game-card';
+import { GamePubListService } from '../../GamePublisher/service/game-pub-list-service';
 
 @Component({
   selector: 'app-game-list',
   standalone: true,
-  imports: [],
+  imports: [GameForm, GameCard],
   templateUrl: './game-list.html',
   styleUrl: './game-list.css'
 })
 export class GameList {
   private readonly gls = inject(GameListService)
   readonly games = this.gls.games
+  private readonly pubService = inject(GamePubListService)
+  publishers = this.pubService.gamePubs
   router = inject(Router)
   showForm = signal(false)
 

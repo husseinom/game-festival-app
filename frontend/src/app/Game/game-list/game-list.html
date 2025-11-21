@@ -1,1 +1,30 @@
-<p>game-list works!</p>
+<div>
+	<p>Vous avez {{ gameCount() }} éléments dans votre liste</p>
+	<button (click)="toggleForm()">
+		@if (showForm()) { Cacher❌ } @else { Ajouter ➕ }
+	</button>
+</div>
+
+@if (showForm()){
+	<div>
+		<app-game-form 
+			[editingGame]="selectedGame()"
+			[publishers]="publishers()"
+			(newGame)="onNewGame($event)"
+			(updateGame)="onUpdateGame($event)">
+		</app-game-form>
+	</div>
+}
+
+<div class="cards-container">
+	@for (game of games(); track game.id) {
+		<app-game-card
+			(card)="goToGame(game.id)"
+			[isSelected]="selectedId() === game.id"
+			(click) ="selectedId() == game.id && showForm() ? toggleForm() : onEdit(game.id)"
+			[game] = "game"
+			(remove)="onDelete($event)">
+		</app-game-card>
+	}
+</div>
+

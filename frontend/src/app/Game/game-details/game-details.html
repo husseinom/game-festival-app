@@ -1,0 +1,11 @@
+@if (game()) {
+    @let game = game()!;
+    <h2>Détails du jeu</h2>
+    <p><strong>Id:</strong> {{ game.id }}</p>
+    <p><strong>Nom:</strong> {{ game.name }}</p>
+    <p><strong>Type:</strong> {{ game.type }}</p>
+    <p><strong>Âge minimum:</strong> {{ game.ageMin }}</p>
+    <p><strong>Édition:</strong> {{ game.edition }}</p>
+    <p><strong>Joueurs max:</strong> {{ game.MaxPlayers }}</p>
+}
+<button (click)="location.back()">Retour</button>

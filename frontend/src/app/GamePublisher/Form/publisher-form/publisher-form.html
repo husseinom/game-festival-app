@@ -1,1 +1,34 @@
-<p>publisher-form works!</p>
+<mat-card>
+	<mat-card-header>
+		<mat-card-title>
+			{{ isEditing ? 'Modifier l\'éditeur' : 'Ajouter un éditeur' }}
+		</mat-card-title>
+	</mat-card-header>
+
+	<mat-card-content>
+		<form [formGroup]="form" (submit)="submit()">
+
+			<mat-form-field appearance="outline" style="width:100%">
+				<mat-label>Nom de l'éditeur</mat-label>
+				<input matInput formControlName="name" placeholder="Saisissez le nom de l'éditeur">
+				@if (form.controls.name.errors?.['required'] && form.controls.name.touched){
+					<mat-error>Le nom est requis</mat-error>
+				}
+				@if (form.controls.name.errors?.['minlength'] && form.controls.name.touched){
+					<mat-error>Le nom doit contenir au moins 2 caractères</mat-error>
+				}
+				@if (form.controls.name.errors?.['maxlength'] && form.controls.name.touched){
+					<mat-error>Le nom ne peut pas dépasser 50 caractères</mat-error>
+				}
+			</mat-form-field>
+
+			<mat-card-actions>
+				<button mat-raised-button color="primary" [disabled]="form.invalid" type="submit">
+					{{ isEditing ? 'Mettre à jour' : 'Ajouter' }}
+				</button>
+			</mat-card-actions>
+
+		</form>
+	</mat-card-content>
+
+</mat-card>

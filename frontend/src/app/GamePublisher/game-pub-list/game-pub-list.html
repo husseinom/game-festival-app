@@ -1,1 +1,30 @@
-<p>game-pub-list works!</p>
+<div>
+	<p>Vous avez {{ gamePubCount() }} éléments dans votre liste</p>
+	<button (click)="toggleForm()">
+		@if (showForm()) { Cacher❌ } @else { Ajouter ➕ }
+	</button>
+</div>
+
+@if (showForm()){
+	<div>
+		<app-publisher-form 
+			[editingPublisher]="selectedGamePub()"
+			(newPublisher)="onNewGamePub($event)"
+			(updatePublisher)="onUpdateGame($event)">
+		</app-publisher-form>
+	</div>
+}
+
+<div>
+	@for (pub of gamePubs(); track pub.id) {
+		<app-game-pub-card
+			(card)="goToGames(pub.id)"
+			[isSelected]="selectedId() === pub.id"
+			(click) ="selectedId() == pub.id && showForm() ? toggleForm() : onEdit(pub.id)"
+			[gamePub] = "pub"
+			(remove)="onDelete($event)">
+		</app-game-pub-card>
+	}
+  
+</div>
+
