@@ -91,6 +91,9 @@ export class PublisherDetails {
       this.selectedGameId.set(null)
     }
   }
+  goToGame(id: number): void {
+    this.router.navigate(['/game', id])
+  }
 
   back(): void {
     this.router.navigate(['/publishers'])

@@ -1,5 +1,5 @@
 export interface GameDto {
-    readonly id: number | null;
+    readonly id: number;
     name: string;
     type : string
     ageMin: number; // minimum age to play the game

@@ -6,6 +6,9 @@
 	</mat-card-header>
 
 	<mat-card-content>
+		@if (publishers().length === 0) {
+			<p>Veuillez d'abord ajouter un éditeur avant de créer un jeu.</p>
+		} 
 		<form [formGroup]="form" (submit)="submit()">
 
 			<mat-form-field appearance="outline" style="width:100%">
@@ -44,8 +47,9 @@
 			<mat-form-field appearance="outline" style="width:100%">
 				<mat-label>Édition (éditeur)</mat-label>
 				<mat-select formControlName="edition" placeholder="Sélectionnez un éditeur">
-					@for (pub of publishers()) { track pub.id }
+					@for (pub of publishers();track pub.id ){
 						<mat-option [value]="pub.name">{{ pub.name }}</mat-option>
+					}
 				</mat-select>
 				@if (form.controls.edition.errors?.['required'] && form.controls.edition.touched){
 					<mat-error>L'édition est requise</mat-error>
@@ -64,7 +68,9 @@
 			</mat-form-field>
 
 			<mat-card-actions>
-				<button mat-raised-button color="primary" [disabled]="form.invalid" type="submit">
+				<button mat-raised-button color="primary" 
+				[disabled]="form.invalid || publishers().length === 0"
+				type="submit">
 					{{ isEditing ? 'Mettre à jour' : 'Ajouter' }}
 				</button>
 			</mat-card-actions>

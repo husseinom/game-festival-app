@@ -5,6 +5,7 @@ import { GamePubListService } from '../service/game-pub-list-service';
 import { GamePublisherDto } from '../../types/game-publisher-dto';
 import { PublisherForm } from '../Form/publisher-form/publisher-form';
 import { GamePubCard } from '../game-pub-card/game-pub-card';
+import { GameListService } from '../../Game/service/game-list-service';
 
 @Component({
   selector: 'app-game-pub-list',
@@ -16,6 +17,8 @@ import { GamePubCard } from '../game-pub-card/game-pub-card';
 export class GamePubList {
   private readonly gls = inject(GamePubListService)
   readonly gamePubs = this.gls.gamePubs
+  private readonly gm = inject(GameListService)
+  readonly games = this.gm.games
   router = inject(Router)
   showForm = signal(false)
 
@@ -52,8 +55,8 @@ export class GamePubList {
     this.selectedId.set(null)
   }
 
-  onUpdateGame(data: {id: number, gamePub: Omit<GamePublisherDto,'id'>}): void {
-    this.gls.updateGamePub(data.id, data.gamePub)
+  onUpdatePublisher(data: {id: number, publisher: Omit<GamePublisherDto,'id'>}): void {
+    this.gls.updateGamePub(data.id, data.publisher)
     this.showForm.set(false)
     this.selectedId.set(null)
   }

@@ -1,6 +1,7 @@
 @if (publisher()) {
+	@let pb= publisher()!;
 	<h2>Détails éditeur</h2>
-	<p><strong>Nom:</strong> {{ publisher()!.name }}</p>
+	<p><strong>Nom:</strong> {{ pb.name }}</p>
 
 	<button (click)="toggleForm()">
 		@if (showForm()) { Fermer le formulaire } @else { Ajouter un jeu }
@@ -9,7 +10,7 @@
 	@if (showForm()) {
 		<app-game-form
 			[editingGame]="editingGame()"
-			[publishers]="[publisher()!]"
+			[publishers]="[pb]"
 			(newGame)="onNewGame($event)"
 			(updateGame)="onUpdateGame($event)">
 		</app-game-form>
@@ -19,11 +20,12 @@
 	@for (g of publisherGames(); track g.id) {
 		<app-game-card
 			[game]="g"
-			(card)="onEdit($event)"
+			(card)="goToGame(g.id)"
 			(remove)="onDelete($event)">
 		</app-game-card>
 	}
 
-} @else {
+} 
+@else {
 	<p>Éditeur introuvable.</p>
 }

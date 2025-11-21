@@ -10,7 +10,7 @@
 		<app-publisher-form 
 			[editingPublisher]="selectedGamePub()"
 			(newPublisher)="onNewGamePub($event)"
-			(updatePublisher)="onUpdateGame($event)">
+			(updatePublisher)="onUpdatePublisher($event)">
 		</app-publisher-form>
 	</div>
 }
@@ -22,7 +22,8 @@
 			[isSelected]="selectedId() === pub.id"
 			(click) ="selectedId() == pub.id && showForm() ? toggleForm() : onEdit(pub.id)"
 			[gamePub] = "pub"
-			(remove)="onDelete($event)">
+			(remove)="onDelete($event)"
+			[games]="games()">
 		</app-game-pub-card>
 	}
   

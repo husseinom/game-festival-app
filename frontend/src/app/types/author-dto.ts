@@ -1,5 +1,5 @@
 export interface AuthorDto {
-    readonly id: number | null;
+    readonly id: number;
     firstName: string;
     lastName: string;
 }

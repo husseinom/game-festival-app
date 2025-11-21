@@ -1,5 +1,5 @@
 export interface GamePublisherDto {
-    readonly id: number | null;
+    readonly id: number;
     name: string;
     logoUrl: string|undefined;
 }

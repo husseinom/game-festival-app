@@ -1,9 +1,9 @@
 @if (game()) {
-    @let game = game()!;
+    @let g = game()!;
 	<mat-card>
 		<mat-card-header>
-			<mat-card-title>{{ game.name }}</mat-card-title>
-			<mat-card-subtitle>{{ game.type }}</mat-card-subtitle>
+			<mat-card-title>{{ g.name }}</mat-card-title>
+			<mat-card-subtitle>{{ g.type }}</mat-card-subtitle>
 		</mat-card-header>
 		<mat-card-actions>
 			<button (click)="onRemove(); "><mat-icon>delete</mat-icon></button>
