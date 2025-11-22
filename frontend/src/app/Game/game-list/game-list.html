@@ -16,7 +16,7 @@
 	</div>
 }
 
-<div class="cards-container">
+<div>
 	@for (game of games(); track game.id) {
 		<app-game-card
 			(card)="goToGame(game.id)"

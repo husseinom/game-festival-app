@@ -24,7 +24,7 @@ export class PublisherDetails {
   showForm = signal(false)
   selectedGameId = signal<number | null>(null)
 
-  publisher = computed<GamePublisherDto | null>(() => {
+  publisher = computed<GamePublisherDto | null>(() => { // Éditeur sélectionné
     const id = this.publisherId()
     if (id === null) return null
     return this.pubService.findGamePubById(id) ?? null
