@@ -13,4 +13,7 @@ router.post(
     gamePublisherController.add
 );
 
+// GET /api/game_publishers/all
+router.get('/all', gamePublisherController.getAllGamePublishers);
+
 export default router;

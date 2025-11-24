@@ -61,3 +61,7 @@ curl -k -X POST https://localhost:4000/api/festivals/add \
     "name": "Ubisoft",
     "logo": "https://cdn.example.com/logos/ubisoft.png"
   }'
+
+  // game_pubishers/all
+  curl -k -X GET https://localhost:4000/api/game_publishers/all \
+  -H "Content-Type: application/json"

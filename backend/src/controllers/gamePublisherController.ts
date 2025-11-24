@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express';
 import * as gamePublisherService from '../services/gamePublisherService.js';
+import prisma from '../config/prisma.js';
 
 export const add = async (req: Request, res: Response) => {
   try {
@@ -9,7 +10,7 @@ export const add = async (req: Request, res: Response) => {
       message: 'Game publisher created successfully',
       data: publisher
     });
-    
+
   } catch (error: any) {
     if (error.message === 'This game publisher already exists.') {
       res.status(409).json({ error: error.message });
@@ -17,5 +18,22 @@ export const add = async (req: Request, res: Response) => {
       console.error(error);
       res.status(500).json({ error: 'Internal server error' });
     }
+  }
+};
+
+export const getAllGamePublishers = async (req: Request, res: Response) => {
+  try {
+    const publishers = await prisma.game_Publisher.findMany({
+      select: {
+        id: true,
+        name: true,
+        logo: true,
+     }
+    });
+
+    res.status(200).json(publishers);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
