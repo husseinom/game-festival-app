@@ -1,10 +1,9 @@
 # game-festival-app
-FullStack web application to manage and organize game festivals
 
-curl:
+
 
 // register
-curl -X POST https://localhost:4000/api/users/register \
+curl -k -X POST https://localhost:4000/api/users/register \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Admin",
@@ -46,6 +45,19 @@ curl -k -X POST https://localhost:4000/api/festivals/add \
     "endDate": "2025-06-21T02:00:00.000Z"
   }'
 
-  // festivals/all
+// festivals/all
   curl -k -X GET https://localhost:4000/api/festivals/all \
   -H "Content-Type: application/json"
+
+// festivals/:Id
+  curl -k -X GET https://localhost:4000/api/festivals/1 \
+  -H "Content-Type: application/json"
+
+// game_publishers/add
+  curl -k -X POST https://localhost:4000/api/game_publishers/add \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc2Mzk3NzEzNywiZXhwIjoxNzY0MDYzNTM3fQ.ozrGgK0LkyQp6lhXLT5fauuMxPkZqw4wT1hV6e3wQus" \
+  -d '{
+    "name": "Ubisoft",
+    "logo": "https://cdn.example.com/logos/ubisoft.png"
+  }'

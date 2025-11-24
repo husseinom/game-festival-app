@@ -1,22 +1,16 @@
 import { Router } from 'express';
-import * as festivalController from '../controllers/festivalController.js';
 import { authMiddleware } from '../middlewares/authMiddleware.js';
 import { requireRole } from '../middlewares/roleMiddleware.js';
+import * as gamePublisherController from '../controllers/gamePublisherController.js';
 
 const router = Router();
 
-// POST /api/festivals/add
+// POST /api/game_publishers/add
 router.post(
     '/add',
     authMiddleware,
     requireRole(['ADMIN', 'SUPER_ORGANISATOR']),
-    festivalController.add
+    gamePublisherController.add
 );
-
-// GET /api/festivals/:id
-router.get('/:id', festivalController.getFestivalById);
-
-// GET /api/festivals/all
-router.get('/all', festivalController.getAllFestivals);
 
 export default router;

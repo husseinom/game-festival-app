@@ -40,3 +40,30 @@ export const getAllFestivals = async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Server error' });
   }
 };
+
+export const getFestivalById = async (req: Request, res: Response) => {
+  const { Id } = req.params;
+  
+  try {
+    const festival = await prisma.festival.findUnique({
+      where: { id: Number(Id) },
+      select: {
+        id: true,
+        name: true,
+        logo: true,
+        location: true,
+        total_tables: true,
+        startDate: true,
+        endDate: true,
+      }
+    });
+    
+    if (!festival) {
+      return res.status(404).json({ error: 'Festival not found' });
+    }
+    
+    res.status(200).json(festival);
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+};

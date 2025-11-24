@@ -37,3 +37,12 @@ model Festival {
 
     @@unique([name, location, startDate])
 }
+
+model Game_Publisher {
+    id          Int         @id @default(autoincrement())
+    
+    name        String
+    logo        String
+
+    @@unique([name])
+}
