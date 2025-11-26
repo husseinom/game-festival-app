@@ -6,11 +6,14 @@ import { GamePublisherDto } from '../../types/game-publisher-dto';
   providedIn: 'root'
 })
 export class GamePubListService {
-  private readonly _gamePubs : WritableSignal<GamePublisherDto[]> = signal<GamePublisherDto[]>([]);
+  private readonly _gamePubs : WritableSignal<GamePublisherDto[]> = signal<GamePublisherDto[]>([{id:1, name:"Asmodee", logoUrl: undefined},
+  {id:2, name:"Smock", logoUrl: undefined},
+  {id:3, name:"Ludonaute", logoUrl: undefined}
+  ]);
 
   gamePubs = this._gamePubs.asReadonly();
 
-  nextId = 1;
+  nextId = 4;
 
   onNewGamePub(gamePub: Omit<GamePublisherDto,'id'>): void {
     const newGamePub: GamePublisherDto = {

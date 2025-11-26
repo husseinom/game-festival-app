@@ -37,7 +37,7 @@ export class PublisherDetails {
   publisherGames = computed<GameDto[]>(() => {
     const pub = this.publisher()
     if (!pub) return []
-    return this.games().filter(g => g.edition === pub.name)
+    return this.games().filter(g => g.editeur === pub.name)
   })
 
   // Le jeu en cours d'édition
@@ -65,7 +65,7 @@ export class PublisherDetails {
     const pub = this.publisher()
     if (!pub) return
     // Force l'édition (éditeur) sur le jeu créé
-    const payload: Omit<GameDto,'id'> = { ...game, edition: pub.name }
+    const payload: Omit<GameDto,'id'> = { ...game, editeur: pub.name }
     this.gameService.onNewGame(payload)
     this.showForm.set(false)
     this.selectedGameId.set(null)
@@ -74,7 +74,7 @@ export class PublisherDetails {
   onUpdateGame(data: {id: number, game: Omit<GameDto,'id'>}): void {
     const pub = this.publisher()
     if (!pub) return
-    const payload: Omit<GameDto,'id'> = { ...data.game, edition: pub.name }
+    const payload: Omit<GameDto,'id'> = { ...data.game, editeur: pub.name }
     this.gameService.updateGame(data.id, payload)
     this.showForm.set(false)
     this.selectedGameId.set(null)

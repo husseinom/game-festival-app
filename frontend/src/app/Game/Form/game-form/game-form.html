@@ -45,14 +45,14 @@
 			</mat-form-field>
 
 			<mat-form-field appearance="outline" style="width:100%">
-				<mat-label>Édition (éditeur)</mat-label>
-				<mat-select formControlName="edition" placeholder="Sélectionnez un éditeur">
+				<mat-label>Editeur</mat-label>
+				<mat-select formControlName="editeur" placeholder="Sélectionnez un éditeur">
 					@for (pub of publishers();track pub.id ){
 						<mat-option [value]="pub.name">{{ pub.name }}</mat-option>
 					}
 				</mat-select>
-				@if (form.controls.edition.errors?.['required'] && form.controls.edition.touched){
-					<mat-error>L'édition est requise</mat-error>
+				@if (form.controls.editeur.errors?.['required'] && form.controls.editeur.touched){
+					<mat-error>L'éditeur est requis</mat-error>
 				}
 			</mat-form-field>
 

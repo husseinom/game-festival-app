@@ -38,7 +38,7 @@ export class GameForm {
     }),
     type: new FormControl<string>('', { nonNullable: true, validators: [Validators.required] }),
     ageMin: new FormControl<number>(0, { nonNullable: true, validators: [Validators.required, Validators.min(0)] }),
-    edition: new FormControl<string>('', { nonNullable: true, validators: [Validators.required] }),
+    editeur: new FormControl<string>('', { nonNullable: true, validators: [Validators.required] }),
     MaxPlayers: new FormControl<number>(1, { nonNullable: true, validators: [Validators.required, Validators.min(1)] }),
   })
 
@@ -51,7 +51,7 @@ export class GameForm {
           name: g.name as string,
           type: g.type,
           ageMin: g.ageMin,
-          edition: g.edition,
+          editeur: g.editeur,
           MaxPlayers: g.MaxPlayers,
         })
       } else {
@@ -67,7 +67,7 @@ export class GameForm {
       type: value.type as string,
       ageMin: value.ageMin as number,
       logoUrl: undefined,
-      edition: value.edition as string,
+      editeur: value.editeur as string,
       MaxPlayers: value.MaxPlayers as number,
     }
 
