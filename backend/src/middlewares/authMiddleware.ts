@@ -18,15 +18,12 @@ export interface AuthRequest extends Request {
 
 export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
   // 1. Récupérer le header "Authorization: Bearer <token>"
-  const authHeader = req.headers.authorization;
+  const token = req.cookies.authToken;
 
-  if (!authHeader) {
+  if (!token) {
     res.status(401).json({ error: 'Accès refusé. Token manquant.' });
     return; // Important de return pour arrêter l'exécution
   }
-
-  // On enlève le mot "Bearer " pour ne garder que le code
-  const token = authHeader.split(' ')[1]; 
 
   try {
     // 2. Vérifier le token
