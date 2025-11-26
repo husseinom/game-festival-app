@@ -45,4 +45,21 @@ model Game_Publisher {
     logo        String
 
     @@unique([name])
+
+    games       Game[]      // Relation to Game
+}
+
+model Game {
+    id                  Int             @id @default(autoincrement())
+    game_publisher_id   Int             // Foreign key to Game_Publisher
+
+    name                String
+    type                String
+    min_age             Int
+    logo_url            String
+
+    // Relations
+    publisher           Game_Publisher  @relation(fields: [game_publisher_id], references: [id])
+
+    @@index([game_publisher_id])
 }
