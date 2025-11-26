@@ -111,3 +111,34 @@ curl -k -X GET https://localhost:4000/api/game_publishers/all \
 curl -k -X GET https://localhost:4000/api/game_publishers/1 \
   -H "Content-Type: application/json"
 `
+
+### Game
+
+# games/add
+
+`
+curl -k -X POST https://localhost:4000/api/games/add \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer 12345678" \
+-d '{
+  "game_publisher_id": 1,
+  "name": "Catan",
+  "type": "Board Game",
+  "min_age": 10,
+  "logo_url": "https://cdn.example.com/logos/catan.png"
+}'
+`
+
+# games/all
+
+`
+curl -k -X GET https://localhost:4000/api/games/all \
+  -H "Content-Type: application/json"
+`
+
+# games/:id
+
+`
+curl -k -X GET https://localhost:4000/api/games/1 \
+  -H "Content-Type: application/json"
+`

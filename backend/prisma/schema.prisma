@@ -58,6 +58,8 @@ model Game {
     min_age             Int
     logo_url            String
 
+    @@unique([name, game_publisher_id])
+
     // Relations
     publisher           Game_Publisher  @relation(fields: [game_publisher_id], references: [id])
 
