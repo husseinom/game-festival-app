@@ -1,8 +1,19 @@
 # game-festival-app
 
+**Executer le .prisma après une modification** : `npx prisma migrate dev --name "nom_de_la_migration"`
 
+**Lancer la base de donnée** : `sudo docker compose -f docker-compose.db.yml up --build`
 
-// register
+**Lancer le back** : `npm run dev`
+
+> ⚠️ **ATTENTION :** On respecte l'achirtecture propre du back SVP
+
+## Routes
+### User
+
+**register**
+
+`
 curl -k -X POST https://localhost:4000/api/users/register \
   -H "Content-Type: application/json" \
   -d '{
@@ -11,31 +22,44 @@ curl -k -X POST https://localhost:4000/api/users/register \
     "password": "admin",
     "role": "ADMIN"
   }'
+`
 
+**login**
 
-// login
+`
 curl -k -X POST https://localhost:4000/api/users/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "admin@test.com",
     "password": "admin"
   }'
+`
 
---> Renvoie un token : "12345678"
+&rarr; Renvoie un token : "12345678"
 
-// me
+**me**
+
+`
 curl -k -X GET https://localhost:4000/api/users/me \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer 12345678"
+`
 
-// admin/all
+**admin/all**
+
+`
 curl -k -X GET https://localhost:4000/api/users/admin/all \
-  -H "Authorization: Bearer TON_TOKEN_ADMIN"
+  -H "Authorization: Bearer 12345678"
+`
 
-// festivals/add
+### Festival
+
+**festivals/add**
+
+`
 curl -k -X POST https://localhost:4000/api/festivals/add \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc2MzY1MTczNSwiZXhwIjoxNzYzNzM4MTM1fQ.CJS35rAB3tJGQ7-Me5T6ZNkeAae1tzSmWSTkcR9d-PE" \
+  -H "Authorization: Bearer 12345678" \
   -d '{
     "name": "Montpellier Festival city",
     "logo": "logo.png",
@@ -44,24 +68,39 @@ curl -k -X POST https://localhost:4000/api/festivals/add \
     "startDate": "2025-06-20T18:00:00.000Z",
     "endDate": "2025-06-21T02:00:00.000Z"
   }'
+`
 
-// festivals/all
+**festivals/all**
+
+`
   curl -k -X GET https://localhost:4000/api/festivals/all \
   -H "Content-Type: application/json"
+`
 
-// festivals/:Id
+**festivals/:id**
+
+`
   curl -k -X GET https://localhost:4000/api/festivals/1 \
   -H "Content-Type: application/json"
+`
 
-// game_publishers/add
-  curl -k -X POST https://localhost:4000/api/game_publishers/add \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc2Mzk3NzEzNywiZXhwIjoxNzY0MDYzNTM3fQ.ozrGgK0LkyQp6lhXLT5fauuMxPkZqw4wT1hV6e3wQus" \
-  -d '{
-    "name": "Ubisoft",
-    "logo": "https://cdn.example.com/logos/ubisoft.png"
-  }'
+### Game Publisher
 
-  // game_pubishers/all
-  curl -k -X GET https://localhost:4000/api/game_publishers/all \
+**game_publishers/add**
+
+`
+curl -k -X POST https://localhost:4000/api/game_publishers/add \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer 12345678" \
+-d '{
+  "name": "Ubisoft",
+  "logo": "https://cdn.example.com/logos/ubisoft.png"
+}'
+`
+
+**game_pubishers/all**  
+
+`
+curl -k -X GET https://localhost:4000/api/game_publishers/all \
   -H "Content-Type: application/json"
+`
