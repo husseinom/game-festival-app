@@ -38,7 +38,7 @@ export class GameForm {
     }),
     type: new FormControl<string>('', { nonNullable: true, validators: [Validators.required] }),
     ageMin: new FormControl<number>(0, { nonNullable: true, validators: [Validators.required, Validators.min(0)] }),
-    editeur: new FormControl<string>('', { nonNullable: true, validators: [Validators.required] }),
+    pubId: new FormControl<number|null>(null, {validators: [Validators.required] }),
     MaxPlayers: new FormControl<number>(1, { nonNullable: true, validators: [Validators.required, Validators.min(1)] }),
   })
 
@@ -51,11 +51,15 @@ export class GameForm {
           name: g.name as string,
           type: g.type,
           ageMin: g.ageMin,
-          editeur: g.editeur,
+          pubId: g.pubId,
           MaxPlayers: g.MaxPlayers,
         })
       } else {
         this.form.reset()
+        // Si un seul éditeur disponible, prérempli automatiquement
+        if (this.publishers().length === 1) {
+          this.form.patchValue({ pubId: this.publishers()[0].id })
+        }
       }
     })
   }
@@ -67,7 +71,7 @@ export class GameForm {
       type: value.type as string,
       ageMin: value.ageMin as number,
       logoUrl: undefined,
-      editeur: value.editeur as string,
+      pubId: value.pubId as number,
       MaxPlayers: value.MaxPlayers as number,
     }
 

@@ -6,6 +6,6 @@ export interface GameDto {
     type : string
     ageMin: number; // minimum age to play the game
     logoUrl: string|undefined;
-    editeur : string; //publisher of the game
+    pubId : number; //publisher of the game
     MaxPlayers: number; // maximum number of players
 }

@@ -5,9 +5,9 @@ import { GameDto } from '../../types/game-dto';
   providedIn: 'root'
 })
 export class GameListService {
-  private readonly _games : WritableSignal<GameDto[]> = signal<GameDto[]>([{id:1, name:"Catan", type:"Board Game", ageMin:10,logoUrl:undefined, editeur:"Asmodee", MaxPlayers:4},
-  {id:2, name:"Pandemic", type:"Cooperative Game", ageMin:8,logoUrl:undefined, editeur:"Ludonaute", MaxPlayers:4},
-  {id:3, name:"7 Wonders", type:"Card Game", ageMin:10,logoUrl:undefined, editeur:"Smock", MaxPlayers:7}
+  private readonly _games : WritableSignal<GameDto[]> = signal<GameDto[]>([{id:1, name:"Catan", type:"Board Game", ageMin:10,logoUrl:undefined, pubId:1, MaxPlayers:4},
+  {id:2, name:"Pandemic", type:"Cooperative Game", ageMin:8,logoUrl:undefined, pubId:2, MaxPlayers:4},
+  {id:3, name:"7 Wonders", type:"Card Game", ageMin:10,logoUrl:undefined, pubId:3, MaxPlayers:7}
   ]);
 
   games = this._games.asReadonly();

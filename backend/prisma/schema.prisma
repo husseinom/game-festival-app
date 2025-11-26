@@ -1,0 +1,67 @@
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+enum Role {
+    ADMIN
+    VISITOR
+    VOLUNTEER
+    ORGANISATOR
+    SUPER_ORGANISATOR
+}
+
+model User {
+    id          Int         @id @default(autoincrement())
+
+    name        String
+    email       String      @unique
+    password    String
+
+    role        Role        @default(VISITOR)
+}
+
+model Festival {
+    id              Int         @id @default(autoincrement())
+    
+    name            String
+    logo            String
+    location        String
+    total_tables    Int
+    startDate       DateTime
+    endDate         DateTime
+
+    @@unique([name, location, startDate])
+}
+
+model Game_Publisher {
+    id          Int         @id @default(autoincrement())
+    
+    name        String
+    logo        String
+
+    @@unique([name])
+
+    games       Game[]      // Relation to Game
+}
+
+model Game {
+    id                  Int             @id @default(autoincrement())
+    game_publisher_id   Int             // Foreign key to Game_Publisher
+
+    name                String
+    type                String
+    min_age             Int
+    logo_url            String
+
+    @@unique([name, game_publisher_id])
+
+    // Relations
+    publisher           Game_Publisher  @relation(fields: [game_publisher_id], references: [id])
+
+    @@index([game_publisher_id])
+}

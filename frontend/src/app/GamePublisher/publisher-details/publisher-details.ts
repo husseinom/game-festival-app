@@ -33,11 +33,11 @@ export class PublisherDetails {
   // Tous les jeux (signal readonly du service)
   readonly games = this.gameService.games
 
-  // Jeux appartenant à cet éditeur (filtrage par edition == publisher.name)
+  // Jeux appartenant à cet éditeur (filtrage par pubId)
   publisherGames = computed<GameDto[]>(() => {
     const pub = this.publisher()
     if (!pub) return []
-    return this.games().filter(g => g.editeur === pub.name)
+    return this.games().filter(g => g.pubId === pub.id)
   })
 
   // Le jeu en cours d'édition
@@ -62,20 +62,14 @@ export class PublisherDetails {
   }
 
   onNewGame(game: Omit<GameDto,'id'>): void {
-    const pub = this.publisher()
-    if (!pub) return
-    // Force l'édition (éditeur) sur le jeu créé
-    const payload: Omit<GameDto,'id'> = { ...game, editeur: pub.name }
-    this.gameService.onNewGame(payload)
+    // Plus besoin de forcer pubId, déjà correct si formulaire prérempli
+    this.gameService.onNewGame(game)
     this.showForm.set(false)
     this.selectedGameId.set(null)
   }
 
   onUpdateGame(data: {id: number, game: Omit<GameDto,'id'>}): void {
-    const pub = this.publisher()
-    if (!pub) return
-    const payload: Omit<GameDto,'id'> = { ...data.game, editeur: pub.name }
-    this.gameService.updateGame(data.id, payload)
+    this.gameService.updateGame(data.id, data.game)
     this.showForm.set(false)
     this.selectedGameId.set(null)
   }

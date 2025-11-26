@@ -44,17 +44,21 @@
 				}
 			</mat-form-field>
 
-			<mat-form-field appearance="outline" style="width:100%">
-				<mat-label>Editeur</mat-label>
-				<mat-select formControlName="editeur" placeholder="Sélectionnez un éditeur">
-					@for (pub of publishers();track pub.id ){
-						<mat-option [value]="pub.name">{{ pub.name }}</mat-option>
+			@if (publishers().length === 1) {
+				<p><strong>Éditeur:</strong> {{ publishers()[0].name }}</p>
+			} @else {
+				<mat-form-field appearance="outline" style="width:100%">
+					<mat-label>publisher</mat-label>
+					<mat-select formControlName="pubId" [disabled]="publishers().length === 0" placeholder="Sélectionnez un éditeur">
+						@for (pub of publishers();track pub.id ){
+							<mat-option [value]="pub.id">{{ pub.name }}</mat-option>
+						}
+					</mat-select>
+					@if (form.controls.pubId.errors?.['required'] && form.controls.pubId.touched){
+						<mat-error>L'éditeur est requis</mat-error>
 					}
-				</mat-select>
-				@if (form.controls.editeur.errors?.['required'] && form.controls.editeur.touched){
-					<mat-error>L'éditeur est requis</mat-error>
-				}
-			</mat-form-field>
+				</mat-form-field>
+			}
 
 			<mat-form-field appearance="outline" style="width:100%">
 				<mat-label>Nombre max de joueurs</mat-label>

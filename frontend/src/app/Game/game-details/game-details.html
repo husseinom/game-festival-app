@@ -5,7 +5,7 @@
     <p><strong>Nom:</strong> {{ g.name }}</p>
     <p><strong>Type:</strong> {{ g.type }}</p>
     <p><strong>Âge minimum:</strong> {{ g.ageMin }}</p>
-    <p><strong>Editeur:</strong> {{ g.editeur }}</p>
+    <p><strong>Éditeur:</strong> {{ publisher()?.name || 'Inconnu' }}</p>
     <p><strong>Joueurs max:</strong> {{ g.MaxPlayers }}</p>
 }
 <button (click)="location.back()">Retour</button>
