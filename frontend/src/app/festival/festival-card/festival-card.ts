@@ -18,7 +18,12 @@ export class FestivalCard {
     const now = new Date();
     const fest = this.festivals();
     if (!fest) return false;
-    return fest.start <= now && now <= fest.end;
+    
+    // Convert to Date objects if they're strings
+    const startDate = typeof fest.startDate === 'string' ? new Date(fest.startDate) : fest.startDate;
+    const endDate = typeof fest.endDate === 'string' ? new Date(fest.endDate) : fest.endDate;
+    
+    return startDate <= now && now <= endDate;
   }
 
   getStatusClass(): string {
@@ -26,9 +31,13 @@ export class FestivalCard {
     const fest = this.festivals();
     if (!fest) return 'upcoming';
     
-    if (fest.start <= now && now <= fest.end) {
+    // Convert to Date objects if they're strings
+    const startDate = typeof fest.startDate === 'string' ? new Date(fest.startDate) : fest.startDate;
+    const endDate = typeof fest.endDate === 'string' ? new Date(fest.endDate) : fest.endDate;
+    
+    if (startDate <= now && now <= endDate) {
       return 'ongoing';
-    } else if (fest.start > now) {
+    } else if (startDate > now) {
       return 'upcoming';
     } else {
       return 'ended';
@@ -45,11 +54,21 @@ export class FestivalCard {
     }
   }
 
-  formatDate(date: Date): string {
-    return date.toLocaleDateString('en-US', {
+  formatDate(date: Date | string): string {
+    // Convert string to Date if needed
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    
+    // Check if it's a valid date
+    if (!dateObj || isNaN(dateObj.getTime())) {
+      return 'Invalid Date';
+    }
+    
+    return dateObj.toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
-      year: 'numeric'
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
     });
   }
 

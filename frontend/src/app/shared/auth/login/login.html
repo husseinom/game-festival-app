@@ -30,14 +30,14 @@
             <div class="form-group">
                 <input 
                     type="text" 
-                    formControlName="login"
-                    placeholder="Username"
-                    [class.error]="form.controls.login.invalid && form.controls.login.touched"
+                    formControlName="email"
+                    placeholder="Email"
+                    [class.error]="form.controls.email.invalid && form.controls.email.touched"
                     required
                 />
-                @if(form.controls.login.invalid && form.controls.login.touched) {
+                @if(form.controls.email.invalid && form.controls.email.touched) {
                     <div class="error-message">
-                        @if (form.controls.login.errors?.['required']) {
+                        @if (form.controls.email.errors?.['required']) {
                             Valid Username is required
                         }
                     </div>

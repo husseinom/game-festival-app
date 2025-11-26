@@ -3,5 +3,5 @@ export interface UserDto {
     name: string,
     email: string,
     password: string
-    role: "visitor"| "admin"| "volunteer"| "organisator"| "super-organisator"
+    role: "visitor"| "admin"| "volunteer"| "organisator"| "super_organisator"
 }

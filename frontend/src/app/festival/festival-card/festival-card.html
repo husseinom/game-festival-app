@@ -19,18 +19,18 @@
       <div class="festival-dates">
         <div class="date-item">
           <div class="date-label">Start Date</div>
-          <div class="date-value">{{ formatDate(ft.start) }}</div>
+          <div class="date-value">{{ (ft.startDate) }}</div>
         </div>
         <div class="date-item">
           <div class="date-label">End Date</div>
-          <div class="date-value">{{ formatDate(ft.end) }}</div>
+          <div class="date-value">{{ (ft.endDate) }}</div>
         </div>
       </div>
 
       <!-- Table Info -->
-      @if (ft.total_table_nb) {
+      @if (ft.total_tables) {
         <div class="table-info">
-          <span>{{ ft.total_table_nb }} Tables Available</span>
+          <span>{{ ft.total_tables }} Tables Available</span>
         </div>
       }
     </mat-card-content>

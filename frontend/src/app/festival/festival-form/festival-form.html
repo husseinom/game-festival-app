@@ -1,0 +1,119 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit($event)" class="festival-form">
+  <h2>{{ isEditing ? 'Edit Festival' : 'Create Festival' }}</h2>
+  
+  <div class="form-group">
+    <input 
+      type="text" 
+      formControlName="name" 
+      placeholder="Festival Name (min 3 characters)"
+      [class.error]="form.controls.name.invalid && form.controls.name.touched"
+      required
+    />
+    @if(form.controls.name.invalid && form.controls.name.touched) {
+      <div class="error-message">
+        @if (form.controls.name.errors?.['required']) {
+          Festival name is required
+        }
+        @if(form.controls.name.errors?.['minlength']){
+          At least 3 characters required
+        }
+      </div>
+    }
+  </div>
+
+  <div class="form-group">
+    <input 
+      type="url" 
+      formControlName="logo" 
+      placeholder="Logo URL (optional)"
+      [class.error]="form.controls.logo.invalid && form.controls.logo.touched"
+    />
+    <!-- @if(form.controls.logo.invalid && form.controls.logo.touched) {
+      <div class="error-message">Please enter a valid URL</div>
+    } -->
+  </div>
+
+  <div class="form-group">
+    <input 
+      type="text" 
+      formControlName="location" 
+      placeholder="Festival Location"
+      [class.error]="form.controls.location.invalid && form.controls.location.touched"
+      required
+    />
+    @if(form.controls.location.invalid && form.controls.location.touched) {
+      <div class="error-message">
+        @if (form.controls.location.errors?.['required']) {
+          Location is required
+        }
+        @if(form.controls.location.errors?.['minlength']){
+          At least 2 characters required
+        }
+      </div>
+    }
+  </div>
+
+  <div class="form-group">
+    <input 
+      type="number" 
+      formControlName="total_tables" 
+      placeholder="Number of Tables"
+      [class.error]="form.controls.total_tables.invalid && form.controls.total_tables.touched"
+      min="1"
+      max="1000"
+      required
+    />
+    @if(form.controls.total_tables.invalid && form.controls.total_tables.touched) {
+      <div class="error-message">
+        @if (form.controls.total_tables.errors?.['required']) {
+          Number of tables is required
+        }
+        @if(form.controls.total_tables.errors?.['min']){
+          Minimum 1 table required
+        }
+        @if(form.controls.total_tables.errors?.['max']){
+          Maximum 1000 tables allowed
+        }
+      </div>
+    }
+  </div>
+
+  <div class="form-group">
+    <input 
+      type="date" 
+      formControlName="startDate" 
+      placeholder="Start Date"
+      [class.error]="form.controls.startDate.invalid && form.controls.startDate.touched"
+      required
+    />
+    @if(form.controls.startDate.invalid && form.controls.startDate.touched) {
+      <div class="error-message">Start date is required</div>
+    }
+  </div>
+
+  <div class="form-group">
+    <input 
+      type="date" 
+      formControlName="endDate" 
+      placeholder="End Date"
+      [class.error]="form.controls.endDate.invalid && form.controls.endDate.touched"
+      required
+    />
+    @if(form.controls.endDate.invalid && form.controls.endDate.touched) {
+      <div class="error-message">End date is required</div>
+    }
+  </div>
+
+  <!-- Custom validator error for date range -->
+  @if(form.hasError('startAfterEnd') && form.controls.startDate.touched && form.controls.endDate.touched) {
+    <div class="error-message">End date must be after start date</div>
+  }
+
+  <button 
+    type="submit" 
+    [class.valid]="form.valid"
+    [class.invalid]="form.invalid"
+  >
+    {{form.valid ? (isEditing ? '✅ Update Festival' : '✅ Create Festival') : '❌ Fill All Fields'}}
+  </button>
+</form>

@@ -8,7 +8,7 @@ import { authGuard } from './shared/auth/auth-guard';
 
 export const routes: Routes = [
     { path: 'login', component: Login },
-    { path: 'festival-list', component: FestivalList},
+    { path: 'festival-list', component: FestivalList, canActivate:[authGuard]},
     // { path: 'admin', component: Admin, canActivate:[authGuard, adminGuard] },
     { path: '', pathMatch: 'full', redirectTo: 'festival-list' },
     { path: '**', redirectTo: 'festival-list' },

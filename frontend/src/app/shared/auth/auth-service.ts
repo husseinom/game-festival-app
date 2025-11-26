@@ -25,7 +25,7 @@ export class AuthService {
     this._isLoading.set(true)
     this._error.set(null)
     this.http.post<{ user: UserDto }>(
-      `${environment.apiUrl}/auth/login`,
+      `${environment.apiUrl}/users/login`,
       { email, password },
       { withCredentials: true }
     ).pipe(
@@ -54,7 +54,7 @@ export class AuthService {
   // --- Déconnexion ---
   logout() {
     this._isLoading.set(true) ; this._error.set(null)
-    this.http.post(`${environment.apiUrl}/auth/logout`, {}, { withCredentials: true })
+    this.http.post(`${environment.apiUrl}/users/logout`, {}, { withCredentials: true })
     .pipe(
       tap(() => { this._currentUser.set(null) }),
       catchError( err => {this._error.set('Erreur de déconnexion') ; return of(null)} ),
@@ -66,7 +66,7 @@ export class AuthService {
   // --- Vérifie la session actuelle (cookie httpOnly) ---
   whoami() {
     this._isLoading.set(true) ; this._error.set(null)
-    this.http.get<{ user: UserDto }>(`${environment.apiUrl}/auth/whoami`, { withCredentials: true })
+    this.http.get<{ user: UserDto }>(`${environment.apiUrl}/users/me`, { withCredentials: true })
     .pipe(
       tap(res => { this._currentUser.set(res?.user ?? null) }),
       catchError(err => {
