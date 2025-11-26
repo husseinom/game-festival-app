@@ -37,3 +37,27 @@ export const getAllGamePublishers = async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+export const getGamePublisherById = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  
+  try {
+    const publisher = await prisma.game_Publisher.findUnique({
+      where: { id: Number(id) },
+      select: {
+        id: true,
+        name: true,
+        logo: true,
+      }
+    });
+
+    if (!publisher) {
+      return res.status(404).json({ error: 'Game publisher not found' });
+    }
+
+    res.status(200).json(publisher);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}

@@ -1,8 +1,8 @@
 # game-festival-app
 
-**Executer le .prisma après une modification** : `npx prisma migrate dev --name "nom_de_la_migration"`
-
 **Lancer la base de donnée** : `sudo docker compose -f docker-compose.db.yml up --build`
+
+**Executer le .prisma après une modification** (il faut d'abord lancer la BD) : `npx prisma migrate dev --name "nom_de_la_migration"`
 
 **Lancer le back** : `npm run dev`
 
@@ -73,14 +73,14 @@ curl -k -X POST https://localhost:4000/api/festivals/add \
 **festivals/all**
 
 `
-  curl -k -X GET https://localhost:4000/api/festivals/all \
+curl -k -X GET https://localhost:4000/api/festivals/all \
   -H "Content-Type: application/json"
 `
 
 **festivals/:id**
 
 `
-  curl -k -X GET https://localhost:4000/api/festivals/1 \
+curl -k -X GET https://localhost:4000/api/festivals/1 \
   -H "Content-Type: application/json"
 `
 
@@ -102,5 +102,12 @@ curl -k -X POST https://localhost:4000/api/game_publishers/add \
 
 `
 curl -k -X GET https://localhost:4000/api/game_publishers/all \
+  -H "Content-Type: application/json"
+`
+
+**game_publishers/:id**
+
+`
+curl -k -X GET https://localhost:4000/api/game_publishers/1 \
   -H "Content-Type: application/json"
 `

@@ -17,6 +17,6 @@ router.post(
 router.get('/all', gamePublisherController.getAllGamePublishers);
 
 // GET /api/game_publishers/:id
-// router.get('/:id', gamePublisherController.getGamePublisherById);
+router.get('/:id', gamePublisherController.getGamePublisherById);
 
 export default router;

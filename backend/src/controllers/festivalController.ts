@@ -42,11 +42,11 @@ export const getAllFestivals = async (req: Request, res: Response) => {
 };
 
 export const getFestivalById = async (req: Request, res: Response) => {
-  const { Id } = req.params;
+  const { id } = req.params;
   
   try {
     const festival = await prisma.festival.findUnique({
-      where: { id: Number(Id) },
+      where: { id: Number(id) },
       select: {
         id: true,
         name: true,
