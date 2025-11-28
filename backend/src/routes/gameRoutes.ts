@@ -20,5 +20,21 @@ router.get('/all', gameController.getAllGames);
 // GET /api/games/:id
 router.get('/:id', gameController.getGameById); 
 
+// PUT /api/games/:id
+router.put(
+    '/:id',
+    authMiddleware,
+    requireRole(['ADMIN', 'SUPER_ORGANISATOR', 'ORGANISATOR']),
+    gameController.updateGame
+);
+
+// DELETE /api/games/:id
+router.delete(
+    '/:id',
+    authMiddleware,
+    requireRole(['ADMIN', 'SUPER_ORGANISATOR', 'ORGANISATOR']),
+    gameController.deleteGame
+);
+
 
 export default router;
