@@ -14,6 +14,13 @@ router.post('/login', userController.login);
 // GET /api/users/me
 router.get('/me', authMiddleware, userController.getProfile);
 
+// POST /api/users/logout
+router.post('/logout', (_req, res) => {
+    res.clearCookie('access_token')
+    res.clearCookie('refresh_token')
+    res.json({ message: 'Déconnexion réussie' })
+})
+
 // GET /api/users/admin/all
 router.get(
   '/admin/all', 

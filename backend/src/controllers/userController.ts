@@ -27,6 +27,14 @@ export const register = async (req: Request, res: Response) => {
 export const login = async (req: Request, res: Response) => {
   try {
     const result = await userService.login(req.body);
+
+    // Set HTTP-only cookie
+    res.cookie('authToken', result.token, {
+      httpOnly: true,
+      secure: true, // HTTPS only
+      sameSite: 'strict',
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    });
     
     res.status(200).json({
       message: 'Connexion réussie',
@@ -42,6 +50,7 @@ export const login = async (req: Request, res: Response) => {
     }
   }
 };
+
 
 export const getProfile = async (req: Request, res: Response) => {
   // On utilise l'ID qui a été mis dans req.user par le middleware
