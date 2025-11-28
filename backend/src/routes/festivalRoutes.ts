@@ -13,10 +13,10 @@ router.post(
     festivalController.add
 );
 
-// GET /api/festivals/:id
-router.get('/:id', festivalController.getFestivalById);
-
 // GET /api/festivals/all
 router.get('/all', festivalController.getAllFestivals);
+
+// GET /api/festivals/:id
+router.get('/:id', festivalController.getFestivalById);
 
 export default router;

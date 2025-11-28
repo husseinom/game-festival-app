@@ -24,3 +24,54 @@ export const createGamePublisher = async (publisherData: any) => {
 
   return newPublisher;
 };
+
+export const updateGamePublisher = async (id: number, publisherData: any) => {
+  const { name, logo } = publisherData;
+
+  const existingPublisher = await prisma.game_Publisher.findUnique({
+    where: { id },
+  });
+
+  if (!existingPublisher) {
+    throw new Error('Game publisher not found');
+  }
+
+  if (name) {
+    const duplicatePublisher = await prisma.game_Publisher.findFirst({
+      where: {
+        name,
+        NOT: {
+          id: id,
+        },
+      },
+    });
+
+    if (duplicatePublisher) {
+      throw new Error('This game publisher already exists.');
+    }
+  }
+
+  const updatedPublisher = await prisma.game_Publisher.update({
+    where: { id },
+    data: {
+      name,
+      logo,
+    },
+  });
+
+  return updatedPublisher;
+};
+
+export const deleteGamePublisher = async (id: number) => {
+  const existingPublisher = await prisma.game_Publisher.findUnique({
+    where: { id },
+  });
+
+  if (!existingPublisher) {
+    throw new Error('Game publisher not found');
+  }
+
+  await prisma.game_Publisher.delete({
+    where: { id },
+  });
+};
