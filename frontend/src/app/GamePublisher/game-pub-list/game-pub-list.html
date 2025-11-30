@@ -1,3 +1,11 @@
+@if (gls.isLoading()) {
+	<p>Chargement des éditeurs...</p>
+}
+
+@if (gls.error()) {
+	<p style="color: red;">Erreur : {{ gls.error() }}</p>
+}
+
 <div>
 	<p>Vous avez {{ gamePubCount() }} éléments dans votre liste</p>
 	<button (click)="toggleForm()">

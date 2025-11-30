@@ -15,7 +15,7 @@ import { GameListService } from '../../Game/service/game-list-service';
   styleUrl: './game-pub-list.css'
 })
 export class GamePubList {
-  private readonly gls = inject(GamePubListService)
+  readonly gls = inject(GamePubListService)
   readonly gamePubs = this.gls.gamePubs
   private readonly gm = inject(GameListService)
   readonly games = this.gm.games
@@ -29,6 +29,7 @@ export class GamePubList {
   gamePubCount = computed(() => this.gamePubs().length)
 
   constructor(){
+    this.gls.getGamePubs();
     // Effect pour mettre à jour selectedGamePub quand selectedId change
     effect(() => {
       const id = this.selectedId();

@@ -42,7 +42,7 @@ model Game_Publisher {
     id          Int         @id @default(autoincrement())
     
     name        String
-    logo        String
+    logo        String?
 
     @@unique([name])
 
@@ -56,7 +56,8 @@ model Game {
     name                String
     type                String
     min_age             Int
-    logo_url            String
+    max_players         Int?
+    logo_url            String?
 
     @@unique([name, game_publisher_id])
 

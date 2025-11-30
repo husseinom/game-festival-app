@@ -7,10 +7,7 @@ export const add = async (req: Request, res: Response) => {
   try {
     const publisher = await gamePublisherService.createGamePublisher(req.body);
 
-    res.status(201).json({
-      message: 'Game publisher created successfully',
-      data: publisher
-    });
+    res.status(201).json(publisher);
 
   } catch (error: any) {
     if (error.message === 'This game publisher already exists.') {
@@ -69,10 +66,7 @@ export const updateGamePublisher = async (req: Request, res: Response) => {
   try {
     const publisher = await gamePublisherService.updateGamePublisher(Number(id), req.body);
 
-    res.status(200).json({
-      message: 'Game publisher updated successfully',
-      data: publisher
-    });
+    res.status(200).json(publisher);
   } catch (error: any) {
     if (error.message === 'Game publisher not found') {
       res.status(404).json({ error: error.message });

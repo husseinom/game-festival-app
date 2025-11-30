@@ -50,9 +50,9 @@ export class GameForm {
         this.form.patchValue({
           name: g.name as string,
           type: g.type,
-          ageMin: g.ageMin,
-          pubId: g.pubId,
-          MaxPlayers: g.MaxPlayers,
+          ageMin: g.min_age,
+          pubId: g.game_publisher_id,
+          MaxPlayers: g.max_players,
         })
       } else {
         this.form.reset()
@@ -69,10 +69,10 @@ export class GameForm {
     const game: Omit<GameDto, 'id'> = {
       name: value.name as string,
       type: value.type as string,
-      ageMin: value.ageMin as number,
-      logoUrl: undefined,
-      pubId: value.pubId as number,
-      MaxPlayers: value.MaxPlayers as number,
+      min_age: value.ageMin as number,
+      logo_url: undefined,
+      game_publisher_id: value.pubId as number,
+      max_players: value.MaxPlayers as number,
     }
 
     const editing = this.editingGame()

@@ -4,8 +4,9 @@ export interface GameDto {
     readonly id: number;
     name: string;
     type : string
-    ageMin: number; // minimum age to play the game
-    logoUrl: string|undefined;
-    pubId : number; //publisher of the game
-    MaxPlayers: number; // maximum number of players
+    min_age: number; // minimum age to play the game
+    logo_url?: string;
+    game_publisher_id : number; //publisher of the game
+    max_players: number; // maximum number of players
+    publisher?: GamePublisherDto; // useful to display publisher info alongside the game
 }

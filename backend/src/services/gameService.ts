@@ -1,7 +1,7 @@
 import prisma from "../config/prisma.js";
 
 export const createGame = async (gameData: any) => {
-  const { game_publisher_id, name, type, min_age, logo_url } = gameData;
+  const { game_publisher_id, name, type, min_age, max_players, logo_url } = gameData;
 
   const existingPublisher = await prisma.game_Publisher.findUnique({
     where: {
@@ -30,7 +30,11 @@ export const createGame = async (gameData: any) => {
       name,
       type,
       min_age,
+      max_players,
       logo_url,
+    },
+    include: {
+      publisher: true,
     },
   });
 
@@ -38,7 +42,7 @@ export const createGame = async (gameData: any) => {
 };
 
 export const updateGame = async (id: number, gameData: any) => {
-  const { game_publisher_id, name, type, min_age, logo_url } = gameData;
+  const { game_publisher_id, name, type, min_age, max_players, logo_url } = gameData;
 
   const existingGame = await prisma.game.findUnique({
     where: { id },
@@ -83,7 +87,11 @@ export const updateGame = async (id: number, gameData: any) => {
       name,
       type,
       min_age,
+      max_players,
       logo_url,
+    },
+    include: {
+      publisher: true,
     },
   });
 
@@ -102,4 +110,23 @@ export const deleteGame = async (id: number) => {
   await prisma.game.delete({
     where: { id },
   });
+};
+
+export const getAllGames = async () => {
+  return await prisma.game.findMany({
+    include: {
+      publisher: true // Important pour afficher le nom de l'éditeur dans la carte
+    }
+  });
+};
+
+export const getGameById = async (id: number) => {
+  const game = await prisma.game.findUnique({
+    where: { id },
+    include: {
+      publisher: true
+    }
+  });
+  if (!game) throw new Error('Game not found');
+  return game;
 };

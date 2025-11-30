@@ -1,3 +1,3 @@
 export const environment = {
-    apiUrl: 'https://localhost:4000/api', // HTTPS local backend
+    apiUrl: 'http://localhost:4000/api', // HTTPS local backend
 }

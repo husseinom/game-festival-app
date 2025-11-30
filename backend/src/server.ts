@@ -38,7 +38,8 @@ app.use(cookieParser())
 
 // Configuration CORS : autoriser le front Angular en HTTPS local
 app.use(cors({
-    origin: 'https://localhost:8080',
+    // origin: 'https://localhost:8080',
+    origin : 'http://localhost:4200',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization']
@@ -54,6 +55,10 @@ app.use('/api/game_publishers', gamePublisherRoutes)
 app.use('/api/games', gameRoutes)
 
 // Lancement du serveur HTTPS
-https.createServer({ key, cert }, app).listen(4000, () => {
-    console.log('👍 Serveur API démarré sur https://localhost:4000')
-})
+// https.createServer({ key, cert }, app).listen(4000, () => {
+//     console.log('👍 Serveur API démarré sur https://localhost:4000')
+// })
+
+app.listen(4000, () => {
+  console.log(`✅ HTTP Server running on http://localhost:${4000}`);
+});

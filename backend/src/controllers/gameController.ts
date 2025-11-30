@@ -6,10 +6,7 @@ export const add = async (req: Request, res: Response) => {
   try {
     const game = await gameService.createGame(req.body);
 
-    res.status(201).json({
-      message: 'Game created successfully',
-      data: game
-    });
+    res.status(201).json(game);
 
   } catch (error: any) {
     if (error.message === 'The specified game publisher does not exist.') {
@@ -31,11 +28,14 @@ export const getAllGames = async (req: Request, res: Response) => {
         name: true,
         type: true,
         min_age: true,
+        max_players: true,
         logo_url: true,
+        game_publisher_id: true,
         publisher: {
           select: {
             id: true,
             name: true,
+            logo: true,
           }
         }
      },
@@ -59,7 +59,9 @@ export const getGameById = async (req: Request, res: Response) => {
         name: true,
         type: true,
         min_age: true,
+        max_players: true,
         logo_url: true,
+        game_publisher_id: true,
         publisher: {
           select: {
             id: true,
@@ -87,10 +89,7 @@ export const updateGame = async (req: Request, res: Response) => {
   try {
     const game = await gameService.updateGame(Number(id), req.body);
 
-    res.status(200).json({
-      message: 'Game updated successfully',
-      data: game
-    });
+    res.status(200).json(game);
   } catch (error: any) {
     if (error.message === 'Game not found') {
       res.status(404).json({ error: error.message });

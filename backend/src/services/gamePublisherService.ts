@@ -75,3 +75,19 @@ export const deleteGamePublisher = async (id: number) => {
     where: { id },
   });
 };
+
+export const getAllGamePublishers = async () => {
+  return await prisma.game_Publisher.findMany({
+    include: { games: true }, // Charge les jeux associés
+    orderBy: { name: 'asc' }
+  });
+};
+
+export const getGamePublisherById = async (id: number) => {
+  const publisher = await prisma.game_Publisher.findUnique({
+    where: { id },
+    include: { games: true }
+  });
+  if (!publisher) throw new Error('Publisher not found');
+  return publisher;
+};
