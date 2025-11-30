@@ -19,7 +19,8 @@ export class GameCard {
 
   isSelected = input<boolean>(false);
 
-  onRemove(): void {
+  onRemove(event:Event): void {
+    event.stopPropagation();
     const g = this.game();
     if (g && g.id !==null) {
       this.remove.emit(g.id);

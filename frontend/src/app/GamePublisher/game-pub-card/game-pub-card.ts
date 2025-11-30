@@ -31,7 +31,8 @@ export class GamePubCard {
   });
 
 
-  onRemove(): void {
+  onRemove(event: Event): void {
+    event.stopPropagation();
     const gp = this.gamePub();
     if (gp && gp.id !==null) {
       this.remove.emit(gp.id);
