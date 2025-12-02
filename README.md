@@ -1,144 +1,94 @@
-# game-festival-app
+# SecureApp - Environnement de Développement
 
-**Lancer la base de donnée** : `sudo docker compose -f docker-compose.db.yml up --build`
+Ce projet utilise Docker pour garantir que tout le monde travaille sur le même environnement (Node, Postgres, Angular).
 
-**Executer le .prisma après une modification** (il faut d'abord lancer la BD) : `npx prisma migrate dev --name "nom_de_la_migration"`
+## ⚠️ RÈGLES D'OR (À LIRE AVANT DE COMMENCER)
 
-**Lancer le back** : `npm run dev`
+- **NE JAMAIS LANCER** `ng serve`, `npm start` ou `npm run dev` sur votre machine locale.
+    - **Pourquoi ?** Le serveur et le front tournent **DANS Docker**. Si vous lancez en local, vous aurez des conflits de ports et des erreurs de base de données.
+- L'installation locale (`npm install`) sert uniquement à **VS Code**.
+    - Cela permet d'avoir l'autocomplétion et d'éviter les lignes rouges dans l'éditeur. L'exécution réelle se fait dans le conteneur.
 
-> ⚠️ **ATTENTION :** On respecte l'achirtecture propre du back SVP
+---
 
-## Routes
-### User
+## 🛠️ 1. Première Installation (À faire une seule fois)
 
-**register**
+1. **Cloner le projet :**
+     ```bash
+     git clone <url-du-repo>
+     cd secureapp
+     ```
 
-`
-curl -k -X POST https://localhost:4000/api/users/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Admin",
-    "email": "admin@test.com",
-    "password": "admin",
-    "role": "ADMIN"
-  }'
-`
+2. **Installer les dépendances locales** (Pour l'autocomplétion VS Code uniquement) :
+     ```bash
+     # Dans le dossier backend
+     cd backend && npm install
+     cd ..
 
-**login**
+     # Dans le dossier frontend
+     cd frontend && npm install
+     cd ..
+     ```
+     > **Note :** Ne pas se soucier des vulnérabilités affichées ici, ce n'est que pour l'éditeur.
 
-`
-curl -k -X POST https://localhost:4000/api/users/login \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "admin@test.com",
-    "password": "admin"
-  }'
-`
+3. **Lancer le projet avec Docker :**
+     ```bash
+     docker-compose up --build
+     ```
+     > Cette étape peut prendre quelques minutes la première fois (téléchargement des images).
 
-&rarr; Renvoie un token : "12345678"
+---
 
-**me**
+## 🚦 2. Utilisation Quotidienne
 
-`
-curl -k -X GET https://localhost:4000/api/users/me \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer 12345678"
-`
+### Démarrer le projet :
+```bash
+docker-compose up
+```
+> Le backend et le frontend se rechargent automatiquement (Hot Reload) quand vous sauvegardez un fichier.
 
-**admin/all**
+### Arrêter le projet :
+- Faire `CTRL + C` dans le terminal ou :
+    ```bash
+    docker-compose down
+    ```
 
-`
-curl -k -X GET https://localhost:4000/api/users/admin/all \
-  -H "Authorization: Bearer 12345678"
-`
+### Accès Rapides :
+- **Frontend (Angular)** : [http://localhost:4200](http://localhost:4200)
+- **Backend (API)** : [http://localhost:4000](http://localhost:4000)
+- **Gestion BDD (Adminer)** : [http://localhost:8081](http://localhost:8081)
+    - **Système** : PostgreSQL
+    - **Serveur** : db
+    - **Utilisateur** : secureapp
+    - **Mot de passe** : secureapp
+    - **Base de données** : secureapp
 
-### Festival
+---
 
-**festivals/add**
+## 📦 3. Gestion des Packages & BDD
 
-`
-curl -k -X POST https://localhost:4000/api/festivals/add \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer 12345678" \
-  -d '{
-    "name": "Montpellier Festival city",
-    "logo": "logo.png",
-    "location": "Place de la comédie",
-    "total_tables": 345,
-    "startDate": "2025-06-20T18:00:00.000Z",
-    "endDate": "2025-06-21T02:00:00.000Z"
-  }'
-`
+### Ajouter une nouvelle librairie (npm) :
+1. Installe en local :
+     ```bash
+     npm install nom-du-paquet
+     ```
+     (dans `backend/` ou `frontend/`)
 
-**festivals/all**
+2. Relance Docker pour qu'il l'installe :
+     ```bash
+     docker-compose up --build
+     ```
 
-`
-curl -k -X GET https://localhost:4000/api/festivals/all \
-  -H "Content-Type: application/json"
-`
+### Migrations Prisma (Base de données) :
+Pour modifier la structure de la BDD, exécute les commandes dans le conteneur backend :
+1. Ouvrir un nouveau terminal pendant que Docker tourne.
+2. Lancer la migration :
+     ```bash
+     docker-compose exec backend npx prisma migrate dev --name nom_de_la_modif
+     ```
 
-**festivals/:id**
-
-`
-curl -k -X GET https://localhost:4000/api/festivals/1 \
-  -H "Content-Type: application/json"
-`
-
-### Game Publisher
-
-**game_publishers/add**
-
-`
-curl -k -X POST https://localhost:4000/api/game_publishers/add \
--H "Content-Type: application/json" \
--H "Authorization: Bearer 12345678" \
--d '{
-  "name": "Ubisoft",
-  "logo": "https://cdn.example.com/logos/ubisoft.png"
-}'
-`
-
-**game_pubishers/all**  
-
-`
-curl -k -X GET https://localhost:4000/api/game_publishers/all \
-  -H "Content-Type: application/json"
-`
-
-**game_publishers/:id**
-
-`
-curl -k -X GET https://localhost:4000/api/game_publishers/1 \
-  -H "Content-Type: application/json"
-`
-
-### Game
-
-# games/add
-
-`
-curl -k -X POST https://localhost:4000/api/games/add \
--H "Content-Type: application/json" \
--H "Authorization: Bearer 12345678" \
--d '{
-  "game_publisher_id": 1,
-  "name": "Catan",
-  "type": "Board Game",
-  "min_age": 10,
-  "logo_url": "https://cdn.example.com/logos/catan.png"
-}'
-`
-
-# games/all
-
-`
-curl -k -X GET https://localhost:4000/api/games/all \
-  -H "Content-Type: application/json"
-`
-
-# games/:id
-
-`
-curl -k -X GET https://localhost:4000/api/games/1 \
-  -H "Content-Type: application/json"
-`
+### Réinitialiser la Base de données (En cas de gros problème) :
+```bash
+docker-compose down -v
+docker-compose up
+```
