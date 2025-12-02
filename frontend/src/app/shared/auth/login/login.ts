@@ -14,7 +14,7 @@ export class Login {
   private readonly loggingService = inject(AuthService);
   private readonly router = inject(Router);
   readonly form = new FormGroup({
-    login: new FormControl('', {nonNullable: true , validators: [Validators.required]}),
+    email: new FormControl('', {nonNullable: true , validators: [Validators.required]}),
     password: new FormControl('', {nonNullable: true, validators: [Validators.required]})
   });
 
@@ -25,12 +25,12 @@ export class Login {
   constructor(){
     effect(() => {
       if(this.LoggedIn()){
-        if(this.loggingService.isAdmin()){
-          this.router.navigate(['/admin'])
-        }
-        else{
+        // if(this.loggingService.isAdmin()){
+        //   this.router.navigate(['/admin'])
+        // }
+        // else{
           this.router.navigate(['/home'])
-        }
+        // }
       }
     })
   }
@@ -41,12 +41,12 @@ export class Login {
       this.form.markAllAsTouched(); 
       return; 
     }
-    const login = this.form.controls.login.value;
+    const email = this.form.controls.email.value;
     const password = this.form.controls.password.value;
 
-    this.loggingService.login(login, password);
+    this.loggingService.login(email, password);
   }
-  get LoginControl(){ return this.form.controls.login;}
+  get EmailControl(){ return this.form.controls.email;}
   get passwordControl() {return this.form.controls.password;}    
 
 }

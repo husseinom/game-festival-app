@@ -1,6 +1,7 @@
 export interface UserDto {
     id: number,
-    login: string,
+    name: string,
+    email: string,
     password: string
-    role: "user"| "admin"
+    role: "visitor"| "admin"| "volunteer"| "organisator"| "super_organisator"
 }

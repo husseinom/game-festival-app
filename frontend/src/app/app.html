@@ -1,12 +1,59 @@
-<mat-toolbar>
-	<button mat-button routerLink="/games" routerLinkActive="active">
-		<mat-icon>sports_esports</mat-icon>
-		Jeux
-	</button>
-	<button mat-button routerLink="/publishers" routerLinkActive="active">
-		<mat-icon>business</mat-icon>
-		Éditeurs
-	</button>
+<mat-toolbar color="primary" class="app-toolbar">
+  <mat-toolbar-row>
+    <!-- Logo / Brand -->
+    <span class="app-title">
+      <a routerLink="/festival-list" class="brand-link">
+        🎮 Game Festival
+      </a>
+    </span>
+    
+    <span class="spacer"></span>
+    
+    <!-- Navigation buttons -->
+    <button mat-raised-button color="accent" class="nav-button">
+      <a routerLink="/festival-list" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
+        🎪 Festivals
+      </a>
+    </button>
+
+    <button mat-raised-button color="accent" class="nav-button">
+      <a routerLink="/festival-list" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
+        🎮 Games
+      </a>
+    </button>
+
+    <button mat-raised-button color="accent" class="nav-button">
+      <a routerLink="/festival-list" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
+         Games Publishers
+      </a>
+    </button>
+
+    <!-- Bouton Admin (si admin connecté) -->
+    <!-- @if (loggedIn() && isAdmin()) {
+      <button mat-raised-button color="accent" class="nav-button">
+        <a routerLink="/admin" routerLinkActive="active">
+          ⚙️ Admin
+        </a>
+      </button>
+    } -->
+
+    <!-- Section authentification -->
+    @if (loggedIn()) {
+      <button mat-raised-button color="warn"  (click)="LoggedOut()" class="nav-button">
+        🚪 Déconnexion
+      </button>
+    } @else {
+      <!-- Utilisateur non connecté -->
+      <button mat-raised-button color="accent" class="nav-button">
+        <a routerLink="/login" routerLinkActive="active">
+          🔑 Connexion
+        </a>
+      </button>
+    }
+  </mat-toolbar-row>
 </mat-toolbar>
 
-<router-outlet></router-outlet>
+<!-- Wrap router-outlet in main-content for better control -->
+<main class="main-content">
+  <router-outlet />
+</main>

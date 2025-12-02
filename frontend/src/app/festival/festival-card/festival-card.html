@@ -1,0 +1,49 @@
+<mat-card class="festival-card" [class.ongoing]="isGoingOn" [class.selected]="isSelected()">
+  @if(festivals()){
+    @let ft = festivals()!;
+    
+    <!-- Card Header -->
+    <mat-card-header class="card-header">
+      <div mat-card-avatar class="festival-logo"></div>
+      <div class="status-badge" [class]="getStatusClass()">
+        {{ getStatusText() }}
+      </div>
+    </mat-card-header>
+
+    <!-- Festival Info -->
+    <mat-card-content class="festival-info">
+      <mat-card-title class="festival-name">{{ ft.name }}</mat-card-title>
+      <mat-card-subtitle class="festival-location">{{ ft.location }}</mat-card-subtitle>
+      
+      <!-- Festival Dates -->
+      <div class="festival-dates">
+        <div class="date-item">
+          <div class="date-label">Start Date</div>
+          <div class="date-value">{{ (ft.startDate) }}</div>
+        </div>
+        <div class="date-item">
+          <div class="date-label">End Date</div>
+          <div class="date-value">{{ (ft.endDate) }}</div>
+        </div>
+      </div>
+
+      <!-- Table Info -->
+      @if (ft.total_tables) {
+        <div class="table-info">
+          <span>{{ ft.total_tables }} Tables Available</span>
+        </div>
+      }
+    </mat-card-content>
+
+    <!-- Action Buttons -->
+    <mat-card-actions class="card-actions">
+      <button mat-raised-button color="primary" class="edit-btn">
+        Edit
+      </button>
+      <button mat-raised-button color="warn" class="delete-btn" (click)="Ondelete()">
+        Delete
+      </button>
+    </mat-card-actions>
+
+  }
+</mat-card>

@@ -1,0 +1,219 @@
+/* Main container */
+.festival-list-container {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  padding: 5px 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  min-height: 100vh;
+}
+
+/* Header section */
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* Page title */
+.header-section::before {
+  content: "🎮 Game Festivals";
+  font-size: 2rem;
+  font-weight: bold;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(45deg, #ff6b6b, #ffd93d);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Logout button */
+.logout-btn-icon {
+  background: linear-gradient(45deg, #ff4757, #ff3838);
+  border: none;
+  border-radius: 25px;
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3);
+  transform: translateY(0);
+}
+
+.logout-btn-icon:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(255, 71, 87, 0.4);
+  background: linear-gradient(45deg, #ff3838, #ff2f2f);
+}
+
+.logout-btn-icon a {
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logout-btn-icon a::before {
+  content: "🚪";
+  font-size: 16px;
+}
+
+/* Festival cards container */
+.festivals-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 25px;
+  margin-top: 10px;
+}
+
+/* Individual festival card styling */
+app-festival-card {
+  display: block;
+  transition: all 0.3s ease;
+  transform: translateY(0);
+}
+
+app-festival-card:hover {
+  transform: translateY(-5px);
+}
+
+/* Add some animation for the festival cards */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+app-festival-card {
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+/* Stagger animation for multiple cards */
+app-festival-card:nth-child(1) { animation-delay: 0.1s; }
+app-festival-card:nth-child(2) { animation-delay: 0.2s; }
+app-festival-card:nth-child(3) { animation-delay: 0.3s; }
+app-festival-card:nth-child(4) { animation-delay: 0.4s; }
+app-festival-card:nth-child(5) { animation-delay: 0.5s; }
+
+/* Empty state message */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: white;
+  font-size: 1.2rem;
+}
+
+.empty-state::before {
+  content: "🎪";
+  font-size: 4rem;
+  display: block;
+  margin-bottom: 20px;
+}
+
+/* Add floating particles effect */
+.festival-list-container::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Action buttons section (for future features) */
+.action-buttons {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  background: linear-gradient(45deg, #4facfe, #00f2fe);
+  border: none;
+  border-radius: 25px;
+  padding: 12px 25px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+}
+
+.action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .festival-list-container {
+    padding: 15px;
+  }
+  
+  .header-section {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+  
+  .header-section::before {
+    font-size: 1.5rem;
+  }
+  
+  .festivals-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-section {
+    padding: 15px;
+    margin-bottom: 20px;
+  }
+  
+  .header-section::before {
+    font-size: 1.3rem;
+  }
+  
+  .logout-btn-icon {
+    padding: 10px 16px;
+  }
+}
+
+/* Loading animation (for future use) */
+.loading-spinner {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top: 3px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 20px auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

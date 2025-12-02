@@ -1,15 +1,34 @@
-import { Component, signal } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
+import { Component, inject, signal } from '@angular/core';
+import { Router, RouterLink, RouterLinkActive, RouterModule, RouterOutlet } from '@angular/router';
+import { AuthService } from './shared/auth/auth-service';
+import { MatToolbar, MatToolbarRow } from '@angular/material/toolbar';
+import { MatButton, MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, MatToolbarModule, MatButtonModule, MatIconModule],
+  imports: [RouterOutlet, MatToolbar, MatToolbarRow, RouterLinkActive, RouterModule, MatButtonModule],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
 export class App {
   protected readonly title = signal('frontend');
+
+  private authService = inject(AuthService);
+  readonly router = inject(Router);
+
+  readonly loggedIn = this.authService.isLoggedIn;
+  readonly isAdmin = this.authService.isAdmin;
+  readonly currentUser = this.authService.currentUser;
+  readonly isLoading = this.authService.isLoading;
+  
+
+  LoggedOut(): void{
+    setTimeout(() => {
+    this.authService.logout();
+    setTimeout(() => {
+      this.router.navigate(['/login']);
+    }, 50);
+    }, 0);
+
+  }
 }

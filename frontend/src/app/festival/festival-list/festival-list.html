@@ -1,0 +1,28 @@
+<div class="festival-list-container">
+  <!-- Header Section -->
+  
+  <div class="button-container">
+    @if(!showform()){
+        <button (click)="toggleform()" class="action-btn add-btn">Add student</button>
+    }
+    @if(showform()){
+        <button (click)="hideform()" class="action-btn cancel-btn">Cancel</button>
+    }
+  </div>
+
+  <!-- Form Section -->
+  @if(showform()){
+    <div class="form-section">
+      <app-festival-form (newFestival)="add($event)"></app-festival-form>
+    </div>
+      
+  }
+ <!-- Festival Cards Grid -->
+  <div class="festivals-grid">
+    @for (festivals of festivals(); track festivals.id){
+      <app-festival-card
+          [festivals]="festivals">
+      </app-festival-card>
+    }
+  </div>
+</div>

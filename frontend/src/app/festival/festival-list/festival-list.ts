@@ -1,0 +1,53 @@
+import { Component, effect, inject, signal } from '@angular/core';
+import { FestivalServices } from '../services/festival-services';
+import { Festival } from '../../types/festival';
+import { FestivalCard } from '../festival-card/festival-card';
+import { Router} from '@angular/router';
+import { AuthService } from '../../shared/auth/auth-service';
+import { CommonModule } from '@angular/common';
+import { FestivalForm } from "../festival-form/festival-form";
+
+@Component({
+  selector: 'app-festival-list',
+  imports: [FestivalCard, CommonModule, FestivalForm],
+  templateUrl: './festival-list.html',
+  styleUrl: './festival-list.css',
+})
+export class FestivalList {
+  private readonly authservice = inject(AuthService);
+  private readonly festivalService = inject(FestivalServices)
+  readonly router = inject(Router);
+  readonly currentUser = this.authservice.currentUser;
+  readonly loggedIn = this.authservice.isLoggedIn;
+  readonly isAdmin = this.authservice.isAdmin;
+  readonly showform = signal(false);
+
+  constructor(){
+    if(!this.loggedIn()){
+      this.router.navigate(['/login']);
+    }
+    effect(()=> {
+        this.festivalService.getFestivals();
+      })
+
+  }
+  festivals = this.festivalService.festivals;
+
+  
+  add(Festival: Festival): void{
+    this.festivalService.addFestival(Festival);
+  }
+  // remove(Festival: Festival):void{
+  //   this.svc.remove(Festival);
+  // }
+  // findbyid(id:number):Festival | undefined{
+  //   return this.svc.findById(id);
+  // }
+
+  toggleform():void{
+    this.showform.set(true);
+  }
+  hideform():void{
+    this.showform.set(false);
+  }
+}

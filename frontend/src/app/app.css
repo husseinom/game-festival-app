@@ -1,0 +1,164 @@
+/* Global styles for the app */
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* Toolbar styling */
+.app-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(135deg, #3f51b5, #2196f3) !important;
+}
+
+/* Brand/Logo styling */
+.app-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.brand-link {
+  text-decoration: none;
+  color: white;
+  transition: color 0.3s ease;
+  font-family: 'Arial', sans-serif;
+}
+
+.brand-link:hover {
+  color: #ffeb3b;
+  text-shadow: 0 0 10px rgba(255, 235, 59, 0.5);
+}
+
+/* Spacer between brand and navigation */
+.spacer {
+  flex: 1 1 auto;
+}
+
+/* Navigation button styling */
+.nav-button {
+  margin-left: 8px;
+  border-radius: 20px !important;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.nav-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Link styling inside buttons */
+.nav-button a {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+}
+
+/* Active route styling */
+.nav-button a.active {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  font-weight: bold;
+}
+
+/* Logout button special styling */
+.nav-button[color="warn"] {
+  background: linear-gradient(45deg, #f44336, #e91e63) !important;
+}
+
+.nav-button[color="warn"]:hover {
+  background: linear-gradient(45deg, #d32f2f, #c2185b) !important;
+}
+
+/* Accent button styling */
+.nav-button[color="accent"] {
+  background: linear-gradient(45deg, #ff9800, #ffb74d) !important;
+}
+
+.nav-button[color="accent"]:hover {
+  background: linear-gradient(45deg, #f57c00, #ff8f00) !important;
+}
+
+/* Main content area */
+router-outlet {
+  flex: 1;
+}
+
+/* Background for the entire app */
+:host {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .app-title {
+    font-size: 1.2rem;
+  }
+  
+  .nav-button {
+    margin-left: 4px;
+    font-size: 0.9rem;
+  }
+  
+  .nav-button a {
+    padding: 6px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-title {
+    font-size: 1rem;
+  }
+  
+  .nav-button {
+    font-size: 0.8rem;
+  }
+  
+  /* Stack navigation vertically on very small screens */
+  .mat-toolbar-row {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}
+
+/* Add some gaming-inspired animations */
+@keyframes glow {
+  0% { text-shadow: 0 0 5px rgba(255, 235, 59, 0.5); }
+  50% { text-shadow: 0 0 20px rgba(255, 235, 59, 0.8); }
+  100% { text-shadow: 0 0 5px rgba(255, 235, 59, 0.5); }
+}
+
+.brand-link:hover {
+  animation: glow 2s ease-in-out infinite;
+}
+
+/* Smooth transitions for all interactive elements */
+* {
+  transition: all 0.3s ease;
+}
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
