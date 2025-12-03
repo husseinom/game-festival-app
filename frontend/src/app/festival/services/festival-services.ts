@@ -62,4 +62,23 @@ export class FestivalServices {
     })
     
   }
+
+  deleteFestival(id: number){
+    this._isLoading.set(true);
+    this._error.set(null);
+
+    this.http.delete<{message: string}>(`${environment.apiUrl}/festivals/delete/${id}`, {
+      withCredentials: true
+    }).subscribe({
+      next: (response) => {
+        const currentFestivals = this._festivals();
+        this._festivals.set(currentFestivals.filter(festival => festival.id !== id));
+        this._isLoading.set(false);
+      },
+      error: (error) => {
+        this._error.set(error.error?.error || 'Error deleting festival');
+        this._isLoading.set(false);
+      }
+    })
+  }
 }  

@@ -22,7 +22,7 @@ export class GameListService {
     this._isLoading.set(true);
     this._error.set(null);
 
-    this.http.get<GameDto[]>(`${environment.apiUrl}/games/all`)
+    this.http.get<GameDto[]>(`${environment.apiUrl}/games/all`, { withCredentials: true })
     .subscribe({
       next: (data) => {
         this._games.set(data);
@@ -37,7 +37,7 @@ export class GameListService {
   }
 
   onNewGame(game: Omit<GameDto,'id'>): void {
-    this.http.post<GameDto>(`${environment.apiUrl}/games/add`, game)
+    this.http.post<GameDto>(`${environment.apiUrl}/games/add`, game, { withCredentials: true })
     .subscribe({
       next: (newGame) => {
         this._games.update(games => [...games, newGame]);
@@ -49,7 +49,7 @@ export class GameListService {
   }
 
   updateGame(id : number, updatedGame: Omit<GameDto,'id'>): void {
-    this.http.put<GameDto>(`${environment.apiUrl}/games/${id}`, updatedGame)
+    this.http.put<GameDto>(`${environment.apiUrl}/games/${id}`, updatedGame, { withCredentials: true })
     .subscribe({
       next: (updatedGame) => {
         this._games.update(games => games.map(game => 
@@ -63,7 +63,7 @@ export class GameListService {
   }
 
   onDeleteGame(gameId: number): void {
-    this.http.delete(`${environment.apiUrl}/games/${gameId}`)
+    this.http.delete(`${environment.apiUrl}/games/${gameId}`, { withCredentials: true })
     .subscribe({
       next: () => {
         this._games.update(games => games.filter(game => game.id !== gameId));

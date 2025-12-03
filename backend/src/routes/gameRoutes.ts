@@ -9,8 +9,8 @@ const router = Router();
 // POST /api/games/add
 router.post(
     '/add',
-    // authMiddleware,
-    // requireRole(['ADMIN', 'SUPER_ORGANISATOR', 'ORGANISATOR']),
+    authMiddleware,
+    requireRole(['ADMIN', 'SUPER_ORGANISATOR', 'ORGANISATOR']),
     gameController.add
 );
 
@@ -23,16 +23,16 @@ router.get('/:id', gameController.getGameById);
 // PUT /api/games/:id
 router.put(
     '/:id',
-    // authMiddleware,
-    // requireRole(['ADMIN', 'SUPER_ORGANISATOR', 'ORGANISATOR']),
+    authMiddleware,
+    requireRole(['ADMIN', 'SUPER_ORGANISATOR', 'ORGANISATOR']),
     gameController.updateGame
 );
 
 // DELETE /api/games/:id
 router.delete(
     '/:id',
-    // authMiddleware,
-    // requireRole(['ADMIN', 'SUPER_ORGANISATOR', 'ORGANISATOR']),
+    authMiddleware,
+    requireRole(['ADMIN', 'SUPER_ORGANISATOR', 'ORGANISATOR']),
     gameController.deleteGame
 );
 

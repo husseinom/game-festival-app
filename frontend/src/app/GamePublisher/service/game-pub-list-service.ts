@@ -22,7 +22,7 @@ export class GamePubListService {
     this._isLoading.set(true);
     this._error.set(null);
 
-    this.http.get<GamePublisherDto[]>(`${environment.apiUrl}/game_publishers/all`)
+    this.http.get<GamePublisherDto[]>(`${environment.apiUrl}/game_publishers/all`, { withCredentials: true })
     .subscribe({
       next: (data) => {
         this._gamePubs.set(data);
@@ -37,7 +37,7 @@ export class GamePubListService {
   }
 
   onNewGamePub(gamePub: Omit<GamePublisherDto,'id'>): void {
-    this.http.post<GamePublisherDto>(`${environment.apiUrl}/game_publishers/add`, gamePub)
+    this.http.post<GamePublisherDto>(`${environment.apiUrl}/game_publishers/add`, gamePub, { withCredentials: true })
     .subscribe({
       next: (newGamePub) => {
         this._gamePubs.update(gamePubs => [...gamePubs, newGamePub]);
@@ -49,7 +49,7 @@ export class GamePubListService {
   }
 
   updateGamePub(id : number, updatedGamePub: Omit<GamePublisherDto,'id'>): void {
-    this.http.put<GamePublisherDto>(`${environment.apiUrl}/game_publishers/${id}`, updatedGamePub)
+    this.http.put<GamePublisherDto>(`${environment.apiUrl}/game_publishers/${id}`, updatedGamePub, { withCredentials: true })
     .subscribe({
       next: (updatedPub) => {
         this._gamePubs.update(gamePubs => gamePubs.map(gamePub => 
@@ -63,7 +63,7 @@ export class GamePubListService {
   }
 
   onDeleteGamePub(gamePubId: number): void {
-    this.http.delete(`${environment.apiUrl}/game_publishers/${gamePubId}`)
+    this.http.delete(`${environment.apiUrl}/game_publishers/${gamePubId}`, { withCredentials: true })
     .subscribe({
       next: () => {
         this._gamePubs.update(gamePubs => gamePubs.filter(gamePub => gamePub.id !== gamePubId));
