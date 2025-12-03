@@ -1,6 +1,6 @@
 @if (game()) {
     @let g = game()!;
-	<mat-card class="game-card" [class.selected]="isSelected">
+	<mat-card class="game-card" [class.selected]="isSelected()">
 		<mat-card-header class="card-header">
             <div mat-card-avatar class="game-logo"></div>
 		</mat-card-header>
