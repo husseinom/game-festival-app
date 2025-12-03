@@ -30,6 +30,7 @@ export class GameList {
 
   constructor(){
     this.gls.getGames();
+    this.pubService.getGamePubs(); // Afin d'avoir les éditeurs disponibles
     // Effect pour mettre à jour selectedGame quand selectedId change
     effect(() => {
       const id = this.selectedId();
