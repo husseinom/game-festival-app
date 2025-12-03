@@ -13,6 +13,14 @@ router.post(
     festivalController.add
 );
 
+// DELETE /api/festivals/:id
+router.delete(
+    '/:id',
+    authMiddleware,
+    requireRole(['ADMIN', 'SUPER_ORGANISATOR']),
+    festivalController.deleteFestival
+);
+
 // GET /api/festivals/all
 router.get('/all', festivalController.getAllFestivals);
 

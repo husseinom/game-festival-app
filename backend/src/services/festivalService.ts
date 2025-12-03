@@ -35,3 +35,19 @@ export const createFestival = async (festivalData: any) => {
 
   return newFestival;
 };
+
+export const deleteFestival = async (id: number) => {
+  const existingFestival = await prisma.festival.findUnique({
+    where: { id },
+  });
+
+  if (!existingFestival) {
+    throw new Error('Festival not found');
+  }
+
+  await prisma.festival.delete({
+    where: { id },
+  });
+
+  return { message: 'Festival deleted successfully' };
+};

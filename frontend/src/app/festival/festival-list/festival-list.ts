@@ -43,6 +43,10 @@ export class FestivalList {
   // findbyid(id:number):Festival | undefined{
   //   return this.svc.findById(id);
   // }
+  remove(festival: Festival): void {
+    console.log('Removing festival:', festival);
+    this.festivalService.deleteFestival(festival);
+  }
 
   toggleform():void{
     this.showform.set(true);

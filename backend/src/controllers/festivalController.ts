@@ -67,3 +67,19 @@ export const getFestivalById = async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Server error' });
   }
 };
+
+export const deleteFestival = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  try {
+    await festivalService.deleteFestival(Number(id));
+    res.status(200).json({ message: 'Festival deleted successfully' });
+  } catch (error: any) {
+    if (error.message === 'Festival not found') {
+      res.status(404).json({ error: error.message });
+    } else {
+      console.error(error);
+      res.status(500).json({ error: 'Server error' });
+    }
+  }
+};

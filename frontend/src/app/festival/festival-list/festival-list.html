@@ -20,9 +20,7 @@
  <!-- Festival Cards Grid -->
   <div class="festivals-grid">
     @for (festivals of festivals(); track festivals.id){
-      <app-festival-card
-          [festivals]="festivals">
-      </app-festival-card>
+      <app-festival-card [festivals]="festivals" (remove)="remove($event)"> </app-festival-card>
     }
   </div>
 </div>
