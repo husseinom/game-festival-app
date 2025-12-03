@@ -34,9 +34,4 @@ export class GameCard {
       this.card.emit(g.id);
     }
   }
-
-
-
-
-
 }

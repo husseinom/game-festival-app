@@ -81,4 +81,24 @@ export class FestivalServices {
       }
     });
   }
+
+  updateFestival(festival: Festival): void {
+    this._isLoading.set(true);
+    this._error.set(null);
+
+    this.http.put<{message: string, data: Festival}>(`${environment.apiUrl}/festivals/${festival.id}`, festival, {
+      withCredentials: true
+    }).subscribe({
+      next: (response) => {
+        const updatedFestival = response.data;
+        const currentFestivals = this._festivals().map(f => f.id === updatedFestival.id ? updatedFestival : f);
+        this._festivals.set(currentFestivals);
+        this._isLoading.set(false);
+      },
+      error: (error) => {
+        this._error.set(error.error?.error || 'Error updating festival');
+        this._isLoading.set(false);
+      }
+    });
+  }
 }  
