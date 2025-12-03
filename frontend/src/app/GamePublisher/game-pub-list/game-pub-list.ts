@@ -29,6 +29,7 @@ export class GamePubList {
   gamePubCount = computed(() => this.gamePubs().length)
 
   constructor(){
+    this.gm.getGames();
     this.gls.getGamePubs();
     // Effect pour mettre à jour selectedGamePub quand selectedId change
     effect(() => {
