@@ -1,39 +1,46 @@
-@if (gls.isLoading()) {
-	<p>Chargement des éditeurs...</p>
-}
+<div class="game-pub-list-container">
+    <!-- Header Section -->
+    <div class="header-section">
+        <!-- Title is handled by CSS ::before -->
+    </div>
 
-@if (gls.error()) {
-	<p style="color: red;">Erreur : {{ gls.error() }}</p>
-}
+    @if (gls.isLoading()) {
+        <p style="color: white; text-align: center;">Chargement des éditeurs...</p>
+    }
 
-<div>
-	<p>Vous avez {{ gamePubCount() }} éléments dans votre liste</p>
-	<button (click)="toggleForm()">
-		@if (showForm()) { Cacher❌ } @else { Ajouter ➕ }
-	</button>
-</div>
+    @if (gls.error()) {
+        <p style="color: red; text-align: center;">Erreur : {{ gls.error() }}</p>
+    }
 
-@if (showForm()){
-	<div>
-		<app-publisher-form 
-			[editingPublisher]="selectedGamePub()"
-			(newPublisher)="onNewGamePub($event)"
-			(updatePublisher)="onUpdatePublisher($event)">
-		</app-publisher-form>
-	</div>
-}
+    <div class="button-container">
+        <button (click)="toggleForm()" class="action-btn" [class.add-btn]="!showForm()" [class.cancel-btn]="showForm()">
+            @if (showForm()) { Cancel } @else { Add Publisher }
+        </button>
+    </div>
 
-<div>
-	@for (pub of gamePubs(); track pub.id) {
-		<app-game-pub-card
-			(card)="goToGames(pub.id)"
-			[isSelected]="selectedId() === pub.id"
-			(click) ="selectedId() == pub.id && showForm() ? toggleForm() : onEdit(pub.id)"
-			[gamePub] = "pub"
-			(remove)="onDelete($event)"
-			[games]="games()">
-		</app-game-pub-card>
-	}
-  
+    <!-- Form Section -->
+    @if (showForm()){
+        <div class="form-section">
+            <app-publisher-form 
+                [editingPublisher]="selectedGamePub()"
+                (newPublisher)="onNewGamePub($event)"
+                (updatePublisher)="onUpdatePublisher($event)">
+            </app-publisher-form>
+        </div>
+    }
+
+    <!-- Game Publishers Cards Grid -->
+    <div class="game-pubs-grid">
+        @for (pub of gamePubs(); track pub.id) {
+            <app-game-pub-card
+                (card)="goToGames(pub.id)"
+                [isSelected]="selectedId() === pub.id"
+                (click) ="selectedId() == pub.id && showForm() ? toggleForm() : onEdit(pub.id)"
+                [gamePub] = "pub"
+                (remove)="onDelete($event)"
+                [games]="games()">
+            </app-game-pub-card>
+        }
+    </div>
 </div>
 

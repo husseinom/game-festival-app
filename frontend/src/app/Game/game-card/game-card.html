@@ -1,13 +1,18 @@
 @if (game()) {
     @let g = game()!;
-	<mat-card>
-		<mat-card-header>
-			<mat-card-title>{{ g.name }}</mat-card-title>
-			<mat-card-subtitle>type : {{ g.type }}</mat-card-subtitle>
+	<mat-card class="game-card" [class.selected]="isSelected">
+		<mat-card-header class="card-header">
+            <div mat-card-avatar class="game-logo"></div>
 		</mat-card-header>
-		<mat-card-actions>
-			<button (click)="onRemove($event)"><mat-icon>delete</mat-icon></button>
-			<button (click)="onCardClick()" ><mat-icon>get_app</mat-icon></button>
+
+        <mat-card-content class="game-info">
+            <mat-card-title class="game-name">{{ g.name }}</mat-card-title>
+            <mat-card-subtitle class="game-type">{{ g.type }}</mat-card-subtitle>
+        </mat-card-content>
+
+		<mat-card-actions class="card-actions">
+			<button mat-raised-button class="delete-btn" (click)="onRemove($event)">Delete</button>
+			<button mat-raised-button class="edit-btn" (click)="onCardClick()" >Edit</button>
 		</mat-card-actions>
 	</mat-card>
 }

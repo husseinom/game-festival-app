@@ -1,13 +1,18 @@
 @if (gamePub()) {
     @let gp = gamePub()!;
-	<mat-card>
-		<mat-card-header>
-			<mat-card-title>{{ gp.name }}</mat-card-title>
-			<mat-card-subtitle>{{ gameCount() }} jeux</mat-card-subtitle>
+	<mat-card class="game-pub-card" [class.selected]="isSelected">
+		<mat-card-header class="card-header">
+            <div mat-card-avatar class="game-pub-logo"></div>
 		</mat-card-header>
-		<mat-card-actions>
-			<button (click)="onRemove($event);"><mat-icon>delete</mat-icon></button>
-            <button (click)="onCardClick()"><mat-icon>get_app</mat-icon></button>
+
+        <mat-card-content class="game-pub-info">
+            <mat-card-title class="game-pub-name">{{ gp.name }}</mat-card-title>
+            <mat-card-subtitle class="game-pub-details">{{ gameCount() }} jeux</mat-card-subtitle>
+        </mat-card-content>
+
+		<mat-card-actions class="card-actions">
+			<button mat-raised-button class="delete-btn" (click)="onRemove($event)">Delete</button>
+            <button mat-raised-button class="edit-btn" (click)="onCardClick()">Edit</button>
 		</mat-card-actions>
 	</mat-card>
 }

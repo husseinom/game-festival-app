@@ -8,7 +8,8 @@ import { MatIconModule } from '@angular/material/icon';
   selector: 'app-game-card',
   standalone: true,
   imports: [MatCardModule, MatButtonModule, MatIconModule],
-  templateUrl: './game-card.html'
+  templateUrl: './game-card.html',
+  styleUrl: './game-card.css'
 })
 export class GameCard {
   public game = input<GameDto | null>(null);
