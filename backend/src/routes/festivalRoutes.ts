@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import * as festivalController from '../controllers/festivalController.js';
-import { authMiddleware } from '../middlewares/authMiddleware.js';
+import { verifyToken } from '../middlewares/authMiddleware.js';
 import { requireRole } from '../middlewares/roleMiddleware.js';
 
 const router = Router();
@@ -8,7 +8,7 @@ const router = Router();
 // POST /api/festivals/add
 router.post(
     '/add',
-    authMiddleware,
+    verifyToken,
     requireRole(['ADMIN', 'SUPER_ORGANISATOR']),
     festivalController.add
 );

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authMiddleware } from '../middlewares/authMiddleware.js';
+import { verifyToken } from '../middlewares/authMiddleware.js';
 import { requireRole } from '../middlewares/roleMiddleware.js';
 import * as gamePublisherController from '../controllers/gamePublisherController.js';
 
@@ -8,7 +8,7 @@ const router = Router();
 // POST /api/game_publishers/add
 router.post(
     '/add',
-    authMiddleware,
+    verifyToken,
     requireRole(['ADMIN', 'SUPER_ORGANISATOR']),
     gamePublisherController.add
 );
@@ -22,7 +22,7 @@ router.get('/:id', gamePublisherController.getGamePublisherById);
 // PUT /api/game_publishers/:id
 router.put(
     '/:id',
-    authMiddleware,
+    verifyToken,
     requireRole(['ADMIN', 'SUPER_ORGANISATOR']),
     gamePublisherController.updateGamePublisher
 );
@@ -30,7 +30,7 @@ router.put(
 // DELETE /api/game_publishers/:id
 router.delete(
     '/:id',
-    authMiddleware,
+    verifyToken,
     requireRole(['ADMIN', 'SUPER_ORGANISATOR']),
     gamePublisherController.deleteGamePublisher
 );
@@ -41,7 +41,7 @@ router.get('/:id/games', gamePublisherController.getGamesByPublisherId);
 // POST /api/game_publishers/:id/games
 router.post(
     '/:id/games',
-    authMiddleware,
+    verifyToken,
     requireRole(['ADMIN', 'SUPER_ORGANISATOR', 'ORGANISATOR']),
     gamePublisherController.addGameToPublisher
 );

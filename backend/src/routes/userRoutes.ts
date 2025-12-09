@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import * as userController from '../controllers/userController.js';
-import { authMiddleware } from '../middlewares/authMiddleware.js';
+import { verifyToken } from '../middlewares/authMiddleware.js';
 import { requireRole } from '../middlewares/roleMiddleware.js';
 
 const router = Router();
@@ -12,7 +12,7 @@ router.post('/register', userController.register);
 router.post('/login', userController.login);
 
 // GET /api/users/me
-router.get('/me', authMiddleware, userController.getProfile);
+router.get('/me', verifyToken, userController.getProfile);
 
 // POST /api/users/logout
 router.post('/logout', (_req, res) => {
@@ -24,7 +24,7 @@ router.post('/logout', (_req, res) => {
 // GET /api/users/admin/all
 router.get(
   '/admin/all', 
-  authMiddleware,
+  verifyToken,
   requireRole(['ADMIN']),
   userController.getAllUsers
 );
