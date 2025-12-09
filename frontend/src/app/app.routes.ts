@@ -15,11 +15,11 @@ export const routes: Routes = [
     { path: 'login', component: Login },
     { path: 'festival-list', component: FestivalList, canActivate:[authGuard]},
     // { path: 'admin', component: Admin, canActivate:[authGuard, adminGuard] },
-    { path: '', pathMatch: 'full', redirectTo: 'festival-list' },
+    { path: '', pathMatch: 'full', redirectTo: 'login' },
 	{ path: 'games', component: GameList, title: 'liste des jeux', canActivate:[authGuard]},
 	{ path: 'game/:id', component: GameDetails, canActivate:[authGuard]},
 	{ path: 'publishers', component: GamePubList, title: 'liste des éditeurs', canActivate:[authGuard]},
 	{ path: 'publisher/:id', component: PublisherDetails, canActivate:[authGuard]},
-    { path: '**', redirectTo: 'festival-list' },
+    { path: '**', redirectTo: 'login' },
 
 ];

@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 import * as userService from '../services/userService.js';
 import type { AuthRequest } from '../middlewares/authMiddleware.js';
+import jwt from 'jsonwebtoken';
 import { createAccessToken, createRefreshToken } from '../middlewares/authMiddleware.js';
 import prisma from '../config/prisma.js';
 
@@ -90,5 +91,31 @@ export const getAllUsers = async (req: Request, res: Response) => {
     res.status(200).json(users);
   } catch (error) {
     res.status(500).json({ error: 'Erreur serveur' });
+  }
+};
+
+export const refresh = async (req: Request, res: Response) => {
+  try {
+    const refreshToken = req.cookies.refresh_token;
+    
+    if (!refreshToken) {
+      return res.status(401).json({ error: 'Refresh token manquant' });
+    }
+    
+    // Verify refresh token and create new access token
+    const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET!) as any;
+    const newAccessToken = createAccessToken({ id: decoded.id, role: decoded.role });
+    
+    // Set new access token cookie
+    res.cookie('access_token', newAccessToken, {
+      httpOnly: true, 
+      secure: true, 
+      sameSite: 'strict', 
+      maxAge: 15 * 60 * 1000
+    });
+    
+    res.status(200).json({ message: 'Token rafraîchi' });
+  } catch (error) {
+    res.status(401).json({ error: 'Refresh token invalide' });
   }
 };

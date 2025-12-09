@@ -29,7 +29,7 @@ export class Login {
         //   this.router.navigate(['/admin'])
         // }
         // else{
-          this.router.navigate(['/home'])
+          this.router.navigate(['/festival-list'])
         // }
       }
     })

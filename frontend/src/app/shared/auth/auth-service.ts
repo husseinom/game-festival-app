@@ -80,7 +80,7 @@ export class AuthService {
 
   // --- Rafraîchissement pour l'interceptor ---
   refresh$() { // observable qui émet null en cas d'erreur
-    return this.http.post(`${environment.apiUrl}/auth/refresh`,{}, { withCredentials: true } )
+    return this.http.post(`${environment.apiUrl}/users/refresh`,{}, { withCredentials: true } )
     .pipe( catchError(() => of(null)) )
   }
 }

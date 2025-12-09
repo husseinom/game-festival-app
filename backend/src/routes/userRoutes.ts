@@ -11,6 +11,9 @@ router.post('/register', userController.register);
 // POST /api/users/login
 router.post('/login', userController.login);
 
+// POST /api/users/refresh
+router.post('/refresh', userController.refresh);
+
 // GET /api/users/me
 router.get('/me', verifyToken, userController.getProfile);
 
