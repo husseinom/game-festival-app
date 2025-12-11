@@ -162,7 +162,19 @@
   box-shadow: none;
 }
 
-/* Masquer les messages vides */
+.register-link {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.register-link:hover {
+  color: #764ba2;
+  text-decoration: underline;
+}
+
+/* Hide empty messages */
 .loading-message:empty,
 .error-message.global-error:empty,
 .success-message:empty {

@@ -1,6 +1,7 @@
 import prisma from '../config/prisma.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { createAccessToken } from '../middlewares/authMiddleware.js';
 
 export const createUser = async (userData: any) => {
   const { name, email, password, role } = userData;
@@ -25,9 +26,13 @@ export const createUser = async (userData: any) => {
       role: role || 'VISITOR',
     },
   });
+  const token = createAccessToken({ id: newUser.id, role: newUser.role }) // création du token d'accès
+
 
   const { password: _, ...userWithoutPassword } = newUser;
-  return userWithoutPassword;
+  return {
+    token,
+    user: userWithoutPassword};
 };
 
 export const login = async (credentials: any) => {
@@ -50,11 +55,7 @@ export const login = async (credentials: any) => {
   }
 
   // create JWT token
-  const token = jwt.sign(
-    { userId: user.id, role: user.role },
-    process.env.JWT_SECRET as string,
-    { expiresIn: '24h' }
-  );
+  const token = createAccessToken({ id: user.id, role: user.role }) // création du token d'accès
 
   // return user data without password
   const { password: _, ...userWithoutPassword } = user;

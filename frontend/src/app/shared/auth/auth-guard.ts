@@ -10,7 +10,7 @@ export const authGuard: CanActivateFn = (route, state) => {
     return true;
   }
 
-  authService.whoami();
+  console.log('Access denied - redirecting to login');
 
   return router.createUrlTree(['/login']);
 };

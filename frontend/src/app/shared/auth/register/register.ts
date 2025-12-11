@@ -1,21 +1,21 @@
-import { Component, effect, inject, output } from '@angular/core';
+import { Component, effect, inject } from '@angular/core';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../auth-service';
-import { Router } from '@angular/router';
-import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
-import { UserDto } from '../../../types/user-dto';
+import { Router, RouterModule } from '@angular/router';
 
 @Component({
-  selector: 'app-login',
-  imports: [ReactiveFormsModule],
-  templateUrl: './login.html',
-  styleUrl: './login.css'
+  selector: 'app-register',
+  imports: [RouterModule, ReactiveFormsModule],
+  templateUrl: './register.html',
+  styleUrl: './register.css',
 })
-export class Login {
+export class Register {
   private readonly loggingService = inject(AuthService);
   private readonly router = inject(Router);
   readonly form = new FormGroup({
     email: new FormControl('', {nonNullable: true , validators: [Validators.required]}),
-    password: new FormControl('', {nonNullable: true, validators: [Validators.required]})
+    password: new FormControl('', {nonNullable: true, validators: [Validators.required]}),
+    name: new FormControl('', {nonNullable: true, validators: [Validators.required]})
   });
 
   readonly isLoading = this.loggingService.isLoading;
@@ -41,12 +41,15 @@ export class Login {
       this.form.markAllAsTouched(); 
       return; 
     }
+    const name = this.form.controls.name.value;
     const email = this.form.controls.email.value;
     const password = this.form.controls.password.value;
 
-    this.loggingService.login(email, password);
+    this.loggingService.register(name, email, password);
   }
+  get NameControl(){return this.form.controls.name;}
   get EmailControl(){ return this.form.controls.email;}
   get passwordControl() {return this.form.controls.password;}    
 
 }
+

@@ -63,6 +63,34 @@ export class AuthService {
     .subscribe()
   }
 
+  register(name: string, email: string, password: string){
+    this._isLoading.set(true); this._error.set(null)
+    this.http.post<{user: UserDto}>(`${environment.apiUrl}/users/register`, 
+      {name, email, password},
+      {withCredentials: true}
+    ).pipe(
+      tap(res =>{
+        if (res?.user) {
+        this._currentUser.set(res.user)
+        console.log(`👍 Utilisateur enregistré et connecté : ${JSON.stringify(res.user)}`);
+      } else {
+        this._error.set('Erreur lors de l\'enregistrement');
+      }
+      }),
+      catchError(err => {
+        if(err.status === 409){
+          this._error.set('cet email est déja utilisé');
+        }else if(err.status === 400) {
+        this._error.set('Données invalides');
+      } else {
+        this._error.set(`Erreur serveur (${err.status})`);
+      }
+      return of(null);
+    }),
+    finalize(() => this._isLoading.set(false))
+    ).subscribe();
+  }
+
   // --- Vérifie la session actuelle (cookie httpOnly) ---
   whoami() {
     this._isLoading.set(true) ; this._error.set(null)
@@ -80,7 +108,7 @@ export class AuthService {
 
   // --- Rafraîchissement pour l'interceptor ---
   refresh$() { // observable qui émet null en cas d'erreur
-    return this.http.post(`${environment.apiUrl}/auth/refresh`,{}, { withCredentials: true } )
+    return this.http.post(`${environment.apiUrl}/users/refresh`,{}, { withCredentials: true } )
     .pipe( catchError(() => of(null)) )
   }
 }

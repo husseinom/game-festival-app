@@ -3,7 +3,7 @@
     <div class="loading-message">
         @if(isLoading()){
             <div class="spinner"></div>
-            ⏳ Connexion en cours, veuillez patienter...
+            ⏳ Trying to Connect, Please wait...
         }
     </div>
 
@@ -17,14 +17,14 @@
     <!-- Message de succès -->
     <div class="success-message">
         @if (LoggedIn()) {
-           ✅ Connexion réussie ! Redirection vers l'accueil... 
+           ✅ Connected successfully ! Redirecting to dashboard 
         }
     </div>
 
     <!-- Formulaire -->
     @if (!isLoading() && !LoggedIn()) {
         <form [formGroup]="form" (ngSubmit)="OnSubmit($event)" class="login-form">
-            <h2>Connexion</h2>
+            <h2>Connection</h2>
 
             <!-- Champ Login -->
             <div class="form-group">
@@ -64,8 +64,13 @@
 
             <!-- Bouton Submit -->
             <button type="submit" class="btn-primary" [disabled]="form.invalid">
-                Se connecter
+                Connect
             </button>
+
+            <!-- register link -->
+            <div class="form-footer">
+                <p>Don't have an Account ? Create one now <a href="/register" class="register-link">Sign Up</a></p>
+            </div>
         </form>
     }
 </div>
