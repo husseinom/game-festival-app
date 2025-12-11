@@ -12,6 +12,7 @@ import festivalRoutes from './routes/festivalRoutes.js'
 import gamePublisherRoutes from './routes/gamePublisherRoutes.js'
 import gameRoutes from './routes/gameRoutes.js'
 import reservantRoutes from './routes/reservantRoutes.js'
+import reservationRoutes from './routes/reservationRoutes.js'
 
 // Création de l’application Express
 const app = express()
@@ -55,6 +56,7 @@ app.use('/api/festivals', festivalRoutes)
 app.use('/api/game_publishers', gamePublisherRoutes)
 app.use('/api/games', gameRoutes)
 app.use('/api/reservants', reservantRoutes)
+app.use('/api/reservations', reservationRoutes)
 
 // Lancement du serveur HTTPS
 // https.createServer({ key, cert }, app).listen(4000, () => {

@@ -35,6 +35,9 @@ model Festival {
     startDate       DateTime
     endDate         DateTime
 
+    // Reservations for this festival
+    reservations    Reservation[]
+
     @@unique([name, location, startDate])
 }
 
@@ -47,6 +50,7 @@ model Game_Publisher {
     @@unique([name])
 
     games       Game[]      // Relation to Game
+    reservations Reservation[]
 }
 
 model Game {
@@ -72,4 +76,34 @@ model Reservant {
 
     name            String
     type            String
+    reservations    Reservation[]
+}
+
+model Reservation {
+    reservation_id           Int     @id @default(autoincrement())
+
+    game_publisher_id        Int
+    festival_id              Int
+    reservant_id             Int
+
+    status                   String
+    comments                 String?
+
+    is_publisher_presenting  Boolean @default(false)
+    game_list_requested      Boolean @default(false)
+    game_list_received       Boolean @default(false)
+    games_received           Boolean @default(false)
+
+    discount_amount          Float?
+    discount_tables          Int?
+    final_invoice_amount     Float?
+
+    // Relations
+    publisher                Game_Publisher @relation(fields: [game_publisher_id], references: [id])
+    festival                 Festival       @relation(fields: [festival_id], references: [id])
+    reservant                Reservant      @relation(fields: [reservant_id], references: [reservant_id])
+
+    @@index([game_publisher_id])
+    @@index([festival_id])
+    @@index([reservant_id])
 }

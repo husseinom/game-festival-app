@@ -56,6 +56,11 @@ export const getProfile = async (req: Request, res: Response) => {
   // On utilise l'ID qui a été mis dans req.user par le middleware
   const userId = (req as AuthRequest).user?.id;
 
+  if (!userId) {
+    res.status(401).json({ error: 'Non authentifié' });
+    return;
+  }
+
   try {
     const user = await prisma.user.findUnique({
       where: { id: userId },
