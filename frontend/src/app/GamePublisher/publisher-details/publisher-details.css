@@ -21,6 +21,30 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
+/* Back button inside header */
+.back-btn {
+  align-self: flex-start; /* place at the start of the header */
+  margin-bottom: 12px;
+  padding: 8px 14px;
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.back-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.back-btn:active {
+  transform: translateY(0);
+}
+
 .publisher-title {
   font-size: 2.5rem;
   font-weight: bold;

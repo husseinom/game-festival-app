@@ -1,11 +1,28 @@
 @if (game()) {
-    @let g = game()!;
-    <h2>Détails du jeu</h2>
-    <p><strong>Id:</strong> {{ g.id }}</p>
-    <p><strong>Nom:</strong> {{ g.name }}</p>
-    <p><strong>Type:</strong> {{ g.type }}</p>
-    <p><strong>Âge minimum:</strong> {{ g.min_age }}</p>
-    <p><strong>Éditeur:</strong> {{ publisher()?.name || 'Inconnu' }}</p>
-    <p><strong>Joueurs max:</strong> {{ g.max_players }}</p>
+  @let g = game()!;
+  <div class="details-grid">
+    <div class="meta">
+      <h2>Détails du jeu</h2>
+      <p><strong>Id:</strong> {{ g.id }}</p>
+      <p><strong>Nom:</strong> {{ g.name }}</p>
+      <p><strong>Type:</strong> {{ g.type }}</p>
+      <p><strong>Âge minimum:</strong> {{ g.min_age }}</p>
+      <p><strong>Éditeur:</strong> {{ publisher()?.name || 'Inconnu' }}</p>
+      <p><strong>Joueurs max:</strong> {{ g.max_players }}</p>
+      <div class="actions">
+        <button class="btn btn-secondary" (click)="location.back()">Retour</button>
+      </div>
+    </div>
+
+    <aside class="aside">
+      <div class="cover">
+        <!-- optional: <img [src]="g.imageUrl" alt="{{ g.name }} cover"> -->
+        Pas d'image
+      </div>
+      <div class="divider"></div>
+      <div class="description">
+        <!-- optional description content here -->
+      </div>
+    </aside>
+  </div>
 }
-<button (click)="location.back()">Retour</button>
