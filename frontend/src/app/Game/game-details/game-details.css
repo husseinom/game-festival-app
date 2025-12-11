@@ -1,0 +1,146 @@
+:host {
+	display: block;
+	box-sizing: border-box;
+	max-width: 980px;
+	margin: 18px auto;
+	padding: 20px;
+	background: #ffffff;
+	border-radius: 10px;
+	box-shadow: 0 6px 18px rgba(10, 25, 47, 0.08);
+	color: #1f2937;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+}
+
+/* Heading */
+:host h2 {
+	margin: 0 0 12px 0;
+	font-size: 1.5rem;
+	color: #0f172a;
+}
+
+/* Grid layout for details — will gracefully fall back to single column on small screens */
+:host .details-grid {
+	display: grid;
+	grid-template-columns: 1fr 320px;
+	gap: 18px;
+	align-items: start;
+}
+
+/* Left column: metadata list */
+:host .meta {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+:host .meta p {
+	margin: 0;
+	padding: 8px 12px;
+	background: rgba(15, 23, 42, 0.03);
+	border-radius: 6px;
+	font-size: 0.95rem;
+	display: flex;
+	gap: 8px;
+	align-items: center;
+}
+
+:host .meta p strong {
+	width: 120px;
+	color: #0b1220;
+	font-weight: 600;
+}
+
+/* Right column: cover / publisher area (optional) */
+:host .aside {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+:host .cover {
+	width: 100%;
+	height: 200px;
+	background: linear-gradient(135deg, #f3f4f6, #fff);
+	border-radius: 8px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: #6b7280;
+	font-size: 0.95rem;
+	overflow: hidden;
+}
+
+:host .cover img {
+	max-width: 100%;
+	max-height: 100%;
+	object-fit: cover;
+	display: block;
+}
+
+/* Description block */
+:host .description {
+	margin-top: 14px;
+	padding: 12px;
+	border-radius: 8px;
+	background: rgba(2, 6, 23, 0.02);
+	color: #374151;
+	line-height: 1.5;
+}
+
+/* Actions */
+:host .actions {
+	margin-top: 16px;
+	display: flex;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+:host .btn {
+	appearance: none;
+	border: none;
+	cursor: pointer;
+	padding: 8px 14px;
+	border-radius: 8px;
+	font-weight: 600;
+	font-size: 0.95rem;
+}
+
+:host .btn-primary {
+	background: #2563eb;
+	color: #fff;
+	box-shadow: 0 6px 14px rgba(37,99,235,0.12);
+}
+
+:host .btn-secondary {
+	background: transparent;
+	color: #0f172a;
+	border: 1px solid rgba(15,23,42,0.06);
+}
+
+/* Small screens: single column */
+@media (max-width: 720px) {
+	:host {
+		padding: 14px;
+		margin: 12px;
+	}
+	:host .details-grid {
+		grid-template-columns: 1fr;
+	}
+	:host .cover {
+		height: 160px;
+	}
+}
+
+/* Utility: subtle divider */
+:host .divider {
+	height: 1px;
+	background: rgba(15,23,42,0.04);
+	margin: 12px 0;
+}
+
+/* Accessibility: focus states */
+:host .btn:focus {
+	outline: 3px solid rgba(37,99,235,0.18);
+	outline-offset: 2px;
+}
+

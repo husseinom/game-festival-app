@@ -21,6 +21,7 @@ export class FestivalList {
   readonly loggedIn = this.authservice.isLoggedIn;
   readonly isAdmin = this.authservice.isAdmin;
   readonly showform = signal(false);
+  readonly editingFestival = signal<Festival | undefined>(undefined);
 
   constructor(){
     if(!this.loggedIn()){
@@ -48,10 +49,21 @@ export class FestivalList {
     this.festivalService.deleteFestival(festival);
   }
 
+  edit(festival: Festival): void {
+    this.editingFestival.set(festival);
+    this.showform.set(true);
+  }
+
+  update(festival: Festival): void {
+    this.festivalService.updateFestival(festival);
+    this.hideform();
+  }
+
   toggleform():void{
     this.showform.set(true);
   }
   hideform():void{
     this.showform.set(false);
+    this.editingFestival.set(undefined);
   }
 }

@@ -4,7 +4,7 @@ import { GamePubListService } from '../service/game-pub-list-service';
 import { GameListService } from '../../Game/service/game-list-service';
 import { GamePublisherDto } from '../../types/game-publisher-dto';
 import { GameDto } from '../../types/game-dto';
-import { GameForm } from '../../Game/Form/game-form/game-form';
+import { GameForm } from '../../Game/game-form/game-form';
 import { GameCard } from '../../Game/game-card/game-card';
 
 @Component({

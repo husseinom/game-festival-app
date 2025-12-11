@@ -36,7 +36,7 @@
             <app-game-card
                 (card)="goToGame(game.id)"
                 [isSelected]="selectedId() === game.id"
-                (click) ="selectedId() == game.id && showForm() ? toggleForm() : onEdit(game.id)"
+                (edit) ="selectedId() == game.id && showForm() ? toggleForm() : onEdit(game.id)"
                 [game] = "game"
                 (remove)="onDelete($event)">
             </app-game-card>

@@ -1,32 +1,48 @@
-@if (publisher()) {
-	@let pb= publisher()!;
-	<h2>Détails éditeur</h2>
-	<p><strong>Nom:</strong> {{ pb.name }}</p>
+<div class="publisher-details-container">
+    @if (publisher()) {
+        @let pb= publisher()!;
+        
+        <!-- Header Section -->
+        <div class="header-section">
+            <button mat-stroked-button class="back-btn" (click)="back()">Retour</button>
+            <h2 class="publisher-title">{{ pb.name }}</h2>
+            <div class="publisher-info">Détails éditeur</div>
+        </div>
 
-	<button (click)="toggleForm()">
-		@if (showForm()) { Fermer le formulaire } @else { Ajouter un jeu }
-	</button>
+        <div class="button-container">
+            <button (click)="toggleForm()" class="action-btn" [class.add-btn]="!showForm()" [class.cancel-btn]="showForm()">
+                @if (showForm()) { Fermer le formulaire } @else { Ajouter un jeu }
+            </button>
+        </div>
 
-	@if (showForm()) {
-		<app-game-form
-			[editingGame]="editingGame()"
-			[publishers]="[pb]"
-			(newGame)="onNewGame($event)"
-			(updateGame)="onUpdateGame($event)">
-		</app-game-form>
-	}
+        @if (showForm()) {
+            <div class="form-section">
+                <app-game-form
+                    [editingGame]="editingGame()"
+                    [publishers]="[pb]"
+                    (newGame)="onNewGame($event)"
+                    (updateGame)="onUpdateGame($event)">
+                </app-game-form>
+            </div>
+        }
 
-	<h3>Jeux de cet éditeur ({{ publisherGames().length }})</h3>
-	@for (g of publisherGames(); track g.id) {
-		<app-game-card
-			[game]="g"
-			(card)="goToGame(g.id)"
-			(click)="onEdit(g.id)"
-			(remove)="onDelete($event)">
-		</app-game-card>
-	}
+        <h3 class="games-section-title">Jeux de cet éditeur ({{ publisherGames().length }})</h3>
+        
+        <div class="games-grid">
+            @for (g of publisherGames(); track g.id) {
+                <app-game-card
+                    [game]="g"
+                    (card)="goToGame(g.id)"
+                    (click)="onEdit(g.id)"
+                    (remove)="onDelete($event)">
+                </app-game-card>
+            }
+        </div>
 
-} 
-@else {
-	<p>Éditeur introuvable.</p>
-}
+    } 
+    @else {
+        <div class="state-message">
+            <p>Éditeur introuvable.</p>
+        </div>
+    }
+</div>

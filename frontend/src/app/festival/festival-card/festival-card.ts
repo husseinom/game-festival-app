@@ -11,6 +11,7 @@ import { Festival } from '../../types/festival';
 export class FestivalCard {
   festivals = input<Festival>();
   remove = output<Festival>();
+  edit = output<Festival>();
 
   isSelected = signal(false);
 
@@ -74,5 +75,9 @@ export class FestivalCard {
 
   Ondelete(): void {
     this.remove.emit(this.festivals()!);
+  }
+
+  onEdit(): void {
+    this.edit.emit(this.festivals()!);
   }
 }

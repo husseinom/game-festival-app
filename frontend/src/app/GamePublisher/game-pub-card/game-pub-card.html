@@ -1,6 +1,6 @@
 @if (gamePub()) {
     @let gp = gamePub()!;
-	<mat-card class="game-pub-card" [class.selected]="isSelected()">
+	<mat-card class="game-pub-card" [class.selected]="isSelected()" (click)="onCardClick($event)">
 		<mat-card-header class="card-header">
             <div mat-card-avatar class="game-pub-logo"></div>
 		</mat-card-header>
@@ -12,7 +12,7 @@
 
 		<mat-card-actions class="card-actions">
 			<button mat-raised-button class="delete-btn" (click)="onRemove($event)">Delete</button>
-            <button mat-raised-button class="edit-btn" (click)="onCardClick()">Edit</button>
+			<button mat-raised-button class="edit-btn" (click)="onEditClick($event)">Edit</button>
 		</mat-card-actions>
 	</mat-card>
 }

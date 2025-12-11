@@ -17,6 +17,7 @@ export class GameCard {
   remove = output<number>();
 
   card = output<number>();
+  edit = output<number>();
 
   isSelected = input<boolean>(false);
 
@@ -28,15 +29,21 @@ export class GameCard {
     }
   }
 
-  onCardClick(): void {
+  onCardClick(event?: Event): void {
+    // Card click -> show details
+    event?.stopPropagation();
     const g = this.game();
     if (g && g.id !== null) {
       this.card.emit(g.id);
     }
   }
 
-
-
-
-
+  onEditClick(event: Event): void {
+    // Edit button -> open form
+    event.stopPropagation();
+    const g = this.game();
+    if (g && g.id !== null) {
+      this.edit.emit(g.id);
+    }
+  }
 }

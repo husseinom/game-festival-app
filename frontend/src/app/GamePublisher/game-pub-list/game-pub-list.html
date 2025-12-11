@@ -35,7 +35,7 @@
             <app-game-pub-card
                 (card)="goToGames(pub.id)"
                 [isSelected]="selectedId() === pub.id"
-                (click) ="selectedId() == pub.id && showForm() ? toggleForm() : onEdit(pub.id)"
+                (edit) = "selectedId() == pub.id && showForm() ? toggleForm() : onEdit(pub.id)"
                 [gamePub] = "pub"
                 (remove)="onDelete($event)"
                 [games]="games()">
