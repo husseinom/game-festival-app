@@ -13,12 +13,14 @@ export class AuthService {
   private readonly _currentUser = signal<UserDto | null>(null)
   private readonly _isLoading = signal(false)
   private readonly _error = signal<string | null>(null)
+  private readonly _hasCheckedAuth = signal(false); // ✅ Track if we've checked auth
   // --- État exposé (readonly, computed) ---
   readonly currentUser = this._currentUser.asReadonly()
   readonly isLoggedIn = computed(() => this._currentUser() != null)
   readonly isAdmin = computed(() => this.currentUser()?.role === 'admin')
   readonly isLoading = this._isLoading.asReadonly()
   readonly error = this._error.asReadonly()
+  readonly hasCheckedAuth = this._hasCheckedAuth.asReadonly()
 
   // --- Connexion ---
   login(email: string, password: string) {
@@ -32,6 +34,7 @@ export class AuthService {
     tap(res => {
       if (res?.user) {
         this._currentUser.set(res.user)
+        this._hasCheckedAuth.set(true); // ✅ Mark as checked after login
         console.log(`👍 Utilisateur connecté : ${JSON.stringify(res.user)}`) // DEBUG
       } else {
         this._error.set('Identifiants invalides')
@@ -56,7 +59,10 @@ export class AuthService {
     this._isLoading.set(true) ; this._error.set(null)
     this.http.post(`${environment.apiUrl}/users/logout`, {}, { withCredentials: true })
     .pipe(
-      tap(() => { this._currentUser.set(null) }),
+      tap(() => { 
+        this._currentUser.set(null)
+        this._hasCheckedAuth.set(false); // ✅ Reset flag on logout
+      }),
       catchError( err => {this._error.set('Erreur de déconnexion') ; return of(null)} ),
       finalize(() => this._isLoading.set(false))
     )
@@ -72,6 +78,7 @@ export class AuthService {
       tap(res =>{
         if (res?.user) {
         this._currentUser.set(res.user)
+        this._hasCheckedAuth.set(true); // ✅ Mark as checked after register
         console.log(`👍 Utilisateur enregistré et connecté : ${JSON.stringify(res.user)}`);
       } else {
         this._error.set('Erreur lors de l\'enregistrement');
@@ -93,17 +100,24 @@ export class AuthService {
 
   // --- Vérifie la session actuelle (cookie httpOnly) ---
   whoami() {
-    this._isLoading.set(true) ; this._error.set(null)
-    this.http.get<{ user: UserDto }>(`${environment.apiUrl}/users/me`, { withCredentials: true })
-    .pipe(
-      tap(res => { this._currentUser.set(res?.user ?? null) }),
+    this._isLoading.set(true);
+    this._error.set(null);
+    
+    return this.http.get<{ user: UserDto }>(`${environment.apiUrl}/users/me`, { 
+      withCredentials: true 
+    }).pipe(
+      tap(res => { 
+        this._currentUser.set(res?.user ?? null);
+        this._hasCheckedAuth.set(true); // ✅ Mark as checked
+      }),
       catchError(err => {
-      this._error.set('Session expirée') ; this._currentUser.set(null) ; return of(null)
-    }),
-    finalize(() => this._isLoading.set(false)),
-    catchError(() => of(null))
-    )
-    .subscribe(res => this._currentUser.set(res?.user ?? null))
+        this._error.set('Session expirée');
+        this._currentUser.set(null);
+        this._hasCheckedAuth.set(true); // ✅ Mark as checked even on error
+        return of(null);
+      }),
+      finalize(() => this._isLoading.set(false))
+    );
   }
 
   // --- Rafraîchissement pour l'interceptor ---
