@@ -8,12 +8,20 @@ import prisma from '../config/prisma.js';
 export const register = async (req: Request, res: Response) => {
   try {
     // Appel au service
-    const user = await userService.createUser(req.body);
+    const result = await userService.createUser(req.body);
+
+    const refreshToken = createRefreshToken({id: result.user.id, role: result.user.role})
     
+    res.cookie('access_token', result.token, {
+      httpOnly: true, secure: true, sameSite: 'strict', maxAge: 15 * 60 * 1000,
+    });
+    res.cookie('refresh_token', refreshToken, {
+      httpOnly: true, secure: true, sameSite: 'strict', maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
     // Réponse succès 201 (Created)
     res.status(201).json({
       message: 'Utilisateur créé avec succès',
-      data: user
+      user: result.user
     });
   } catch (error: any) {
     // Gestion basique des erreurs

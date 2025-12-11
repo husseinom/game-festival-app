@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { Login } from './shared/auth/login/login';
+import { Register } from './shared/auth/register/register';
 // import { Home } from './home/home/home';
 import { FestivalList } from './festival/festival-list/festival-list';
 // import { Admin } from './admin/admin/admin';
@@ -13,6 +14,7 @@ import { PublisherDetails } from './GamePublisher/publisher-details/publisher-de
 
 export const routes: Routes = [
     { path: 'login', component: Login },
+    {path: 'register', component: Register},
     { path: 'festival-list', component: FestivalList, canActivate:[authGuard]},
     // { path: 'admin', component: Admin, canActivate:[authGuard, adminGuard] },
     { path: '', pathMatch: 'full', redirectTo: 'login' },

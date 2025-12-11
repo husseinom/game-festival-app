@@ -26,9 +26,13 @@ export const createUser = async (userData: any) => {
       role: role || 'VISITOR',
     },
   });
+  const token = createAccessToken({ id: newUser.id, role: newUser.role }) // création du token d'accès
+
 
   const { password: _, ...userWithoutPassword } = newUser;
-  return userWithoutPassword;
+  return {
+    token,
+    user: userWithoutPassword};
 };
 
 export const login = async (credentials: any) => {

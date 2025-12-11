@@ -1,0 +1,98 @@
+<div class="register-container">
+    <!-- Loading message -->
+    <div class="loading-message">
+        @if(isLoading()){
+            <div class="spinner"></div>
+            ⏳ Creating account, please wait...
+        }
+    </div>
+
+    <!-- Error message -->
+    <div class="error-message global-error">
+        @if (error() && !isLoading()) {
+            ❌ {{ error() }}
+        }
+    </div>
+
+    <!-- Success message -->
+    <div class="success-message">
+        @if (LoggedIn()) {
+           ✅ Account created successfully! Redirecting to dashboard... 
+        }
+    </div>
+
+    <!-- Form -->
+    @if (!isLoading() && !LoggedIn()) {
+        <form [formGroup]="form" (ngSubmit)="OnSubmit($event)" class="register-form">
+            <h2>Create Account</h2>
+
+            <!-- Name Field -->
+            <div class="form-group">
+                <input 
+                    type="text" 
+                    formControlName="name"
+                    placeholder="Full Name"
+                    [class.error]="NameControl.invalid && NameControl.touched"
+                    required
+                />
+                @if(NameControl.invalid && NameControl.touched) {
+                    <div class="error-message">
+                        @if (NameControl.errors?.['required']) {
+                            Name is required
+                        }
+                    </div>
+                }
+            </div>
+
+            <!-- Email Field -->
+            <div class="form-group">
+                <input 
+                    type="email" 
+                    formControlName="email"
+                    placeholder="Email Address"
+                    [class.error]="EmailControl.invalid && EmailControl.touched"
+                    required
+                />
+                @if(EmailControl.invalid && EmailControl.touched) {
+                    <div class="error-message">
+                        @if (EmailControl.errors?.['required']) {
+                            Email is required
+                        } @else if (EmailControl.errors?.['email']) {
+                            Invalid email format
+                        }
+                    </div>
+                }
+            </div>
+
+            <!-- Password Field -->
+            <div class="form-group">
+                <input 
+                    type="password" 
+                    formControlName="password"
+                    placeholder="Password"
+                    [class.error]="passwordControl.invalid && passwordControl.touched"
+                    required
+                />
+                @if(passwordControl.invalid && passwordControl.touched) {
+                    <div class="error-message">
+                        @if (passwordControl.errors?.['required']) {
+                            Password is required
+                        } @else if (passwordControl.errors?.['minlength']) {
+                            Password must be at least 6 characters long
+                        }
+                    </div>
+                }
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn-primary" [disabled]="form.invalid">
+                Create Account
+            </button>
+
+            <!-- Login link -->
+            <div class="form-footer">
+                <p>Already have an account? <a href="/login" class="login-link">Sign In</a></p>
+            </div>
+        </form>
+    }
+</div>

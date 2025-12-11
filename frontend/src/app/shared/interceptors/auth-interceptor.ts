@@ -5,7 +5,7 @@ import { catchError, switchMap, throwError } from 'rxjs';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const auth = inject(AuthService);
-  const excluded = ['auth/login', 'auth/logout', 'auth/refresh']
+  const excluded = ['users/login', 'users/logout', 'users/refresh']
 
   if(excluded.some(path => req.url.includes(path))){return next(req)}
   
