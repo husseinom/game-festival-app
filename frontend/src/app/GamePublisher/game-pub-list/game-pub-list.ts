@@ -3,7 +3,7 @@ import { inject, signal, computed, effect } from '@angular/core';
 import { Router } from '@angular/router';
 import { GamePubListService } from '../service/game-pub-list-service';
 import { GamePublisherDto } from '../../types/game-publisher-dto';
-import { PublisherForm } from '../Form/publisher-form/publisher-form';
+import { PublisherForm } from '../publisher-form/publisher-form';
 import { GamePubCard } from '../game-pub-card/game-pub-card';
 import { GameListService } from '../../Game/service/game-list-service';
 

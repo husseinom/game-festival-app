@@ -1,7 +1,7 @@
 import { Component, output, input, computed, effect } from '@angular/core';
 import { FormGroup, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
-import { GameDto } from '../../../types/game-dto';
-import { GamePublisherDto } from '../../../types/game-publisher-dto';
+import { GameDto } from '../../types/game-dto';
+import { GamePublisherDto } from '../../types/game-publisher-dto';
 
 // Angular Material imports (kept same as student example)
 import { MatFormFieldModule } from '@angular/material/form-field';

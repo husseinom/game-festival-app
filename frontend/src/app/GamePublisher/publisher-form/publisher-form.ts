@@ -1,7 +1,7 @@
 
 import { Component, output, input, effect } from '@angular/core';
 import { FormGroup, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
-import { GamePublisherDto } from '../../../types/game-publisher-dto';
+import { GamePublisherDto } from '../../types/game-publisher-dto';
 
 // Angular Material imports
 import { MatFormFieldModule } from '@angular/material/form-field';

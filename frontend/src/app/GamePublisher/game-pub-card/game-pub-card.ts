@@ -18,6 +18,7 @@ export class GamePubCard {
 
   remove = output<number>(); 
   card = output<number>();
+  edit = output<number>();
 
   isSelected = input<boolean>(false);
 
@@ -39,15 +40,19 @@ export class GamePubCard {
     }
   }
   
-  onCardClick(): void {
+  onCardClick(event?: Event): void {
+    event?.stopPropagation();
     const gp = this.gamePub();
     if (gp && gp.id !== null) {
       this.card.emit(gp.id);
     }
   }
 
-
- 
-  
-
+  onEditClick(event: Event): void {
+    event.stopPropagation();
+    const gp = this.gamePub();
+    if (gp && gp.id !== null) {
+      this.edit.emit(gp.id);
+    }
+  }
 }
