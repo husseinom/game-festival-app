@@ -1,14 +1,15 @@
 import { Router } from 'express';
-import { authMiddleware } from '../middlewares/authMiddleware.js';
+import { verifyToken } from '../middlewares/authMiddleware.js';
 import { requireRole } from '../middlewares/roleMiddleware.js';
 import * as reservantController from '../controllers/reservantController.js';
+import { verify } from 'crypto';
 
 const router = Router();
 
 // POST /api/reservants/add
 router.post(
   '/add',
-  authMiddleware,
+  verifyToken,
   requireRole(['ADMIN', 'SUPER_ORGANISATOR']),
   reservantController.add
 );
@@ -22,7 +23,7 @@ router.get('/:id', reservantController.getById);
 // DELETE /api/reservants/:id
 router.delete(
   '/:id',
-  authMiddleware,
+  verifyToken,
   requireRole(['ADMIN', 'SUPER_ORGANISATOR']),
   reservantController.remove
 );
