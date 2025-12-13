@@ -206,21 +206,3 @@ export const getGameById = async (id: number) => {
   return game;
 };
 
-export const getAllGames = async () => {
-  return await prisma.game.findMany({
-    include: {
-      publisher: true // Important pour afficher le nom de l'éditeur dans la carte
-    }
-  });
-};
-
-export const getGameById = async (id: number) => {
-  const game = await prisma.game.findUnique({
-    where: { id },
-    include: {
-      publisher: true
-    }
-  });
-  if (!game) throw new Error('Game not found');
-  return game;
-};

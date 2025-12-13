@@ -116,3 +116,21 @@ export const getGamesByPublisherId = async (req: Request, res: Response) => {
 export const addGameToPublisher = async (req: Request, res: Response) => {
   const { id } = req.params;
   const gameData = { ...req.body, publisherId: Number(id) };
+  try {
+    const game = await gameService.createGame(gameData);
+
+    res.status(201).json({
+      message: 'Game created successfully for the publisher',
+      data: game
+    });
+  } catch (error: any) {
+    if (error.message === 'The specified game publisher does not exist.') {
+      res.status(404).json({ error: error.message });
+    } else if (error.message === 'A game with the same name already exists for this publisher.') {
+      res.status(409).json({ error: error.message });
+    } else {
+      console.error(error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  }
+};
