@@ -27,15 +27,17 @@ export const getAllGames = async (req: Request, res: Response) => {
         id: true,
         name: true,
         type: true,
-        min_age: true,
-        max_players: true,
-        logo_url: true,
-        game_publisher_id: true,
+        minAge: true,
+        maxPlayers: true,
+        minPlayers: true,
+        duration: true,
+        imageUrl: true,
+        publisherId: true,
         publisher: {
           select: {
             id: true,
             name: true,
-            logo: true,
+            logoUrl: true,
           }
         }
      },
@@ -58,15 +60,17 @@ export const getGameById = async (req: Request, res: Response) => {
         id: true,
         name: true,
         type: true,
-        min_age: true,
-        max_players: true,
-        logo_url: true,
-        game_publisher_id: true,
+        minAge: true,
+        maxPlayers: true,
+        minPlayers: true,
+        duration: true,
+        imageUrl: true,
+        publisherId: true,
         publisher: {
           select: {
             id: true,
             name: true,
-            logo: true,
+            logoUrl: true,
           }
         }
       }

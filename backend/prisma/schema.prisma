@@ -41,34 +41,54 @@ model Festival {
     @@unique([name, location, startDate])
 }
 
-model Game_Publisher {
-    id          Int         @id @default(autoincrement())
-    
-    name        String
-    logo        String?
+model GamePublisher {
+    id           Int     @id @default(autoincrement())
+    name         String
+    exposant     Boolean @default(false)
+    distributeur Boolean @default(false)
+    logoUrl      String? 
 
-    @@unique([name])
-
-    games       Game[]      // Relation to Game
+    games        Game[]
     reservations Reservation[]
+
+}
+
+model GameType {
+    id    Int    @id @default(autoincrement())
+    label String
+    games Game[]
+}
+
+model GameMechanism {
+    id          Int     @id @default(autoincrement())
+    label       String
+    description String? @db.Text
+    games       Game[]
 }
 
 model Game {
-    id                  Int             @id @default(autoincrement())
-    game_publisher_id   Int             // Foreign key to Game_Publisher
-
-    name                String
-    type                String
-    min_age             Int
-    max_players         Int?
-    logo_url            String?
-
-    @@unique([name, game_publisher_id])
+    id          Int      @id @default(autoincrement())
+    name        String
+    author      String?
+    minPlayers  Int?
+    maxPlayers  Int?
+    minAge      Int?
+    duration    Int?
+    prototype   Boolean  @default(false)
+    theme       String?  @db.Text
+    description String?  @db.Text
+    imageUrl    String?
+    noticeUrl   String?
+    videoUrl    String?
 
     // Relations
-    publisher           Game_Publisher  @relation(fields: [game_publisher_id], references: [id])
+    publisherId Int?
+    publisher   GamePublisher? @relation(fields: [publisherId], references: [id])
 
-    @@index([game_publisher_id])
+    typeId      Int?
+    type        GameType?      @relation(fields: [typeId], references: [id])
+
+    mechanisms  GameMechanism[]
 }
 
 model Reservant {
@@ -99,7 +119,7 @@ model Reservation {
     final_invoice_amount     Float?
 
     // Relations
-    publisher                Game_Publisher @relation(fields: [game_publisher_id], references: [id])
+    publisher                GamePublisher @relation(fields: [game_publisher_id], references: [id])
     festival                 Festival       @relation(fields: [festival_id], references: [id])
     reservant                Reservant      @relation(fields: [reservant_id], references: [reservant_id])
 

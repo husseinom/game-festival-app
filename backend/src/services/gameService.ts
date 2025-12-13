@@ -1,22 +1,50 @@
 import prisma from "../config/prisma.js";
 
 export const createGame = async (gameData: any) => {
-  const { game_publisher_id, name, type, min_age, max_players, logo_url } = gameData;
+  const { 
+    publisherId, // Renommé de game_publisher_id
+    name, 
+    typeId, // Renommé de type (qui était un string, maintenant une relation)
+    minAge, // Renommé de min_age
+    maxPlayers, // Renommé de max_players
+    minPlayers, // Nouveau champ
+    duration, // Nouveau champ
+    imageUrl, // Renommé de logo_url
+    noticeUrl, // Nouveau champ
+    videoUrl, // Nouveau champ
+    prototype, // Nouveau champ
+    theme, // Nouveau champ
+    description, // Nouveau champ
+    mechanisms // Array of IDs
+  } = gameData;
 
-  const existingPublisher = await prisma.game_Publisher.findUnique({
-    where: {
-      id: game_publisher_id,
-    },
-  });
+  // Vérification de l'éditeur
+  if (publisherId) {
+    const existingPublisher = await prisma.gamePublisher.findUnique({
+      where: { id: publisherId },
+    });
 
-  if (!existingPublisher) {
-    throw new Error('The specified game publisher does not exist.');
+    if (!existingPublisher) {
+      throw new Error('The specified game publisher does not exist.');
+    }
   }
 
+  // Vérification du type de jeu
+  if (typeId) {
+    const existingType = await prisma.gameType.findUnique({
+      where: { id: typeId },
+    });
+
+    if (!existingType) {
+      throw new Error('The specified game type does not exist.');
+    }
+  }
+
+  // Vérification doublon (Nom + Éditeur)
   const existingGame = await prisma.game.findFirst({
     where: {
       name,
-      game_publisher_id,
+      publisherId: publisherId || undefined, // undefined si null pour éviter erreur Prisma
     },
   });
 
@@ -26,15 +54,27 @@ export const createGame = async (gameData: any) => {
 
   const newGame = await prisma.game.create({
     data: {
-      game_publisher_id,
       name,
-      type,
-      min_age,
-      max_players,
-      logo_url,
+      publisherId,
+      typeId,
+      minAge,
+      maxPlayers,
+      minPlayers,
+      duration,
+      imageUrl,
+      noticeUrl,
+      videoUrl,
+      prototype: prototype || false,
+      theme,
+      description,
+      mechanisms: mechanisms && mechanisms.length > 0 ? {
+        connect: mechanisms.map((id: number) => ({ id: Number(id) }))
+      } : undefined,
     },
     include: {
       publisher: true,
+      type: true,
+      mechanisms: true
     },
   });
 
@@ -42,7 +82,22 @@ export const createGame = async (gameData: any) => {
 };
 
 export const updateGame = async (id: number, gameData: any) => {
-  const { game_publisher_id, name, type, min_age, max_players, logo_url } = gameData;
+  const { 
+    publisherId, 
+    name, 
+    typeId, 
+    minAge, 
+    maxPlayers, 
+    minPlayers,
+    duration,
+    imageUrl,
+    noticeUrl,
+    videoUrl,
+    prototype,
+    theme,
+    description,
+    mechanisms
+  } = gameData;
 
   const existingGame = await prisma.game.findUnique({
     where: { id },
@@ -52,11 +107,9 @@ export const updateGame = async (id: number, gameData: any) => {
     throw new Error('Game not found');
   }
 
-  if (game_publisher_id) {
-    const existingPublisher = await prisma.game_Publisher.findUnique({
-      where: {
-        id: game_publisher_id,
-      },
+  if (publisherId) {
+    const existingPublisher = await prisma.gamePublisher.findUnique({
+      where: { id: publisherId },
     });
 
     if (!existingPublisher) {
@@ -64,11 +117,21 @@ export const updateGame = async (id: number, gameData: any) => {
     }
   }
 
-  if (name || game_publisher_id) {
+  if (typeId) {
+    const existingType = await prisma.gameType.findUnique({
+      where: { id: typeId },
+    });
+
+    if (!existingType) {
+      throw new Error('The specified game type does not exist.');
+    }
+  }
+
+  if (name || publisherId) {
     const duplicateGame = await prisma.game.findFirst({
       where: {
         name: name ?? existingGame.name,
-        game_publisher_id: game_publisher_id ?? existingGame.game_publisher_id,
+        publisherId: publisherId ?? existingGame.publisherId,
         NOT: {
           id: id,
         },
@@ -83,15 +146,27 @@ export const updateGame = async (id: number, gameData: any) => {
   const updatedGame = await prisma.game.update({
     where: { id },
     data: {
-      game_publisher_id,
       name,
-      type,
-      min_age,
-      max_players,
-      logo_url,
+      publisherId,
+      typeId,
+      minAge,
+      maxPlayers,
+      minPlayers,
+      duration,
+      imageUrl,
+      noticeUrl,
+      videoUrl,
+      prototype,
+      theme,
+      description,
+      mechanisms: mechanisms ? {
+        set: mechanisms.map((id: number) => ({ id: Number(id) }))
+      } : undefined,
     },
     include: {
       publisher: true,
+      type: true,
+      mechanisms: true
     },
   });
 
@@ -110,6 +185,25 @@ export const deleteGame = async (id: number) => {
   await prisma.game.delete({
     where: { id },
   });
+};
+
+export const getAllGames = async () => {
+  return await prisma.game.findMany({
+    include: {
+      publisher: true // Important pour afficher le nom de l'éditeur dans la carte
+    }
+  });
+};
+
+export const getGameById = async (id: number) => {
+  const game = await prisma.game.findUnique({
+    where: { id },
+    include: {
+      publisher: true
+    }
+  });
+  if (!game) throw new Error('Game not found');
+  return game;
 };
 
 export const getAllGames = async () => {
