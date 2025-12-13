@@ -23,27 +23,29 @@ export const add = async (req: Request, res: Response) => {
 export const getAllGames = async (req: Request, res: Response) => {
   try {
     const games = await prisma.game.findMany({
-      select: {
-        id: true,
-        name: true,
-        type: true,
-        minAge: true,
-        maxPlayers: true,
-        minPlayers: true,
-        duration: true,
-        imageUrl: true,
-        publisherId: true,
-        publisher: {
-          select: {
-            id: true,
-            name: true,
-            logoUrl: true,
-          }
-        }
-     },
+      include: {
+        publisher: true,
+        type: true
+      }
     });
 
-    res.status(200).json(games);
+    // Transformer les données au format attendu par le frontend
+    const formattedGames = games.map(game => ({
+      id: game.id,
+      name: game.name,
+      type: game.type?.label || '', // Le frontend attend un string
+      min_age: game.minAge,
+      max_players: game.maxPlayers,
+      logo_url: game.imageUrl,
+      game_publisher_id: game.publisherId,
+      publisher: game.publisher ? {
+        id: game.publisher.id,
+        name: game.publisher.name,
+        logoUrl: game.publisher.logoUrl
+      } : undefined
+    }));
+
+    res.status(200).json(formattedGames);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal server error' });
@@ -56,23 +58,9 @@ export const getGameById = async (req: Request, res: Response) => {
   try {
     const game = await prisma.game.findUnique({
       where: { id: Number(id) },
-      select: {
-        id: true,
-        name: true,
-        type: true,
-        minAge: true,
-        maxPlayers: true,
-        minPlayers: true,
-        duration: true,
-        imageUrl: true,
-        publisherId: true,
-        publisher: {
-          select: {
-            id: true,
-            name: true,
-            logoUrl: true,
-          }
-        }
+      include: {
+        publisher: true,
+        type: true
       }
     });
 
@@ -80,7 +68,23 @@ export const getGameById = async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Game not found' });
     }
 
-    res.status(200).json(game);
+    // Transformer les données au format attendu par le frontend
+    const formattedGame = {
+      id: game.id,
+      name: game.name,
+      type: game.type?.label || '',
+      min_age: game.minAge,
+      max_players: game.maxPlayers,
+      logo_url: game.imageUrl,
+      game_publisher_id: game.publisherId,
+      publisher: game.publisher ? {
+        id: game.publisher.id,
+        name: game.publisher.name,
+        logoUrl: game.publisher.logoUrl
+      } : undefined
+    };
+
+    res.status(200).json(formattedGame);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal server error' });
