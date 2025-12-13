@@ -43,15 +43,15 @@ export const getAllGames = async (req: Request, res: Response) => {
       }
     });
 
-    // Transformer les données au format attendu par le frontend
+    // Retourner les données en camelCase
     const formattedGames = games.map(game => ({
       id: game.id,
       name: game.name,
-      type: game.type?.label || '', // Le frontend attend un string
-      min_age: game.minAge,
-      max_players: game.maxPlayers,
-      logo_url: game.imageUrl,
-      game_publisher_id: game.publisherId,
+      type: game.type?.label || '',
+      minAge: game.minAge,
+      maxPlayers: game.maxPlayers,
+      imageUrl: game.imageUrl,
+      publisherId: game.publisherId,
       publisher: game.publisher ? {
         id: game.publisher.id,
         name: game.publisher.name,
@@ -82,15 +82,15 @@ export const getGameById = async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Game not found' });
     }
 
-    // Transformer les données au format attendu par le frontend
+    // Retourner les données en camelCase
     const formattedGame = {
       id: game.id,
       name: game.name,
       type: game.type?.label || '',
-      min_age: game.minAge,
-      max_players: game.maxPlayers,
-      logo_url: game.imageUrl,
-      game_publisher_id: game.publisherId,
+      minAge: game.minAge,
+      maxPlayers: game.maxPlayers,
+      imageUrl: game.imageUrl,
+      publisherId: game.publisherId,
       publisher: game.publisher ? {
         id: game.publisher.id,
         name: game.publisher.name,

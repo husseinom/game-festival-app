@@ -26,7 +26,7 @@ export class GamePubCard {
     const gp = this.gamePub();
     const list = this.games ? this.games() : [];
     if (gp) {
-      return list.filter(g => g.game_publisher_id === gp.id).length;
+      return list.filter(g => g.publisherId === gp.id).length;
     }
     return null;
   });

@@ -45,6 +45,22 @@
   transform: translateY(0);
 }
 
+.publisher-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 10px;
+}
+
+.publisher-logo {
+  width: 80px;
+  height: 80px;
+  border-radius: 15px;
+  object-fit: cover;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  border: 3px solid rgba(255, 255, 255, 0.3);
+}
+
 .publisher-title {
   font-size: 2.5rem;
   font-weight: bold;

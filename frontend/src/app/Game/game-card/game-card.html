@@ -2,8 +2,8 @@
 	@let g = game()!;
 	<mat-card class="game-card" [class.selected]="isSelected()" (click)="onCardClick($event)">
 		<mat-card-header class="card-header">
-            @if (g.logo_url) {
-                <img mat-card-avatar [src]="g.logo_url" alt="Logo du jeu" class="game-logo-img">
+            @if (g.imageUrl) {
+                <img mat-card-avatar [src]="g.imageUrl" alt="Logo du jeu" class="game-logo-img">
             } @else {
                 <div mat-card-avatar class="game-logo"></div>
             }

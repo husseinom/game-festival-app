@@ -1,21 +1,16 @@
 import prisma from "../config/prisma.js";
 
 export const createGame = async (gameData: any) => {
-  // Accepter les anciens ET nouveaux noms de champs pour la rétro-compatibilité
   const { 
-    publisherId,
-    game_publisher_id, // Ancien nom du frontend
+    publisherId: inputPublisherId,
     name, 
     typeId,
-    type, // Ancien nom (string) - on cherchera le type par label
+    type,
     minAge,
-    min_age, // Ancien nom
     maxPlayers,
-    max_players, // Ancien nom
     minPlayers,
     duration,
     imageUrl,
-    logo_url, // Ancien nom
     noticeUrl,
     videoUrl,
     prototype,
@@ -24,16 +19,9 @@ export const createGame = async (gameData: any) => {
     mechanisms
   } = gameData;
 
-  // Utiliser les anciens noms si les nouveaux ne sont pas fournis
-  const finalPublisherId = publisherId || game_publisher_id;
-  const finalMinAge = minAge !== undefined ? minAge : min_age;
-  const finalMaxPlayers = maxPlayers !== undefined ? maxPlayers : max_players;
-  const finalImageUrl = imageUrl || logo_url;
-  
-  // Si 'type' est un string (ancien format), chercher le typeId correspondant
+  // Si 'type' est un string, chercher le typeId correspondant
   let finalTypeId = typeId;
   if (!finalTypeId && type && typeof type === 'string') {
-    // Recherche insensible à la casse
     const foundType = await prisma.gameType.findFirst({
       where: { 
         label: {
@@ -50,9 +38,9 @@ export const createGame = async (gameData: any) => {
   }
 
   // Vérification de l'éditeur
-  if (finalPublisherId) {
+  if (inputPublisherId) {
     const existingPublisher = await prisma.gamePublisher.findUnique({
-      where: { id: finalPublisherId },
+      where: { id: inputPublisherId },
     });
 
     if (!existingPublisher) {
@@ -75,7 +63,7 @@ export const createGame = async (gameData: any) => {
   const existingGame = await prisma.game.findFirst({
     where: {
       name,
-      publisherId: finalPublisherId || undefined,
+      publisherId: inputPublisherId || undefined,
     },
   });
 
@@ -86,20 +74,20 @@ export const createGame = async (gameData: any) => {
   const newGame = await prisma.game.create({
     data: {
       name,
-      publisherId: finalPublisherId,
+      publisherId: inputPublisherId,
       typeId: finalTypeId,
-      minAge: finalMinAge,
-      maxPlayers: finalMaxPlayers,
+      minAge,
+      maxPlayers,
       minPlayers,
       duration,
-      imageUrl: finalImageUrl,
+      imageUrl,
       noticeUrl,
       videoUrl,
       prototype: prototype || false,
       theme,
       description,
       mechanisms: mechanisms && mechanisms.length > 0 ? {
-        connect: mechanisms.map((id: number) => ({ id: Number(id) }))
+        connect: mechanisms.map((mechId: number) => ({ id: Number(mechId) }))
       } : undefined,
     },
     include: {
@@ -109,15 +97,15 @@ export const createGame = async (gameData: any) => {
     },
   });
 
-  // Retourner au format attendu par le frontend
+  // Retourner en camelCase
   return {
     id: newGame.id,
     name: newGame.name,
     type: newGame.type?.label || '',
-    min_age: newGame.minAge,
-    max_players: newGame.maxPlayers,
-    logo_url: newGame.imageUrl,
-    game_publisher_id: newGame.publisherId,
+    minAge: newGame.minAge,
+    maxPlayers: newGame.maxPlayers,
+    imageUrl: newGame.imageUrl,
+    publisherId: newGame.publisherId,
     publisher: newGame.publisher ? {
       id: newGame.publisher.id,
       name: newGame.publisher.name,
@@ -128,19 +116,15 @@ export const createGame = async (gameData: any) => {
 
 export const updateGame = async (id: number, gameData: any) => {
   const { 
-    publisherId,
-    game_publisher_id,
+    publisherId: inputPublisherId,
     name, 
     typeId,
     type,
     minAge,
-    min_age,
     maxPlayers,
-    max_players,
     minPlayers,
     duration,
     imageUrl,
-    logo_url,
     noticeUrl,
     videoUrl,
     prototype,
@@ -149,16 +133,9 @@ export const updateGame = async (id: number, gameData: any) => {
     mechanisms
   } = gameData;
 
-  // Utiliser les anciens noms si les nouveaux ne sont pas fournis
-  const finalPublisherId = publisherId || game_publisher_id;
-  const finalMinAge = minAge !== undefined ? minAge : min_age;
-  const finalMaxPlayers = maxPlayers !== undefined ? maxPlayers : max_players;
-  const finalImageUrl = imageUrl || logo_url;
-  
-  // Si 'type' est un string (ancien format), chercher le typeId correspondant
+  // Si 'type' est un string, chercher le typeId correspondant
   let finalTypeId = typeId;
   if (!finalTypeId && type && typeof type === 'string') {
-    // Recherche insensible à la casse
     const foundType = await prisma.gameType.findFirst({
       where: { 
         label: {
@@ -170,7 +147,6 @@ export const updateGame = async (id: number, gameData: any) => {
     if (foundType) {
       finalTypeId = foundType.id;
     } else {
-      // Le type n'existe pas, on peut soit créer un nouveau type, soit lever une erreur
       throw new Error(`Game type "${type}" does not exist. Available types: Tout public, Ambiance, Experts, Enfants, Classiques, Initiés, Jeu de rôle`);
     }
   }
@@ -183,9 +159,9 @@ export const updateGame = async (id: number, gameData: any) => {
     throw new Error('Game not found');
   }
 
-  if (finalPublisherId) {
+  if (inputPublisherId) {
     const existingPublisher = await prisma.gamePublisher.findUnique({
-      where: { id: finalPublisherId },
+      where: { id: inputPublisherId },
     });
 
     if (!existingPublisher) {
@@ -203,11 +179,11 @@ export const updateGame = async (id: number, gameData: any) => {
     }
   }
 
-  if (name || finalPublisherId) {
+  if (name || inputPublisherId) {
     const duplicateGame = await prisma.game.findFirst({
       where: {
         name: name ?? existingGame.name,
-        publisherId: finalPublisherId ?? existingGame.publisherId,
+        publisherId: inputPublisherId ?? existingGame.publisherId,
         NOT: {
           id: id,
         },
@@ -223,20 +199,20 @@ export const updateGame = async (id: number, gameData: any) => {
     where: { id },
     data: {
       name,
-      publisherId: finalPublisherId,
+      publisherId: inputPublisherId,
       typeId: finalTypeId,
-      minAge: finalMinAge,
-      maxPlayers: finalMaxPlayers,
+      minAge,
+      maxPlayers,
       minPlayers,
       duration,
-      imageUrl: finalImageUrl,
+      imageUrl,
       noticeUrl,
       videoUrl,
       prototype,
       theme,
       description,
       mechanisms: mechanisms ? {
-        set: mechanisms.map((id: number) => ({ id: Number(id) }))
+        set: mechanisms.map((mechId: number) => ({ id: Number(mechId) }))
       } : undefined,
     },
     include: {
@@ -246,15 +222,15 @@ export const updateGame = async (id: number, gameData: any) => {
     },
   });
 
-  // Retourner au format attendu par le frontend
+  // Retourner en camelCase
   return {
     id: updatedGame.id,
     name: updatedGame.name,
     type: updatedGame.type?.label || '',
-    min_age: updatedGame.minAge,
-    max_players: updatedGame.maxPlayers,
-    logo_url: updatedGame.imageUrl,
-    game_publisher_id: updatedGame.publisherId,
+    minAge: updatedGame.minAge,
+    maxPlayers: updatedGame.maxPlayers,
+    imageUrl: updatedGame.imageUrl,
+    publisherId: updatedGame.publisherId,
     publisher: updatedGame.publisher ? {
       id: updatedGame.publisher.id,
       name: updatedGame.publisher.name,

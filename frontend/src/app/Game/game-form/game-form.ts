@@ -59,9 +59,9 @@ export class GameForm implements OnInit {
         this.form.patchValue({
           name: g.name as string,
           type: g.type,
-          ageMin: g.min_age,
-          pubId: g.game_publisher_id,
-          MaxPlayers: g.max_players,
+          ageMin: g.minAge,
+          pubId: g.publisherId,
+          MaxPlayers: g.maxPlayers,
         })
       } else {
         this.form.reset()
@@ -78,10 +78,10 @@ export class GameForm implements OnInit {
     const game: Omit<GameDto, 'id'> = {
       name: value.name as string,
       type: value.type as string,
-      min_age: value.ageMin as number,
-      logo_url: undefined,
-      game_publisher_id: value.pubId as number,
-      max_players: value.MaxPlayers as number,
+      minAge: value.ageMin as number,
+      imageUrl: undefined,
+      publisherId: value.pubId as number,
+      maxPlayers: value.MaxPlayers as number,
     }
 
     const editing = this.editingGame()
