@@ -26,17 +26,27 @@ export const createGame = async (gameData: any) => {
 
   // Utiliser les anciens noms si les nouveaux ne sont pas fournis
   const finalPublisherId = publisherId || game_publisher_id;
-  const finalMinAge = minAge || min_age;
-  const finalMaxPlayers = maxPlayers || max_players;
+  const finalMinAge = minAge !== undefined ? minAge : min_age;
+  const finalMaxPlayers = maxPlayers !== undefined ? maxPlayers : max_players;
   const finalImageUrl = imageUrl || logo_url;
   
   // Si 'type' est un string (ancien format), chercher le typeId correspondant
   let finalTypeId = typeId;
   if (!finalTypeId && type && typeof type === 'string') {
+    // Recherche insensible à la casse
     const foundType = await prisma.gameType.findFirst({
-      where: { label: type }
+      where: { 
+        label: {
+          equals: type,
+          mode: 'insensitive'
+        }
+      }
     });
-    finalTypeId = foundType?.id;
+    if (foundType) {
+      finalTypeId = foundType.id;
+    } else {
+      throw new Error(`Game type "${type}" does not exist. Available types: Tout public, Ambiance, Experts, Enfants, Classiques, Initiés, Jeu de rôle`);
+    }
   }
 
   // Vérification de l'éditeur
@@ -141,17 +151,28 @@ export const updateGame = async (id: number, gameData: any) => {
 
   // Utiliser les anciens noms si les nouveaux ne sont pas fournis
   const finalPublisherId = publisherId || game_publisher_id;
-  const finalMinAge = minAge || min_age;
-  const finalMaxPlayers = maxPlayers || max_players;
+  const finalMinAge = minAge !== undefined ? minAge : min_age;
+  const finalMaxPlayers = maxPlayers !== undefined ? maxPlayers : max_players;
   const finalImageUrl = imageUrl || logo_url;
   
   // Si 'type' est un string (ancien format), chercher le typeId correspondant
   let finalTypeId = typeId;
   if (!finalTypeId && type && typeof type === 'string') {
+    // Recherche insensible à la casse
     const foundType = await prisma.gameType.findFirst({
-      where: { label: type }
+      where: { 
+        label: {
+          equals: type,
+          mode: 'insensitive'
+        }
+      }
     });
-    finalTypeId = foundType?.id;
+    if (foundType) {
+      finalTypeId = foundType.id;
+    } else {
+      // Le type n'existe pas, on peut soit créer un nouveau type, soit lever une erreur
+      throw new Error(`Game type "${type}" does not exist. Available types: Tout public, Ambiance, Experts, Enfants, Classiques, Initiés, Jeu de rôle`);
+    }
   }
 
   const existingGame = await prisma.game.findUnique({

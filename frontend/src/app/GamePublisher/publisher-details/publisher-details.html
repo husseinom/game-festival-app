@@ -33,7 +33,7 @@
                 <app-game-card
                     [game]="g"
                     (card)="goToGame(g.id)"
-                    (click)="onEdit(g.id)"
+                    (edit)="onEdit($event)"
                     (remove)="onDelete($event)">
                 </app-game-card>
             }

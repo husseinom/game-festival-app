@@ -2,6 +2,18 @@ import type { Request, Response } from 'express';
 import * as gameService from '../services/gameService.js'; 
 import prisma from '../config/prisma.js';
 
+export const getAllGameTypes = async (req: Request, res: Response) => {
+  try {
+    const gameTypes = await prisma.gameType.findMany({
+      orderBy: { label: 'asc' }
+    });
+    res.status(200).json(gameTypes);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 export const add = async (req: Request, res: Response) => {
   try {
     const game = await gameService.createGame(req.body);
@@ -13,6 +25,8 @@ export const add = async (req: Request, res: Response) => {
       res.status(404).json({ error: error.message });
     } else if (error.message === 'A game with the same name already exists for this publisher.') {
       res.status(409).json({ error: error.message });
+    } else if (error.message.includes('does not exist. Available types:')) {
+      res.status(400).json({ error: error.message });
     } else {
       console.error(error);
       res.status(500).json({ error: 'Internal server error' });
@@ -105,6 +119,8 @@ export const updateGame = async (req: Request, res: Response) => {
       res.status(404).json({ error: error.message });
     } else if (error.message === 'A game with the same name already exists for this publisher.') {
       res.status(409).json({ error: error.message });
+    } else if (error.message.includes('does not exist. Available types:')) {
+      res.status(400).json({ error: error.message });
     } else {
       console.error(error);
       res.status(500).json({ error: 'Internal server error' });
