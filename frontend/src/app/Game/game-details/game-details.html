@@ -6,9 +6,17 @@
       <p><strong>Id:</strong> {{ g.id }}</p>
       <p><strong>Nom:</strong> {{ g.name }}</p>
       <p><strong>Type:</strong> {{ g.type }}</p>
-      <p><strong>Âge minimum:</strong> {{ g.min_age }}</p>
-      <p><strong>Éditeur:</strong> {{ publisher()?.name || 'Inconnu' }}</p>
-      <p><strong>Joueurs max:</strong> {{ g.max_players }}</p>
+      <p><strong>Âge minimum:</strong> {{ g.minAge }}</p>
+      <p class="publisher-row">
+        <strong>Éditeur:</strong>
+        <span class="publisher-info">
+          @if (publisher()?.logoUrl) {
+            <img [src]="publisher()!.logoUrl" alt="Logo éditeur" class="publisher-logo">
+          }
+          {{ publisher()?.name || 'Inconnu' }}
+        </span>
+      </p>
+      <p><strong>Joueurs max:</strong> {{ g.maxPlayers }}</p>
       <div class="actions">
         <button class="btn btn-secondary" (click)="location.back()">Retour</button>
       </div>
@@ -16,8 +24,11 @@
 
     <aside class="aside">
       <div class="cover">
-        <!-- optional: <img [src]="g.imageUrl" alt="{{ g.name }} cover"> -->
-        Pas d'image
+        @if (g.imageUrl) {
+          <img [src]="g.imageUrl" alt="{{ g.name }} cover">
+        } @else {
+          Pas d'image
+        }
       </div>
       <div class="divider"></div>
       <div class="description">

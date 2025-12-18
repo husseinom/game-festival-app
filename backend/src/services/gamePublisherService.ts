@@ -1,10 +1,15 @@
 import prisma from "../config/prisma.js";
 
 export const createGamePublisher = async (publisherData: any) => {
-  const { name, logo } = publisherData;
+  // Adaptation aux nouveaux champs : logoUrl, exposant, distributeur
+  const { name, logoUrl, logo, exposant, distributeur } = publisherData;
+  
+  // Rétro-compatibilité si le front envoie encore "logo"
+  const finalLogoUrl = logoUrl || logo;
 
   // Check if a publisher with the same name already exists
-  const existingPublisher = await prisma.game_Publisher.findUnique({
+  // Utilisation de findFirst car 'name' n'est pas unique dans le schéma CSV
+  const existingPublisher = await prisma.gamePublisher.findFirst({
     where: {
       name,
     },
@@ -15,10 +20,12 @@ export const createGamePublisher = async (publisherData: any) => {
   }
 
   // Create a new game publisher
-  const newPublisher = await prisma.game_Publisher.create({
+  const newPublisher = await prisma.gamePublisher.create({
     data: {
       name,
-      logo,
+      logoUrl: finalLogoUrl,
+      exposant: exposant || false,
+      distributeur: distributeur || false,
     },
   });
 
@@ -26,9 +33,10 @@ export const createGamePublisher = async (publisherData: any) => {
 };
 
 export const updateGamePublisher = async (id: number, publisherData: any) => {
-  const { name, logo } = publisherData;
+  const { name, logoUrl, logo, exposant, distributeur } = publisherData;
+  const finalLogoUrl = logoUrl || logo;
 
-  const existingPublisher = await prisma.game_Publisher.findUnique({
+  const existingPublisher = await prisma.gamePublisher.findUnique({
     where: { id },
   });
 
@@ -37,7 +45,7 @@ export const updateGamePublisher = async (id: number, publisherData: any) => {
   }
 
   if (name) {
-    const duplicatePublisher = await prisma.game_Publisher.findFirst({
+    const duplicatePublisher = await prisma.gamePublisher.findFirst({
       where: {
         name,
         NOT: {
@@ -51,11 +59,13 @@ export const updateGamePublisher = async (id: number, publisherData: any) => {
     }
   }
 
-  const updatedPublisher = await prisma.game_Publisher.update({
+  const updatedPublisher = await prisma.gamePublisher.update({
     where: { id },
     data: {
       name,
-      logo,
+      logoUrl: finalLogoUrl,
+      exposant,
+      distributeur
     },
   });
 
@@ -63,7 +73,7 @@ export const updateGamePublisher = async (id: number, publisherData: any) => {
 };
 
 export const deleteGamePublisher = async (id: number) => {
-  const existingPublisher = await prisma.game_Publisher.findUnique({
+  const existingPublisher = await prisma.gamePublisher.findUnique({
     where: { id },
   });
 
@@ -71,20 +81,20 @@ export const deleteGamePublisher = async (id: number) => {
     throw new Error('Game publisher not found');
   }
 
-  await prisma.game_Publisher.delete({
+  await prisma.gamePublisher.delete({
     where: { id },
   });
 };
 
 export const getAllGamePublishers = async () => {
-  return await prisma.game_Publisher.findMany({
+  return await prisma.gamePublisher.findMany({
     include: { games: true }, // Charge les jeux associés
     orderBy: { name: 'asc' }
   });
 };
 
 export const getGamePublisherById = async (id: number) => {
-  const publisher = await prisma.game_Publisher.findUnique({
+  const publisher = await prisma.gamePublisher.findUnique({
     where: { id },
     include: { games: true }
   });
