@@ -27,7 +27,11 @@
 
 			<mat-form-field appearance="outline" style="width:100%">
 				<mat-label>Type</mat-label>
-				<input matInput formControlName="type" placeholder="Saisissez le type de jeu">
+				<mat-select formControlName="type" placeholder="Sélectionnez un type de jeu">
+					@for (gameType of gameTypes(); track gameType.id) {
+						<mat-option [value]="gameType.label">{{ gameType.label }}</mat-option>
+					}
+				</mat-select>
 				@if (form.controls.type.errors?.['required'] && form.controls.type.touched){
 					<mat-error>Le type est requis</mat-error>
 				}

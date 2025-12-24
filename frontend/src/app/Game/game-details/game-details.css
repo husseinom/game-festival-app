@@ -50,6 +50,26 @@
 	font-weight: 600;
 }
 
+
+:host .publisher-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+:host .publisher-info {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+:host .publisher-logo {
+	width: 32px;
+	height: 32px;
+	border-radius: 6px;
+	object-fit: cover;
+}
+
 /* Right column: cover / publisher area (optional) */
 :host .aside {
 	display: flex;

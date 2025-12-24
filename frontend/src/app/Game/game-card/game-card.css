@@ -47,6 +47,15 @@ mat-card-header.card-header {
   flex-shrink: 0 !important;
 }
 
+.game-logo-img {
+  width: 60px !important;
+  height: 60px !important;
+  border-radius: 15px !important;
+  object-fit: cover !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+  flex-shrink: 0 !important;
+}
+
 .game-logo::before {
   content: "🎮";
   color: white;

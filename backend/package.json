@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "tsx watch src/server.ts"
+    "dev": "tsx watch src/server.ts",
+    "import:csv": "tsx scripts/import-csv.ts"
   },
   "keywords": [],
   "author": "",
@@ -29,7 +30,7 @@
     "@types/express": "^5.0.3",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/morgan": "^1.9.10",
-    "@types/node": "^24.7.2",
+    "@types/node": "^24.10.3",
     "@types/pg": "^8.15.5",
     "prisma": "^6.19.0",
     "tsx": "^4.20.6",

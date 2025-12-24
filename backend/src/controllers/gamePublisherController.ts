@@ -21,11 +21,13 @@ export const add = async (req: Request, res: Response) => {
 
 export const getAllGamePublishers = async (req: Request, res: Response) => {
   try {
-    const publishers = await prisma.game_Publisher.findMany({
+    const publishers = await prisma.gamePublisher.findMany({
       select: {
         id: true,
         name: true,
-        logo: true,
+        logoUrl: true,
+        exposant: true,
+        distributeur: true
      }
     });
 
@@ -40,12 +42,14 @@ export const getGamePublisherById = async (req: Request, res: Response) => {
   const { id } = req.params;
   
   try {
-    const publisher = await prisma.game_Publisher.findUnique({
+    const publisher = await prisma.gamePublisher.findUnique({
       where: { id: Number(id) },
       select: {
         id: true,
         name: true,
-        logo: true,
+        logoUrl: true,
+        exposant: true,
+        distributeur: true
       }
     });
 
@@ -97,28 +101,12 @@ export const deleteGamePublisher = async (req: Request, res: Response) => {
 
 export const getGamesByPublisherId = async (req: Request, res: Response) => {
   const { id } = req.params;
-
   try {
-    const publisher = await prisma.game_Publisher.findUnique({
-      where: { id: Number(id) },
-      include: {
-        games: {
-          select: {
-            id: true,
-            name: true,
-            type: true,
-            min_age: true,
-            logo_url: true,
-          }
-        }
-      }
+    const games = await prisma.game.findMany({
+      where: { publisherId: Number(id) },
+      include: { type: true }
     });
-
-    if (!publisher) {
-      return res.status(404).json({ error: 'Game publisher not found' });
-    }
-
-    res.status(200).json(publisher.games);
+    res.status(200).json(games);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal server error' });
@@ -127,8 +115,7 @@ export const getGamesByPublisherId = async (req: Request, res: Response) => {
 
 export const addGameToPublisher = async (req: Request, res: Response) => {
   const { id } = req.params;
-  const gameData = { ...req.body, game_publisher_id: Number(id) };
-
+  const gameData = { ...req.body, publisherId: Number(id) };
   try {
     const game = await gameService.createGame(gameData);
 

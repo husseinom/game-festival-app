@@ -1,7 +1,8 @@
-import { Component, output, input, computed, effect } from '@angular/core';
+import { Component, output, input, computed, effect, inject, OnInit } from '@angular/core';
 import { FormGroup, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { GameDto } from '../../types/game-dto';
 import { GamePublisherDto } from '../../types/game-publisher-dto';
+import { GameListService } from '../service/game-list-service';
 
 // Angular Material imports (kept same as student example)
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -24,12 +25,16 @@ import { MatCardModule } from '@angular/material/card';
   templateUrl: './game-form.html',
   styleUrl: './game-form.css'
 })
-export class GameForm {
+export class GameForm implements OnInit {
+  private readonly gameListService = inject(GameListService);
+  
   newGame = output<Omit<GameDto, 'id'>>()
   updateGame = output<{ id: number; game: Omit<GameDto, 'id'> }>()
 
   editingGame = input<GameDto | null>(null)
   publishers = input<GamePublisherDto[]>([])
+  
+  gameTypes = this.gameListService.gameTypes;
 
   readonly form = new FormGroup({
     name: new FormControl<string>('', {
@@ -42,6 +47,10 @@ export class GameForm {
     MaxPlayers: new FormControl<number>(1, { nonNullable: true, validators: [Validators.required, Validators.min(1)] }),
   })
 
+  ngOnInit(): void {
+    this.gameListService.getGameTypes();
+  }
+
   constructor() {
     // Patch the form when editingGame changes
     effect(() => {
@@ -50,9 +59,9 @@ export class GameForm {
         this.form.patchValue({
           name: g.name as string,
           type: g.type,
-          ageMin: g.min_age,
-          pubId: g.game_publisher_id,
-          MaxPlayers: g.max_players,
+          ageMin: g.minAge,
+          pubId: g.publisherId,
+          MaxPlayers: g.maxPlayers,
         })
       } else {
         this.form.reset()
@@ -69,10 +78,10 @@ export class GameForm {
     const game: Omit<GameDto, 'id'> = {
       name: value.name as string,
       type: value.type as string,
-      min_age: value.ageMin as number,
-      logo_url: undefined,
-      game_publisher_id: value.pubId as number,
-      max_players: value.MaxPlayers as number,
+      minAge: value.ageMin as number,
+      imageUrl: undefined,
+      publisherId: value.pubId as number,
+      maxPlayers: value.MaxPlayers as number,
     }
 
     const editing = this.editingGame()

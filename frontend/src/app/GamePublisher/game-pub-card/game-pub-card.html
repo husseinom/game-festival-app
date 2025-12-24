@@ -2,7 +2,11 @@
     @let gp = gamePub()!;
 	<mat-card class="game-pub-card" [class.selected]="isSelected()" (click)="onCardClick($event)">
 		<mat-card-header class="card-header">
-            <div mat-card-avatar class="game-pub-logo"></div>
+            @if (gp.logoUrl) {
+                <img mat-card-avatar [src]="gp.logoUrl" alt="Logo de l'éditeur" class="game-pub-logo-img">
+            } @else {
+                <div mat-card-avatar class="game-pub-logo"></div>
+            }
 		</mat-card-header>
 
         <mat-card-content class="game-pub-info">
