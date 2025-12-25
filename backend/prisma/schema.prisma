@@ -29,7 +29,6 @@ model Festival {
     id              Int         @id @default(autoincrement())
     
     name            String
-    logo            String
     location        String
     total_tables    Int
     startDate       DateTime

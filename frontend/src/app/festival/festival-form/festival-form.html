@@ -23,18 +23,6 @@
 
   <div class="form-group">
     <input 
-      type="url" 
-      formControlName="logo" 
-      placeholder="Logo URL (optional)"
-      [class.error]="form.controls.logo.invalid && form.controls.logo.touched"
-    />
-    <!-- @if(form.controls.logo.invalid && form.controls.logo.touched) {
-      <div class="error-message">Please enter a valid URL</div>
-    } -->
-  </div>
-
-  <div class="form-group">
-    <input 
       type="text" 
       formControlName="location" 
       placeholder="Festival Location"

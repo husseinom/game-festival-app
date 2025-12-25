@@ -1,7 +1,7 @@
 import prisma from '../config/prisma.js';
 
 export const createFestival = async (festivalData: any) => {
-  const { name, logo, location, total_tables, startDate, endDate } = festivalData;
+  const { name, location, total_tables, startDate, endDate } = festivalData;
 
   // date conversion
   const start = new Date(startDate);
@@ -25,7 +25,6 @@ export const createFestival = async (festivalData: any) => {
   const newFestival = await prisma.festival.create({
     data: {
         name,
-        logo,
         location,
         total_tables,
         startDate: start,
@@ -37,7 +36,7 @@ export const createFestival = async (festivalData: any) => {
 };
 
 export const updateFestival = async (id: number, festivalData: any) => {
-  const { name, logo, location, total_tables, startDate, endDate } = festivalData;
+  const { name, location, total_tables, startDate, endDate } = festivalData;
 
   const existingFestival = await prisma.festival.findUnique({
     where: { id },

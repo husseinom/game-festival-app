@@ -18,8 +18,6 @@ export class FestivalForm {
       nonNullable: true, 
       validators: [Validators.required, Validators.minLength(3)]
     }),
-    logo: new FormControl('', { 
-    }),
     location: new FormControl('', {
       nonNullable: true, 
       validators: [Validators.required, Validators.minLength(2)]
@@ -44,7 +42,6 @@ export class FestivalForm {
       if(festival){
         this.form.patchValue({
           name: festival.name,
-          logo: festival.logo,
           location: festival.location,
           total_tables: festival.total_tables || 1,
           startDate: this.formatDateForInput(festival.startDate),
@@ -94,7 +91,6 @@ export class FestivalForm {
 
     const festival: Omit<Festival, 'id'> = {
       name: this.form.value.name!,
-      logo: this.form.value.logo!,
       location: this.form.value.location!,
       total_tables: this.form.value.total_tables!,
       startDate: new Date(this.form.value.startDate!),
@@ -115,7 +111,6 @@ export class FestivalForm {
     const updatedFestival: Festival = {
       ...this.editingFestival()!,
       name: this.form.value.name!,
-      logo: this.form.value.logo!,
       location: this.form.value.location!,
       total_tables: this.form.value.total_tables!,
       startDate: new Date(this.form.value.startDate!),
