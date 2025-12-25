@@ -1,6 +1,7 @@
 import { Component, inject, output } from '@angular/core';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
-import { AdminService, Role } from '../service/admin.service';
+import { AdminService } from '../service/admin.service';
+import { Role } from '../../types/user-dto';
 
 @Component({
   selector: 'app-user-form',
@@ -15,11 +16,11 @@ export class UserForm {
   userCreated = output<void>();
 
   readonly roles: { value: Role; label: string }[] = [
-    { value: 'VISITOR', label: 'Visiteur' },
-    { value: 'VOLUNTEER', label: 'Bénévole' },
-    { value: 'ORGANISATOR', label: 'Organisateur' },
-    { value: 'SUPER_ORGANISATOR', label: 'Super Organisateur' },
-    { value: 'ADMIN', label: 'Administrateur' }
+    { value: 'VISITOR', label: 'Visitor' },
+    { value: 'VOLUNTEER', label: 'Volunteer' },
+    { value: 'ORGANISATOR', label: 'Organisator' },
+    { value: 'SUPER_ORGANISATOR', label: 'Super Organisator' },
+    { value: 'ADMIN', label: 'Administrator' }
   ];
 
   readonly form = new FormGroup({
@@ -42,7 +43,7 @@ export class UserForm {
     const { name, email, password, role } = this.form.getRawValue();
     this.adminService.createUser({ name, email, password, role });
     
-    // Reset form after submission
+   
     this.form.reset({ role: 'VISITOR' });
     this.userCreated.emit();
   }

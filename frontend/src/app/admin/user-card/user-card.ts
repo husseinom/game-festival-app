@@ -1,7 +1,6 @@
 import { Component, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { UserDto } from '../../types/user-dto';
-import { Role } from '../service/admin.service';
+import { UserDto, Role } from '../../types/user-dto';
 
 @Component({
   selector: 'app-user-card',

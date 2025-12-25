@@ -1,9 +1,7 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '@env/environment';
-import { UserDto } from '../../types/user-dto';
-
-export type Role = 'ADMIN' | 'VISITOR' | 'VOLUNTEER' | 'ORGANISATOR' | 'SUPER_ORGANISATOR';
+import { UserDto, Role } from '../../types/user-dto';
 
 @Injectable({
   providedIn: 'root'
