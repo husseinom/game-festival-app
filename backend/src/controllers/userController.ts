@@ -132,3 +132,86 @@ export const refresh = async (req: Request, res: Response) => {
     res.status(401).json({ error: 'Refresh token invalide' });
   }
 };
+
+// Update user role (Admin only)
+export const updateUserRole = async (req: Request, res: Response) => {
+  try {
+    const userId = parseInt(req.params.id);
+    const { role } = req.body;
+
+    if (!role) {
+      res.status(400).json({ error: 'Le rôle est requis' });
+      return;
+    }
+
+    const validRoles = ['ADMIN', 'VISITOR', 'VOLUNTEER', 'ORGANISATOR', 'SUPER_ORGANISATOR'];
+    if (!validRoles.includes(role)) {
+      res.status(400).json({ error: 'Rôle invalide' });
+      return;
+    }
+
+    const updatedUser = await userService.updateUserRole(userId, role);
+    res.status(200).json({ message: 'Rôle mis à jour', user: updatedUser });
+  } catch (error: any) {
+    if (error.message === 'Utilisateur non trouvé') {
+      res.status(404).json({ error: error.message });
+    } else {
+      console.error(error);
+      res.status(500).json({ error: 'Erreur serveur interne' });
+    }
+  }
+};
+
+// Delete user (Admin only)
+export const deleteUser = async (req: Request, res: Response) => {
+  try {
+    const userId = parseInt(req.params.id);
+    const result = await userService.deleteUser(userId);
+    res.status(200).json(result);
+  } catch (error: any) {
+    if (error.message === 'Utilisateur non trouvé') {
+      res.status(404).json({ error: error.message });
+    } else {
+      console.error(error);
+      res.status(500).json({ error: 'Erreur serveur interne' });
+    }
+  }
+};
+
+// Create user by admin (Admin only)
+export const createUserByAdmin = async (req: Request, res: Response) => {
+  try {
+    const { name, email, password, role } = req.body;
+
+    if (!name || !email || !password) {
+      res.status(400).json({ error: 'Nom, email et mot de passe sont requis' });
+      return;
+    }
+
+    const newUser = await userService.createUserByAdmin({ name, email, password, role });
+    res.status(201).json({ message: 'Utilisateur créé avec succès', user: newUser });
+  } catch (error: any) {
+    if (error.message === 'Cet email est déjà utilisé.') {
+      res.status(409).json({ error: error.message });
+    } else {
+      console.error(error);
+      res.status(500).json({ error: 'Erreur serveur interne' });
+    }
+  }
+};
+
+// Get user by ID (Admin only)
+export const getUserById = async (req: Request, res: Response) => {
+  try {
+    const userId = parseInt(req.params.id);
+    const user = await userService.getUserById(userId);
+    res.status(200).json(user);
+  } catch (error: any) {
+    if (error.message === 'Utilisateur non trouvé') {
+      res.status(404).json({ error: error.message });
+    } else {
+      console.error(error);
+      res.status(500).json({ error: 'Erreur serveur interne' });
+    }
+  }
+};

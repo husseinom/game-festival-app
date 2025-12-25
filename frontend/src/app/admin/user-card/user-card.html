@@ -1,0 +1,47 @@
+<div class="user-card" [class.current-user]="isCurrentUser()">
+  <div class="user-info">
+    <div class="user-avatar">{{ user().name.charAt(0).toUpperCase() }}</div>
+    <div class="user-details">
+      <h3>
+        {{ user().name }}
+        @if (isCurrentUser()) {
+          <span class="you-badge">(Vous)</span>
+        }
+      </h3>
+      <p class="user-email">{{ user().email }}</p>
+      <span 
+        class="role-badge"
+        [class.badge-admin]="user().role === 'ADMIN'"
+        [class.badge-super-org]="user().role === 'SUPER_ORGANISATOR'"
+        [class.badge-org]="user().role === 'ORGANISATOR'"
+        [class.badge-volunteer]="user().role === 'VOLUNTEER'"
+        [class.badge-visitor]="user().role === 'VISITOR'"
+      >{{ user().role }}</span>
+    </div>
+  </div>
+
+  <div class="user-actions">
+    <div class="role-selector">
+      <label for="role-{{ user().id }}">Rôle :</label>
+      <select 
+        id="role-{{ user().id }}" 
+        [value]="user().role"
+        (change)="onRoleChange($event)"
+        [disabled]="isCurrentUser()">
+        @for (role of roles; track role.value) {
+          <option [value]="role.value" [selected]="role.value === user().role">
+            {{ role.label }}
+          </option>
+        }
+      </select>
+    </div>
+
+    <button 
+      class="btn-delete" 
+      (click)="onDelete()" 
+      [disabled]="isCurrentUser()"
+      [title]="isCurrentUser() ? 'Vous ne pouvez pas vous supprimer' : 'Supprimer cet utilisateur'">
+      Supprimer
+    </button>
+  </div>
+</div>
