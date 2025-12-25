@@ -49,6 +49,23 @@ services:
     # Commande magique : Génère le client Prisma PUIS lance le serveur
     command: sh -c "npx prisma generate && npm run dev"
 
+  importer:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: gamefestival_importer
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    environment:
+      DATABASE_URL: postgres://gamefest:gamefest@db:5432/gamefest
+      NODE_ENV: development
+    depends_on:
+      db:
+        condition: service_healthy
+    command: sh -c "npm install --silent && npx prisma generate && npx ts-node ./scripts/import-csv.ts"
+    restart: "no"
+
   # --- Frontend (Angular) ---
   frontend:
     build:
