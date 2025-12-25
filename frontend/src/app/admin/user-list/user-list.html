@@ -1,0 +1,41 @@
+<div class="admin-container">
+  <header class="admin-header">
+    <h1>Gestion des utilisateurs</h1>
+    <div class="header-actions">
+      <span class="user-count">{{ userCount() }} utilisateur(s)</span>
+      <button class="btn-refresh" (click)="refreshUsers()">Rafraîchir</button>
+      <button class="btn-add" (click)="toggleForm()">
+        {{ showForm() ? 'Fermer' : 'Créer un utilisateur' }}
+      </button>
+    </div>
+  </header>
+
+  @if (error()) {
+    <div class="alert alert-error">{{ error() }}</div>
+  }
+
+  @if (success()) {
+    <div class="alert alert-success">{{ success() }}</div>
+  }
+
+  @if (showForm()) {
+    <app-user-form (userCreated)="onUserCreated()"></app-user-form>
+  }
+
+  @if (isLoading()) {
+    <div class="loading">Chargement...</div>
+  }
+
+  <div class="users-grid">
+    @for (user of users(); track user.id) {
+      <app-user-card 
+        [user]="user"
+        [isCurrentUser]="user.id === currentUser()?.id"
+        (roleChanged)="onUpdateRole($event)"
+        (deleteRequested)="onDeleteUser($event)">
+      </app-user-card>
+    } @empty {
+      <p class="no-users">Aucun utilisateur trouvé</p>
+    }
+  </div>
+</div>

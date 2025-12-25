@@ -29,13 +29,13 @@
     </button>
 
     <!-- Bouton Admin (si admin connecté) -->
-    <!-- @if (loggedIn() && isAdmin()) {
+    @if (loggedIn() && isAdmin()) {
       <button mat-raised-button color="accent" class="nav-button">
-        <a routerLink="/admin" routerLinkActive="active">
+        <a routerLink="/admin/users" routerLinkActive="active">
           ⚙️ Admin
         </a>
       </button>
-    } -->
+    }
 
     <!-- Section authentification -->
     @if (loggedIn()) {
