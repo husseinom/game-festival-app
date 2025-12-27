@@ -36,184 +36,232 @@ function toInt(value: any): number | null {
   return isNaN(num) ? null : num;
 }
 
+async function seedPriceZoneTypes() {
+  await prisma.priceZoneType.createMany({
+    data: [
+      { key: 'standard', name: 'standard' },
+      { key: 'vip', name: 'vip' },
+      { key: 'standard_vip', name: 'standard_vip' },
+    ],
+    skipDuplicates: true, // safe to run multiple times
+  });
+  console.log(' Seeded PriceZoneType rows');
+}
+
 async function importData() {
   try {
     console.log(' Début de l\'importation des données CSV...\n');
 
-    // Vider les tables existantes (dans l'ordre inverse des dépendances)
-    console.log(' Suppression des données existantes...');
-    // Note: On ne supprime pas JeuMecanism car c'est une table de relation implicite gérée par Prisma
-    // On supprime d'abord les jeux pour casser les liens
-    await prisma.game.deleteMany(); 
-    await prisma.gameMechanism.deleteMany();
-    await prisma.gameType.deleteMany();
-    await prisma.gamePublisher.deleteMany();
-    console.log(' Tables vidées\n');
+    // Seed small static tables unconditionally (idempotent)
+    await seedPriceZoneTypes();
 
-    // Importer les ÉDITEURS (GamePublisher)
+    // --- Helper to bulk create when table empty, otherwise upsert per row ---
+    async function createManyIfEmpty<T>(
+      countFn: () => Promise<number>,
+      createManyFn: (data: T[]) => Promise<any>,
+      data: T[]
+    ) {
+      const cnt = await countFn();
+      if (cnt === 0) {
+        await createManyFn(data);
+        return true; // bulk created
+      }
+      return false; // already had data
+    }
+
+    // --- GamePublishers (éditeurs) ---
     console.log('Importation des éditeurs...');
-    const editeurs = readCSV('editeur.csv');
-    
-    for (const editeur of editeurs) {
-      await prisma.gamePublisher.create({
-        data: {
-          id: parseInt(editeur.idEditeur),
-          name: editeur.libelleEditeur,
-          exposant: editeur.exposant === '1',
-          distributeur: editeur.distributeur === '1',
-          logoUrl: cleanValue(editeur.logoEditeur)
-        }
-      });
-    }
-    console.log(`${editeurs.length} éditeurs importés\n`);
+    const editeurs = readCSV('editeur.csv').map(ed => ({
+      id: parseInt(ed.idEditeur),
+      name: ed.libelleEditeur,
+      exposant: ed.exposant === '1',
+      distributeur: ed.distributeur === '1',
+      logoUrl: cleanValue(ed.logoEditeur)
+    }));
 
-    // Importer les TYPES DE JEU (GameType)
-    console.log(' Importation des types de jeu...');
-    const typesJeu = readCSV('typeJeu.csv');
-    
-    for (const type of typesJeu) {
-      await prisma.gameType.create({
-        data: {
-          id: parseInt(type.idTypeJeu),
-          label: type.libelleTypeJeu,
-          // idZone ignoré car absent du nouveau schéma
-        }
-      });
-    }
-    console.log(`${typesJeu.length} types de jeu importés\n`);
+    const createdPublishers = await createManyIfEmpty(
+      () => prisma.gamePublisher.count(),
+      (data) => prisma.gamePublisher.createMany({ data, skipDuplicates: true }),
+      editeurs
+    );
 
-    // Importer les MÉCANISMES (GameMechanism)
-    console.log(' Importation des mécanismes...');
-    const mecanismes = readCSV('mecanism.csv');
-    
-    for (const meca of mecanismes) {
-      await prisma.gameMechanism.create({
-        data: {
-          id: parseInt(meca.idMecanism),
-          label: meca.mecaName,
-          description: cleanValue(meca.mecaDesc)
+    if (!createdPublishers) {
+      // upsert each publisher to avoid duplicates, keep existing ids if present
+      for (const p of editeurs) {
+        try {
+          await prisma.gamePublisher.upsert({
+            where: { id: p.id },
+            create: p,
+            update: {
+              name: p.name,
+              exposant: p.exposant,
+              distributeur: p.distributeur,
+              logoUrl: p.logoUrl
+            }
+          });
+        } catch (err: any) {
+          console.log(`  Éditeur upsert ignored for id=${p.id}: ${err.message}`);
         }
-      });
-    }
-    console.log(` ${mecanismes.length} mécanismes importés\n`);
-
-    // Récupérer les IDs valides des éditeurs et types
-    console.log(' Récupération des IDs valides...');
-    const editeursValides = await prisma.gamePublisher.findMany({ select: { id: true } });
-    const typesValides = await prisma.gameType.findMany({ select: { id: true } });
-    
-    const editeursIds = new Set(editeursValides.map(e => e.id));
-    const typesIds = new Set(typesValides.map(t => t.id));
-    
-    console.log(` ${editeursIds.size} éditeurs valides, ${typesIds.size} types valides\n`);
-
-    // Importer les JEUX (Game)
-    console.log(' Importation des jeux...');
-    const jeux = readCSV('jeu.csv');
-    
-    let jeuxImportes = 0;
-    let jeuxIgnores = 0;
-    
-    for (const jeu of jeux) {
-      try {
-        const idEditeur = toInt(jeu.idEditeur);
-        const idTypeJeu = toInt(jeu.idTypeJeu);
-        
-        // Vérifier que l'éditeur existe (si spécifié)
-        if (idEditeur && !editeursIds.has(idEditeur)) {
-          console.log(` Jeu "${jeu.libelleJeu}" ignoré : éditeur ${idEditeur} n'existe pas`);
-          jeuxIgnores++;
-          continue;
-        }
-        
-        // Vérifier que le type existe (si spécifié)
-        if (idTypeJeu && !typesIds.has(idTypeJeu)) {
-          console.log(` Jeu "${jeu.libelleJeu}" ignoré : type ${idTypeJeu} n'existe pas`);
-          jeuxIgnores++;
-          continue;
-        }
-        
-        await prisma.game.create({
-          data: {
-            id: parseInt(jeu.idJeu),
-            name: jeu.libelleJeu,
-            author: cleanValue(jeu.auteurJeu),
-            minPlayers: toInt(jeu.nbMinJoueurJeu),
-            maxPlayers: toInt(jeu.nbMaxJoueurJeu),
-            noticeUrl: cleanValue(jeu.noticeJeu),
-            publisherId: idEditeur,
-            typeId: idTypeJeu,
-            minAge: toInt(jeu.agemini),
-            prototype: jeu.prototype === '1',
-            duration: toInt(jeu.duree),
-            theme: cleanValue(jeu.theme),
-            description: cleanValue(jeu.description),
-            imageUrl: cleanValue(jeu.imageJeu),
-            videoUrl: cleanValue(jeu.videoRegle)
-          }
-        });
-        
-        jeuxImportes++;
-        
-        // Afficher la progression tous les 100 jeux
-        if (jeuxImportes % 100 === 0) {
-          console.log(` ${jeuxImportes} jeux importés...`);
-        }
-      } catch (error: any) {
-        console.log(` Erreur sur jeu "${jeu.libelleJeu}": ${error.message}`);
-        jeuxIgnores++;
       }
     }
-    
-    console.log(` ${jeuxImportes} jeux importés, ${jeuxIgnores} ignorés\n`);
+    console.log(`${editeurs.length} éditeurs traités\n`);
 
-    // Récupérer les IDs valides des jeux et mécanismes
-    console.log(' Récupération des IDs valides pour les relations...');
-    const jeuxValides = await prisma.game.findMany({ select: { id: true } });
-    const mecanismesValides = await prisma.gameMechanism.findMany({ select: { id: true } });
-    
-    const jeuxIds = new Set(jeuxValides.map(j => j.id));
-    const mecanismesIds = new Set(mecanismesValides.map(m => m.id));
-    
-    console.log(`${jeuxIds.size} jeux valides, ${mecanismesIds.size} mécanismes valides\n`);
+    // --- GameTypes ---
+    console.log('Importation des types de jeu...');
+    const typesJeu = readCSV('typeJeu.csv').map(t => ({
+      id: parseInt(t.idTypeJeu),
+      label: t.libelleTypeJeu
+    }));
 
-    // Importer les RELATIONS JEU-MÉCANISME
+    const createdTypes = await createManyIfEmpty(
+      () => prisma.gameType.count(),
+      (data) => prisma.gameType.createMany({ data, skipDuplicates: true }),
+      typesJeu
+    );
+
+    if (!createdTypes) {
+      for (const tt of typesJeu) {
+        try {
+          await prisma.gameType.upsert({
+            where: { id: tt.id },
+            create: tt,
+            update: { label: tt.label }
+          });
+        } catch (err: any) {
+          console.log(`  Type upsert ignored for id=${tt.id}: ${err.message}`);
+        }
+      }
+    }
+    console.log(`${typesJeu.length} types de jeu traités\n`);
+
+    // --- GameMechanisms ---
+    console.log('Importation des mécanismes...');
+    const mecanismes = readCSV('mecanism.csv').map(m => ({
+      id: parseInt(m.idMecanism),
+      label: m.mecaName,
+      description: cleanValue(m.mecaDesc)
+    }));
+
+    const createdMecas = await createManyIfEmpty(
+      () => prisma.gameMechanism.count(),
+      (data) => prisma.gameMechanism.createMany({ data, skipDuplicates: true }),
+      mecanismes
+    );
+
+    if (!createdMecas) {
+      for (const mm of mecanismes) {
+        try {
+          await prisma.gameMechanism.upsert({
+            where: { id: mm.id },
+            create: mm,
+            update: { label: mm.label, description: mm.description }
+          });
+        } catch (err: any) {
+          console.log(`  Mécanisme upsert ignored for id=${mm.id}: ${err.message}`);
+        }
+      }
+    }
+    console.log(`${mecanismes.length} mécanismes traités\n`);
+
+    // --- Jeux (Game) ---
+    console.log(' Importation des jeux...');
+    const jeux = readCSV('jeu.csv').map(j => ({
+      id: parseInt(j.idJeu),
+      name: j.libelleJeu,
+      author: cleanValue(j.auteurJeu),
+      minPlayers: toInt(j.nbMinJoueurJeu),
+      maxPlayers: toInt(j.nbMaxJoueurJeu),
+      noticeUrl: cleanValue(j.noticeJeu),
+      publisherId: toInt(j.idEditeur),
+      typeId: toInt(j.idTypeJeu),
+      minAge: toInt(j.agemini),
+      prototype: j.prototype === '1',
+      duration: toInt(j.duree),
+      theme: cleanValue(j.theme),
+      description: cleanValue(j.description),
+      imageUrl: cleanValue(j.imageJeu),
+      videoUrl: cleanValue(j.videoRegle)
+    }));
+
+    const createdGamesBulk = await createManyIfEmpty(
+      () => prisma.game.count(),
+      (data) => prisma.game.createMany({ data, skipDuplicates: true }),
+      jeux
+    );
+
+    if (!createdGamesBulk) {
+      let jeuxImportes = 0;
+      let jeuxIgnores = 0;
+      for (const jeu of jeux) {
+        try {
+          await prisma.game.upsert({
+            where: { id: jeu.id },
+            create: jeu,
+            update: {
+              name: jeu.name,
+              author: jeu.author,
+              minPlayers: jeu.minPlayers,
+              maxPlayers: jeu.maxPlayers,
+              noticeUrl: jeu.noticeUrl,
+              publisherId: jeu.publisherId,
+              typeId: jeu.typeId,
+              minAge: jeu.minAge,
+              prototype: jeu.prototype,
+              duration: jeu.duration,
+              theme: jeu.theme,
+              description: jeu.description,
+              imageUrl: jeu.imageUrl,
+              videoUrl: jeu.videoUrl
+            }
+          });
+          jeuxImportes++;
+          if (jeuxImportes % 100 === 0) console.log(` ${jeuxImportes} jeux upsertés...`);
+        } catch (error: any) {
+          console.log(` Erreur sur jeu "${jeu.name}": ${error.message}`);
+          jeuxIgnores++;
+        }
+      }
+      console.log(` ${jeuxImportes} jeux upsertés, ${jeuxIgnores} ignorés\n`);
+    } else {
+      console.log(`${jeux.length} jeux créés en bulk\n`);
+    }
+
+    // --- Relations Jeu-Mécanisme ---
     console.log(' Importation des relations jeu-mécanisme...');
     const jeuMecanismes = readCSV('jeu_mecanism.csv');
-    
+
+    // fetch valid ids to avoid errors
+    const jeuxValides = await prisma.game.findMany({ select: { id: true } });
+    const mecanismesValides = await prisma.gameMechanism.findMany({ select: { id: true } });
+    const jeuxIds = new Set(jeuxValides.map(j => j.id));
+    const mecanismesIds = new Set(mecanismesValides.map(m => m.id));
+
     let relationsImportees = 0;
     let relationsIgnorees = 0;
-    
+
     for (const relation of jeuMecanismes) {
       try {
         const idJeu = toInt(relation.idJeu);
         const idMecanism = toInt(relation.idMecanism);
-        
-        // Vérifier que le jeu et le mécanisme existent
-        if (!idJeu || !jeuxIds.has(idJeu)) {
-          relationsIgnorees++;
-          continue;
-        }
-        
-        if (!idMecanism || !mecanismesIds.has(idMecanism)) {
-          relationsIgnorees++;
-          continue;
-        }
-        
-        // Mise à jour du jeu pour ajouter le mécanisme (relation Many-to-Many)
-        await prisma.game.update({
-          where: { id: idJeu },
-          data: {
-            mechanisms: {
-              connect: { id: idMecanism }
+
+        if (!idJeu || !jeuxIds.has(idJeu)) { relationsIgnorees++; continue; }
+        if (!idMecanism || !mecanismesIds.has(idMecanism)) { relationsIgnorees++; continue; }
+
+        // use a guarded update connect; ignore unique-constraint errors when already connected
+        try {
+          await prisma.game.update({
+            where: { id: idJeu },
+            data: {
+              mechanisms: { connect: { id: idMecanism } }
             }
-          }
-        });
-        
-        relationsImportees++;
-        
-        // Afficher la progression tous les 100 relations
-        if (relationsImportees % 100 === 0) {
+          });
+          relationsImportees++;
+        } catch (innerErr: any) {
+          // already connected or other issue — ignore duplicate relation errors
+          relationsIgnorees++;
+        }
+
+        if (relationsImportees % 100 === 0 && relationsImportees > 0) {
           console.log(` ${relationsImportees} relations importées...`);
         }
       } catch (error: any) {
@@ -221,11 +269,10 @@ async function importData() {
         relationsIgnorees++;
       }
     }
-    
-    console.log(` ${relationsImportees} relations importées, ${relationsIgnorees} ignorées\n`);
 
+    console.log(` ${relationsImportees} relations importées, ${relationsIgnorees} ignorées\n`);
     console.log(' Importation terminée avec succès !');
-    
+
   } catch (error) {
     console.error(' Erreur lors de l\'importation :', error);
     throw error;

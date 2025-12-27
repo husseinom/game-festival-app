@@ -13,6 +13,9 @@ export class FestivalCard {
   remove = output<Festival>();
   edit = output<Festival>();
 
+  card = output<number>();
+
+
   isSelected = signal(false);
 
   get isGoingOn(): boolean {
@@ -68,8 +71,6 @@ export class FestivalCard {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
     });
   }
 
@@ -79,5 +80,14 @@ export class FestivalCard {
 
   onEdit(): void {
     this.edit.emit(this.festivals()!);
+  }
+
+  onCardClick(event?: Event): void {
+    // Card click -> show details
+    event?.stopPropagation();
+    const g = this.festivals();
+    if (g && g.id !== null) {
+      this.card.emit(g.id);
+    }
   }
 }

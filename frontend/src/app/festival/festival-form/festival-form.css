@@ -31,7 +31,6 @@
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   background: linear-gradient(45deg, #ff9a9e, #fecfef);
   -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
@@ -118,6 +117,41 @@
 /* Date inputs specific styling */
 .festival-form input[type="date"] {
   color-scheme: dark; /* Makes the calendar popup dark mode compatible */
+}
+
+/* Select styling (match festival glass style) */
+.festival-form select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 100%;
+  padding: 12px 40px 12px 15px; /* room for caret */
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #fff;
+  border-radius: 12px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all .2s ease;
+  box-sizing: border-box;
+  background-image: linear-gradient(45deg, transparent 50%, rgba(255,255,255,0.4) 50%),
+                    linear-gradient(135deg, rgba(255,255,255,0.4) 50%, transparent 50%);
+  background-position: calc(100% - 18px) calc(1em + 2px), calc(100% - 13px) calc(1em + 2px);
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+}
+
+.festival-form select:focus {
+  outline: none;
+  background: rgba(255,255,255,0.11);
+  border-color: rgba(255,255,255,0.36);
+  box-shadow: 0 0 12px rgba(255,255,255,0.06);
+}
+
+/* Option colours for better contrast in some browsers */
+.festival-form select option {
+  background: rgba(10,10,10,0.9);
+  color: #fff;
 }
 
 /* Responsive */

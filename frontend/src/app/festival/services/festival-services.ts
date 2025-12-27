@@ -101,4 +101,8 @@ export class FestivalServices {
       }
     });
   }
+
+  findFestivalById(id: number): Festival | undefined {
+      return this._festivals().find(festival => festival.id === id);
+  }
 }  

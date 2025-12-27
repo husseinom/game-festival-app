@@ -27,7 +27,6 @@ export const getAllFestivals = async (req: Request, res: Response) => {
       select: {
         id: true,
         name: true,
-        logo: true,
         location: true,
         total_tables: true,
         startDate: true,
@@ -50,7 +49,6 @@ export const getFestivalById = async (req: Request, res: Response) => {
       select: {
         id: true,
         name: true,
-        logo: true,
         location: true,
         total_tables: true,
         startDate: true,

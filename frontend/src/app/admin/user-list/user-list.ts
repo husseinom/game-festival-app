@@ -1,5 +1,6 @@
 import { Component, inject, signal, computed } from '@angular/core';
-import { AdminService, Role } from '../service/admin.service';
+import { AdminService} from '../service/admin.service';
+import { Role } from '../../types/user-dto';
 import { UserCard } from '../user-card/user-card';
 import { UserForm } from '../user-form/user-form';
 import { AuthService } from '../../shared/auth/auth-service';

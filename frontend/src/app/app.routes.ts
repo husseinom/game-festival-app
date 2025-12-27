@@ -10,12 +10,16 @@ import { GameDetails } from './Game/game-details/game-details';
 import { GamePubList } from './GamePublisher/game-pub-list/game-pub-list';
 import { PublisherDetails } from './GamePublisher/publisher-details/publisher-details';
 import { UserList } from './admin/user-list/user-list';
+import { FestivalDetails } from './festival/festival-details/festival-details';
+import { PriceZoneCard } from './PriceZone/price-zone-card/price-zone-card';
 
 
 export const routes: Routes = [
     { path: 'login', component: Login },
     {path: 'register', component: Register},
     { path: 'festival-list', component: FestivalList, canActivate:[authGuard]},
+    {path: 'festival/:id', component: FestivalDetails, canActivate:[authGuard]},
+    {path: 'price-zone/:id', component: PriceZoneCard, canActivate:[authGuard]},
     { path: 'admin/users', component: UserList, canActivate:[authGuard, adminGuard] },
     { path: '', pathMatch: 'full', redirectTo: 'login' },
 	{ path: 'games', component: GameList, title: 'liste des jeux', canActivate:[authGuard]},
