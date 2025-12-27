@@ -37,7 +37,7 @@ export class PublisherDetails {
   publisherGames = computed<GameDto[]>(() => {
     const pub = this.publisher()
     if (!pub) return []
-    return this.games().filter(g => g.game_publisher_id === pub.id)
+    return this.games().filter(g => g.publisherId === pub.id)
   })
 
   // Le jeu en cours d'édition

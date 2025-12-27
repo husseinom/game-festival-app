@@ -1,7 +1,7 @@
-import { Component, input, output, effect } from '@angular/core';
+import { Component, input, output, effect, inject } from '@angular/core';
 import { Festival } from '../../types/festival';
 import { FormGroup, FormControl, ReactiveFormsModule, Validators, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
-
+import { PriceZoneServices } from '../../PriceZone/services/price-zone-services';
 @Component({
   selector: 'app-festival-form',
   imports: [ReactiveFormsModule],
@@ -12,13 +12,17 @@ export class FestivalForm {
   newFestival = output<Festival>();
   updatedFestival = output<Festival>();
   editingFestival = input<Festival>();
+
+
+  private readonly pzService = inject(PriceZoneServices);
+
+  priceZoneTypes = this.pzService.priceZoneTypes;
+
   
   readonly form = new FormGroup({
     name: new FormControl('', {
       nonNullable: true, 
       validators: [Validators.required, Validators.minLength(3)]
-    }),
-    logo: new FormControl('', { 
     }),
     location: new FormControl('', {
       nonNullable: true, 
@@ -35,7 +39,8 @@ export class FestivalForm {
     endDate: new FormControl('', {
       nonNullable: true, 
       validators: [Validators.required]
-    })
+    }),
+    priceZoneTypeId: new FormControl<number | null>(null) 
   });
 
   constructor(){
@@ -44,16 +49,18 @@ export class FestivalForm {
       if(festival){
         this.form.patchValue({
           name: festival.name,
-          logo: festival.logo,
           location: festival.location,
           total_tables: festival.total_tables || 1,
           startDate: this.formatDateForInput(festival.startDate),
-          endDate: this.formatDateForInput(festival.endDate)
+          endDate: this.formatDateForInput(festival.endDate),
+          priceZoneTypeId: festival.priceZoneTypeId
         });
       } else {
         this.form.reset();
       }
     });
+
+    this.pzService.getPriceZoneTypes();
 
     // Add custom validator to ensure end date is after start date
     this.form.addValidators(this.dateRangeValidator);
@@ -94,11 +101,11 @@ export class FestivalForm {
 
     const festival: Omit<Festival, 'id'> = {
       name: this.form.value.name!,
-      logo: this.form.value.logo!,
       location: this.form.value.location!,
       total_tables: this.form.value.total_tables!,
       startDate: new Date(this.form.value.startDate!),
-      endDate: new Date(this.form.value.endDate!)
+      endDate: new Date(this.form.value.endDate!),
+      priceZoneTypeId: Number(this.form.value.priceZoneTypeId!)
     };
 
     this.newFestival.emit(festival as Festival);
@@ -115,11 +122,11 @@ export class FestivalForm {
     const updatedFestival: Festival = {
       ...this.editingFestival()!,
       name: this.form.value.name!,
-      logo: this.form.value.logo!,
       location: this.form.value.location!,
       total_tables: this.form.value.total_tables!,
       startDate: new Date(this.form.value.startDate!),
-      endDate: new Date(this.form.value.endDate!)
+      endDate: new Date(this.form.value.endDate!),
+      priceZoneTypeId: Number(this.form.value.priceZoneTypeId!)
     };
 
     this.updatedFestival.emit(updatedFestival);

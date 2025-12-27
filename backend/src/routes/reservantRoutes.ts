@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { verifyToken } from '../middlewares/authMiddleware.js';
 import { requireRole } from '../middlewares/roleMiddleware.js';
 import * as reservantController from '../controllers/reservantController.js';
+import { verify } from 'crypto';
 
 const router = Router();
 

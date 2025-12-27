@@ -33,7 +33,7 @@ export class GameDetails {
   // Éditeur du jeu (computed depuis pubId)
   publisher = computed(() => {
     const g = this.game();
-    return g ? this.pubService.findGamePubById(g.game_publisher_id) : null;
+    return g ? this.pubService.findGamePubById(g.publisherId) : null;
   });
 
   constructor() {

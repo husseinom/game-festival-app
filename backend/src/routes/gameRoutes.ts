@@ -5,6 +5,8 @@ import * as gameController from '../controllers/gameController.js';
 
 const router = Router();
 
+// GET /api/games/types - Liste des types de jeux
+router.get('/types', gameController.getAllGameTypes);
 
 // POST /api/games/add
 router.post(

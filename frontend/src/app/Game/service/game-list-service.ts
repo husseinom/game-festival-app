@@ -9,12 +9,13 @@ import { environment } from '@env/environment';
 export class GameListService {
   private readonly http = inject(HttpClient);
   private readonly _games : WritableSignal<GameDto[]> = signal<GameDto[]>([]);
-  
+  private readonly _gameTypes = signal<{id: number, label: string}[]>([]);
   
   private readonly _isLoading = signal(false);
   private readonly _error = signal<string | null>(null);
 
   games = this._games.asReadonly();
+  gameTypes = this._gameTypes.asReadonly();
   isLoading = this._isLoading.asReadonly()
   error = this._error.asReadonly()
 
@@ -76,6 +77,18 @@ export class GameListService {
 
   removeAllGames(): void { 
     this._games.set([]);
+  }
+
+  getGameTypes(): void {
+    this.http.get<{id: number, label: string}[]>(`${environment.apiUrl}/games/types`, { withCredentials: true })
+      .subscribe({
+        next: (data) => {
+          this._gameTypes.set(data);
+        },
+        error: (error) => {
+          console.error('Error fetching game types:', error);
+        }
+      });
   }
 
 

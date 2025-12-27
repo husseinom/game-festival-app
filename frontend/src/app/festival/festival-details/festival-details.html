@@ -1,0 +1,33 @@
+<div class="festival-details-container">
+    @if (festival()) {
+        @let fest= festival()!;
+        
+        <!-- Header Section -->
+        <div class="header-section">
+            <button mat-stroked-button class="back-btn" (click)="back()">Retour</button>
+            <div class="festival-header">
+                <h2 class="festival-title">{{ fest.name }}</h2>
+            </div>
+            <div class="festival-info">Festival Details</div>
+        </div>
+
+        <h3 class="priceZone-section-title">Festival's Price Zones </h3>
+        
+        <div class="priceZone-grid">
+            @for (pz of priceZones(); track pz.id) {
+                <app-price-zone-card
+                [pz]="pz"
+                (card)="goToPriceZone($event)"
+                >
+                    
+                </app-price-zone-card>
+            }
+        </div>
+
+    } 
+    @else {
+        <div class="state-message">
+            <p>Unknown Festival.</p>
+        </div>
+    }
+</div>
