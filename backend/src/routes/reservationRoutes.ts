@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authMiddleware } from '../middlewares/authMiddleware.js';
+import { verifyToken } from '../middlewares/authMiddleware.js';
 import { requireRole } from '../middlewares/roleMiddleware.js';
 import * as reservationController from '../controllers/reservationController.js';
 
@@ -8,7 +8,7 @@ const router = Router();
 // POST /api/reservations/add
 router.post(
   '/add',
-  authMiddleware,
+  verifyToken,
   requireRole(['ADMIN', 'SUPER_ORGANISATOR']),
   reservationController.add
 );
@@ -22,7 +22,7 @@ router.get('/:id', reservationController.getById);
 // PUT /api/reservations/:id
 router.put(
   '/:id',
-  authMiddleware,
+  verifyToken,
   requireRole(['ADMIN', 'SUPER_ORGANISATOR']),
   reservationController.update
 );
@@ -30,7 +30,7 @@ router.put(
 // DELETE /api/reservations/:id
 router.delete(
   '/:id',
-  authMiddleware,
+  verifyToken,
   requireRole(['ADMIN', 'SUPER_ORGANISATOR']),
   reservationController.remove
 );
