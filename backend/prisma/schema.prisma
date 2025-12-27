@@ -33,6 +33,12 @@ model Festival {
     total_tables    Int
     startDate       DateTime
     endDate         DateTime
+    priceZoneTypeId  Int?
+    priceZoneType    PriceZoneType?  @relation(fields: [priceZoneTypeId], references: [id])
+    priceZones      PriceZone[]
+
+    // add opposite relation for MapZone
+    mapZones        MapZone[]
 
     // Reservations for this festival
     reservations    Reservation[]
@@ -56,6 +62,35 @@ model GameType {
     id    Int    @id @default(autoincrement())
     label String
     games Game[]
+}
+
+model MapZone{
+    id     Int  @id @default(autoincrement())
+    festival_id Int
+    festival Festival  @relation(fields: [festival_id], references: [id])
+    price_zone_id Int
+    price_zone PriceZone @relation(fields: [price_zone_id], references: [id])
+    name String
+
+}
+
+model PriceZoneType{
+    id     Int     @id @default(autoincrement())
+    key    String  @unique
+    name   String
+    festivals Festival[]
+}
+
+model PriceZone{
+    id  Int   @id @default(autoincrement())
+    festival_id Int
+    festival Festival @relation(fields: [festival_id], references: [id])
+    name  String
+    table_price Float
+    total_tables  Int?
+
+    mapZones MapZone[]
+
 }
 
 model GameMechanism {
