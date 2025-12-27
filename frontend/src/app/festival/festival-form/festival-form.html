@@ -97,6 +97,15 @@
     <div class="error-message">End date must be after start date</div>
   }
 
+  <div class="form-group">
+    <select formControlName="priceZoneTypeId">
+      <option value="" disabled selected>Choisir type de zones de prix</option>
+      @for (type of priceZoneTypes(); track type.id) {
+        <option [value]="type.id">{{ type.name }}</option>
+      }
+    </select>
+  </div>
+
   <button 
     type="submit" 
     [class.valid]="form.valid"

@@ -1,4 +1,4 @@
-<mat-card class="festival-card" [class.ongoing]="isGoingOn" [class.selected]="isSelected()">
+<mat-card class="festival-card" [class.ongoing]="isGoingOn" [class.selected]="isSelected()" (click)="onCardClick($event)">
   @if(festivals()){
     @let ft = festivals()!;
     

@@ -23,12 +23,23 @@ export class FestivalList {
   readonly showform = signal(false);
   readonly editingFestival = signal<Festival | undefined>(undefined);
 
+  readonly selectedId = signal<number | null>(null)
+  readonly selectedFestival = signal<Festival | null>(null)
+  
+
   constructor(){
-    if(!this.loggedIn()){
-      this.router.navigate(['/login']);
-    }
+    // if(!this.loggedIn()){
+    //   this.router.navigate(['/login']);
+    // }
     effect(()=> {
         this.festivalService.getFestivals();
+        const id = this.selectedId();
+      if (id !== null) {
+        const festival = this.festivalService.findFestivalById(id);
+        this.selectedFestival.set(festival || null);
+      } else {
+        this.selectedFestival.set(null);
+      }
       })
 
   }
@@ -37,6 +48,7 @@ export class FestivalList {
   
   add(Festival: Festival): void{
     this.festivalService.addFestival(Festival);
+    this.hideform();
   }
   // remove(Festival: Festival):void{
   //   this.svc.remove(Festival);
@@ -51,7 +63,7 @@ export class FestivalList {
 
   edit(festival: Festival): void {
     this.editingFestival.set(festival);
-    this.showform.set(true);
+    this.toggleform();
   }
 
   update(festival: Festival): void {
@@ -65,5 +77,9 @@ export class FestivalList {
   hideform():void{
     this.showform.set(false);
     this.editingFestival.set(undefined);
+  }
+
+  goToFestival(id: number){
+    this.router.navigate(['/festival', id])
   }
 }
