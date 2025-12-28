@@ -14,6 +14,7 @@ export const createReservation = async (data: any) => {
     discount_amount,
     discount_tables,
     final_invoice_amount,
+    tables
   } = data;
 
   const reservation = await prisma.reservation.create({
@@ -21,7 +22,7 @@ export const createReservation = async (data: any) => {
       game_publisher_id,
       festival_id,
       reservant_id,
-      status,
+      status: status || 'Contact pris',
       comments,
       is_publisher_presenting,
       game_list_requested,
@@ -30,7 +31,18 @@ export const createReservation = async (data: any) => {
       discount_amount,
       discount_tables,
       final_invoice_amount,
+      zones: {
+        create: tables && Array.isArray(tables) 
+          ? tables.map((t: any) => ({
+              price_zone_id: t.price_zone_id,
+              table_count: t.table_count
+            })) 
+          : []
+      }
     },
+    include: {
+      zones: { include: { priceZone: true } }
+    }
   });
 
   return reservation;
@@ -42,6 +54,7 @@ export const getAllReservations = async () => {
       publisher: true,
       festival: true,
       reservant: true,
+      zones: { include: { priceZone: true } },
     },
   });
 };
@@ -49,7 +62,12 @@ export const getAllReservations = async () => {
 export const getReservationById = async (id: number) => {
   return prisma.reservation.findUnique({
     where: { reservation_id: id },
-    include: { publisher: true, festival: true, reservant: true },
+    include: { 
+      publisher: true, 
+      festival: true, 
+      reservant: true,
+      zones: { include: { priceZone: true } }
+    },
   });
 };
 
@@ -57,6 +75,7 @@ export const updateReservation = async (id: number, data: any) => {
   return prisma.reservation.update({
     where: { reservation_id: id },
     data,
+    include: { zones: true }
   });
 };
 
