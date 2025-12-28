@@ -55,7 +55,7 @@ model GamePublisher {
 
     games        Game[]
     reservations Reservation[]
-
+    contacts     Contact[]
 }
 
 model GameType {
@@ -72,6 +72,8 @@ model MapZone{
     price_zone PriceZone @relation(fields: [price_zone_id], references: [id])
     name String
 
+    festivalGames  FestivalGame[]
+    tableTypes     TableType[]
 }
 
 model PriceZoneType{
@@ -90,6 +92,7 @@ model PriceZone{
     total_tables  Int?
 
     mapZones MapZone[]
+    zoneReservations ZoneReservation[]
 
 }
 
@@ -123,6 +126,7 @@ model Game {
     type        GameType?      @relation(fields: [typeId], references: [id])
 
     mechanisms  GameMechanism[]
+    festivalGames FestivalGame[]
 }
 
 model Reservant {
@@ -153,11 +157,69 @@ model Reservation {
     final_invoice_amount     Float?
 
     // Relations
-    publisher                GamePublisher @relation(fields: [game_publisher_id], references: [id])
-    festival                 Festival       @relation(fields: [festival_id], references: [id])
-    reservant                Reservant      @relation(fields: [reservant_id], references: [reservant_id])
+    publisher               GamePublisher @relation(fields: [game_publisher_id], references: [id])
+    festival                Festival       @relation(fields: [festival_id], references: [id])
+    reservant               Reservant      @relation(fields: [reservant_id], references: [reservant_id])
+    zones                   ZoneReservation[]
+    games                   FestivalGame[]
+    contactLogs             ContactLog[]
 
     @@index([game_publisher_id])
     @@index([festival_id])
     @@index([reservant_id])
+}
+
+model ZoneReservation {
+  id             Int         @id @default(autoincrement())
+  reservation_id Int
+  price_zone_id  Int
+  table_count    Int         @default(0) // "table_nb"
+
+  reservation    Reservation @relation(fields: [reservation_id], references: [reservation_id])
+  priceZone      PriceZone   @relation(fields: [price_zone_id], references: [id])
+
+  @@unique([reservation_id, price_zone_id]) // Un éditeur ne peut pas avoir 2 lignes pour la même zone dans la même résa
+}
+
+model FestivalGame {
+  id              Int         @id @default(autoincrement())
+  reservation_id  Int
+  game_id         Int
+  map_zone_id     Int?        // Peut être null tant que l'orga ne l'a pas placé
+  
+  copy_count      Int         @default(1) // Nombre d'exemplaires du jeu
+  allocated_tables Int        @default(1) // Combien de tables ça prend
+
+  reservation     Reservation @relation(fields: [reservation_id], references: [reservation_id])
+  game            Game        @relation(fields: [game_id], references: [id])
+  mapZone         MapZone?    @relation(fields: [map_zone_id], references: [id])
+}
+
+model TableType {
+  id              Int      @id @default(autoincrement())
+  name            String   // "small", "large", "city"
+  nb_total        Int      // Stock total disponible
+  nb_total_player Int      // Capacité joueurs (ex: 4)
+  
+  map_zone_id     Int
+  mapZone         MapZone  @relation(fields: [map_zone_id], references: [id])
+}
+
+model Contact {
+  id                Int           @id @default(autoincrement())
+  game_publisher_id Int
+  name              String
+  email             String
+  tel               String?
+
+  publisher         GamePublisher @relation(fields: [game_publisher_id], references: [id])
+}
+
+model ContactLog {
+  id             Int         @id @default(autoincrement())
+  reservation_id Int
+  contact_date   DateTime    @default(now())
+  notes          String?     @db.Text
+
+  reservation    Reservation @relation(fields: [reservation_id], references: [reservation_id])
 }
