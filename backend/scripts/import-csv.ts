@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { parse } from 'csv-parse/sync';
 import { fileURLToPath } from 'url';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 const __filename = fileURLToPath(import.meta.url);
@@ -51,6 +52,21 @@ async function seedPriceZoneTypes() {
 async function importData() {
   try {
     console.log(' Début de l\'importation des données CSV...\n');
+
+    // --- Create admin user ---
+    console.log('Création de l\'utilisateur admin...');
+    const hashedPassword = await bcrypt.hash('admin', 10);
+    await prisma.user.upsert({
+      where: { email: 'admin@test.com' },
+      update: {},
+      create: {
+        name: 'Admin',
+        email: 'admin@test.com',
+        password: hashedPassword,
+        role: 'ADMIN'
+      }
+    });
+    console.log(' Admin créé\n');
 
     // Seed small static tables unconditionally (idempotent)
     await seedPriceZoneTypes();
@@ -165,23 +181,51 @@ async function importData() {
 
     // --- Jeux (Game) ---
     console.log(' Importation des jeux...');
-    const jeux = readCSV('jeu.csv').map(j => ({
-      id: parseInt(j.idJeu),
-      name: j.libelleJeu,
-      author: cleanValue(j.auteurJeu),
-      minPlayers: toInt(j.nbMinJoueurJeu),
-      maxPlayers: toInt(j.nbMaxJoueurJeu),
-      noticeUrl: cleanValue(j.noticeJeu),
-      publisherId: toInt(j.idEditeur),
-      typeId: toInt(j.idTypeJeu),
-      minAge: toInt(j.agemini),
-      prototype: j.prototype === '1',
-      duration: toInt(j.duree),
-      theme: cleanValue(j.theme),
-      description: cleanValue(j.description),
-      imageUrl: cleanValue(j.imageJeu),
-      videoUrl: cleanValue(j.videoRegle)
-    }));
+
+    // 1. Récupérer les IDs existants pour validation (clés étrangères)
+    const existingPublishers = await prisma.gamePublisher.findMany({ select: { id: true } });
+    const validPublisherIds = new Set(existingPublishers.map(p => p.id));
+
+    const existingTypes = await prisma.gameType.findMany({ select: { id: true } });
+    const validTypeIds = new Set(existingTypes.map(t => t.id));
+
+    // 2. Mapper les jeux en vérifiant les clés étrangères
+    const jeux = readCSV('jeu.csv').map(j => {
+      const rawPubId = toInt(j.idEditeur);
+      const rawTypeId = toInt(j.idTypeJeu);
+
+      // Vérification Editeur
+      let finalPubId = rawPubId;
+      if (rawPubId && !validPublisherIds.has(rawPubId)) {
+        console.warn(`  ⚠️  Attention : Jeu "${j.libelleJeu}" référence l'éditeur ${rawPubId} introuvable. Mis à NULL.`);
+        finalPubId = null;
+      }
+
+      // Vérification Type
+      let finalTypeId = rawTypeId;
+      if (rawTypeId && !validTypeIds.has(rawTypeId)) {
+        console.warn(`  ⚠️  Attention : Jeu "${j.libelleJeu}" référence le type ${rawTypeId} introuvable. Mis à NULL.`);
+        finalTypeId = null;
+      }
+
+      return {
+        id: parseInt(j.idJeu),
+        name: j.libelleJeu,
+        author: cleanValue(j.auteurJeu),
+        minPlayers: toInt(j.nbMinJoueurJeu),
+        maxPlayers: toInt(j.nbMaxJoueurJeu),
+        noticeUrl: cleanValue(j.noticeJeu),
+        publisherId: finalPubId, // ID validé ou null
+        typeId: finalTypeId,     // ID validé ou null
+        minAge: toInt(j.agemini),
+        prototype: j.prototype === '1',
+        duration: toInt(j.duree),
+        theme: cleanValue(j.theme),
+        description: cleanValue(j.description),
+        imageUrl: cleanValue(j.imageJeu),
+        videoUrl: cleanValue(j.videoRegle)
+      };
+    });
 
     const createdGamesBulk = await createManyIfEmpty(
       () => prisma.game.count(),
