@@ -1,0 +1,268 @@
+/* Override Material Card styling */
+mat-card.reservation-card {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05)) !important;
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 20px !important;
+  padding: 0 !important;
+  margin-bottom: 0px;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    0 4px 16px rgba(255, 255, 255, 0.1) inset !important;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Hover effects */
+mat-card.reservation-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.2),
+    0 8px 24px rgba(255, 255, 255, 0.1) inset !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+}
+
+/* Material Card Header */
+mat-card-header.card-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: flex-start !important;
+  padding: 20px 20px 0 20px !important;
+  margin-bottom: 0 !important;
+}
+
+/* Reservation logo (using mat-card-avatar) */
+.reservation-logo {
+  width: 60px !important;
+  height: 60px !important;
+  border-radius: 15px !important;
+  background: linear-gradient(45deg, #667eea, #764ba2) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 24px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+  flex-shrink: 0 !important;
+}
+
+.reservation-logo::before {
+  content: "📋";
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Status badge */
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  margin-left: auto;
+}
+
+.status-badge.confirmed {
+  background: linear-gradient(45deg, #00f260, #0575e6);
+  color: white;
+}
+
+.status-badge.invoiced {
+  background: linear-gradient(45deg, #4facfe, #00f2fe);
+  color: white;
+}
+
+.status-badge.discussion {
+  background: linear-gradient(45deg, #f093fb, #f5576c);
+  color: white;
+}
+
+.status-badge.default {
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  color: white;
+  opacity: 0.7;
+}
+
+/* Material Card Content */
+mat-card-content.reservation-info {
+  padding: 15px 20px !important;
+  flex-grow: 1;
+}
+
+/* Material Card Title */
+mat-card-title.publisher-name {
+  font-size: 1.5rem !important;
+  font-weight: bold !important;
+  color: white !important;
+  margin-bottom: 8px !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+  background: linear-gradient(45deg, #ff9a9e, #fecfef) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+mat-card-subtitle.festival-name {
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-size: 0.9rem !important;
+  margin-bottom: 15px !important;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Tables Section */
+.tables-section {
+  margin: 15px 0;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.section-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tables-badge {
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  color: white;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+/* Zones List */
+.zones-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.zone-item {
+  display: flex;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.8rem;
+  margin-bottom: 6px;
+  padding: 4px 0;
+}
+
+.zone-item.empty {
+  color: rgba(255, 255, 255, 0.4);
+  font-style: italic;
+}
+
+.zone-bullet {
+  width: 6px;
+  height: 6px;
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  border-radius: 50%;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+/* Presence Info */
+.presence-info {
+  display: flex;
+  align-items: center;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.presence-info.presenting {
+  color: rgba(0, 242, 96, 0.9);
+}
+
+.presence-icon {
+  font-size: 1.2rem;
+  margin-right: 8px;
+}
+
+.presence-text {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* Material Card Actions */
+mat-card-actions.card-actions {
+  padding: 15px 20px !important;
+  background: rgba(255, 255, 255, 0.05);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin: 0 !important;
+}
+
+.price-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.price-label {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.price-amount {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: white;
+  background: linear-gradient(45deg, #ffd93d, #ff6b6b);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Action button */
+.details-btn {
+  background: linear-gradient(45deg, #667eea, #764ba2) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 25px !important;
+  padding: 8px 20px !important;
+  font-weight: 600 !important;
+  font-size: 0.85rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3) !important;
+  transition: all 0.3s ease !important;
+}
+
+.details-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
+}
+
+:host {
+  display: block;
+  height: 100%;
+}

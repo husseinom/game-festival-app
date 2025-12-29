@@ -1,0 +1,38 @@
+<div class="reservation-list-container">
+  <!-- Header Section -->
+  <div class="header-section">
+    <button (click)="onAddReservation()" class="action-btn add-btn">
+      + Nouvelle Réservation
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading) {
+    <div class="loading-container">
+      <div class="spinner"></div>
+    </div>
+  }
+
+  <!-- Reservations Grid -->
+  @if (!isLoading) {
+    <div class="reservations-grid">
+      @for (resa of reservations; track resa.reservation_id) {
+        <div (click)="onReservationClick(resa.reservation_id)">
+          <app-reservation-card [reservation]="resa"></app-reservation-card>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Empty State -->
+  @if (!isLoading && reservations.length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">📋</div>
+      <p class="empty-message">Aucune réservation pour le moment.</p>
+      <button (click)="onAddReservation()" class="action-btn add-btn">
+        Créer la première réservation
+      </button>
+    </div>
+  }
+
+</div>

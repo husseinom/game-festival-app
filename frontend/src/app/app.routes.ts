@@ -12,6 +12,7 @@ import { PublisherDetails } from './GamePublisher/publisher-details/publisher-de
 import { UserList } from './admin/user-list/user-list';
 import { FestivalDetails } from './festival/festival-details/festival-details';
 import { PriceZoneCard } from './PriceZone/price-zone-card/price-zone-card';
+import { ReservationList } from './reservation/reservation-list/reservation-list';
 
 
 export const routes: Routes = [
@@ -26,6 +27,7 @@ export const routes: Routes = [
 	{ path: 'game/:id', component: GameDetails, canActivate:[authGuard]},
 	{ path: 'publishers', component: GamePubList, title: 'liste des éditeurs', canActivate:[authGuard]},
 	{ path: 'publisher/:id', component: PublisherDetails, canActivate:[authGuard]},
+    { path: 'reservations', component: ReservationList, canActivate:[authGuard]},
     { path: '**', redirectTo: 'login' },
 
 ];

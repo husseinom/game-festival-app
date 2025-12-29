@@ -28,6 +28,12 @@
       </a>
     </button>
 
+    <button mat-raised-button color="accent" class="nav-button">
+      <a routerLink="/reservations" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
+         Reservations
+      </a>
+    </button>
+
     <!-- Bouton Admin (si admin connecté) -->
     @if (loggedIn() && isAdmin()) {
       <button mat-raised-button color="accent" class="nav-button">

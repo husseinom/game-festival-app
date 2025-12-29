@@ -1,0 +1,57 @@
+<mat-card class="reservation-card" (click)="onCardClick($event)">
+  <!-- Card Header -->
+  <mat-card-header class="card-header">
+    <div mat-card-avatar class="reservation-logo"></div>
+    <div class="status-badge" [class]="getStatusClass()">
+      {{ reservation.status }}
+    </div>
+  </mat-card-header>
+
+  <!-- Reservation Info -->
+  <mat-card-content class="reservation-info">
+    <mat-card-title class="publisher-name">{{ reservation.publisher?.name || 'Éditeur Inconnu' }}</mat-card-title>
+    <mat-card-subtitle class="festival-name">{{ reservation.festival?.name }}</mat-card-subtitle>
+    
+    <!-- Tables Info -->
+    <div class="tables-section">
+      <div class="section-header">
+        <span class="section-title">Espace réservé</span>
+        <span class="tables-badge">{{ totalTables }} tables</span>
+      </div>
+      
+      <ul class="zones-list">
+        @for (zone of reservation.zones; track $index) {
+          <li class="zone-item">
+            <span class="zone-bullet"></span>
+            {{ zone.table_count }} x {{ zone.priceZone.name }}
+          </li>
+        }
+        
+        @if (!reservation.zones?.length) {
+          <li class="zone-item empty">
+            Aucune table sélectionnée
+          </li>
+        }
+      </ul>
+    </div>
+
+    <!-- Presence Info -->
+    <div class="presence-info" [class.presenting]="reservation.is_publisher_presenting">
+      <span class="presence-icon">{{ reservation.is_publisher_presenting ? '🎤' : '👻' }}</span>
+      <span class="presence-text">{{ reservation.is_publisher_presenting ? 'Sera présent' : 'Ne sera pas présent' }}</span>
+    </div>
+  </mat-card-content>
+
+  <!-- Card Actions -->
+  <mat-card-actions class="card-actions">
+    <div class="price-section">
+      <span class="price-label">Total à payer</span>
+      <span class="price-amount">
+        {{ reservation.final_invoice_amount | currency:'EUR':'symbol':'1.0-0' }}
+      </span>
+    </div>
+    <button mat-raised-button color="primary" class="details-btn">
+      Détails
+    </button>
+  </mat-card-actions>
+</mat-card>
