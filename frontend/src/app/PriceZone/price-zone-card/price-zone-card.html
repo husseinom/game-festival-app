@@ -7,18 +7,26 @@
 
   <mat-card-content class="pz-info">
     <div class="pz-row">
-      <strong>Table price:</strong>
+      <strong>Table price: </strong>
       <span>{{ zone?.table_price }} €</span>
     </div>
 
     <div class="pz-row">
-      <strong>Total tables:</strong>
-      <span>{{ zone?.total_table_nb }}</span>
+      <strong>Total tables: </strong>
+      <span>{{ zone?.total_tables }}</span>
     </div>
 
     <div class="pz-row">
-      <strong>Map zones:</strong>
-      <span>{{ (zone?.mapZones?.length ?? 0) }} Map Zone(s)</span>
+      <strong>Map zones: </strong>
+      <span>
+        @if(zone?.mapZones?.length) {
+          @for(mapZone of zone.mapZones; track mapZone.id) {
+            <div>{{ mapZone.name }}</div>
+          }
+        } @else {
+          <span>No map zones</span>
+        }
+      </span>
     </div>
   </mat-card-content>
 </mat-card>

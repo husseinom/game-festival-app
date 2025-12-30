@@ -10,6 +10,6 @@ export interface PriceZone {
     name: PriceZoneType,
     festival_id: number,
     table_price: number,
-    total_table_nb: number | undefined
+    total_tables: number | undefined
     mapZones: MapZone[] | undefined
 }
