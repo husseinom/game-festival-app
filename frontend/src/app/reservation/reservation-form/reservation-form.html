@@ -4,13 +4,15 @@
 
     <div class="form-group">
       <label for="game_publisher_id">Éditeur de jeu</label>
-      <input
-        type="number"
+      <select
         id="game_publisher_id"
         formControlName="game_publisher_id"
-        placeholder="ID de l'éditeur"
-        [disabled]="isEditing"
-      />
+      >
+        <option value="" disabled>Sélectionner un éditeur</option>
+        <option *ngFor="let publisher of gamePublishers()" [value]="publisher.id">
+          {{ publisher.name }}
+        </option>
+      </select>
       <span class="error" *ngIf="form.get('game_publisher_id')?.hasError('required')">
         L'éditeur de jeu est obligatoire
       </span>
@@ -18,13 +20,15 @@
 
     <div class="form-group">
       <label for="festival_id">Festival</label>
-      <input
-        type="number"
+      <select
         id="festival_id"
         formControlName="festival_id"
-        placeholder="ID du festival"
-        [disabled]="isEditing"
-      />
+      >
+        <option value="" disabled>Sélectionner un festival</option>
+        <option *ngFor="let festival of festivals()" [value]="festival.id">
+          {{ festival.name }} - {{ festival.location }}
+        </option>
+      </select>
       <span class="error" *ngIf="form.get('festival_id')?.hasError('required')">
         Le festival est obligatoire
       </span>

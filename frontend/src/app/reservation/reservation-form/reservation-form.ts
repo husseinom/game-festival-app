@@ -3,6 +3,8 @@ import { CreateReservationDTO, Reservation } from '../../types/reservation';
 import { FormGroup, FormControl, ReactiveFormsModule, Validators, FormArray } from '@angular/forms';
 import { ReservationService } from '../services/reservation.service';
 import { PriceZoneServices } from '../../PriceZone/services/price-zone-services';
+import { GamePubListService } from '../../GamePublisher/service/game-pub-list-service';
+import { FestivalServices } from '../../festival/services/festival-services';
 import { AuthService } from '../../shared/auth/auth-service';
 import { CommonModule } from '@angular/common';
 
@@ -19,9 +21,13 @@ export class ReservationForm {
 
   private readonly reservationService = inject(ReservationService);
   private readonly priceZoneService = inject(PriceZoneServices);
+  private readonly gamePubService = inject(GamePubListService);
+  private readonly festivalService = inject(FestivalServices);
   private readonly authService = inject(AuthService);
 
   priceZones = this.priceZoneService.priceZones;
+  gamePublishers = this.gamePubService.gamePubs;
+  festivals = this.festivalService.festivals;
 
   readonly form = new FormGroup({
     game_publisher_id: new FormControl<number | null>(null, {
@@ -74,6 +80,10 @@ export class ReservationForm {
           final_invoice_amount: reservation.final_invoice_amount || null
         });
 
+        // Désactiver les champs qui ne doivent pas être modifiés en édition
+        this.form.get('game_publisher_id')?.disable();
+        this.form.get('festival_id')?.disable();
+
         const tablesArray = this.form.get('tables') as FormArray;
         tablesArray.clear();
 
@@ -94,6 +104,10 @@ export class ReservationForm {
           });
         }
       } else {
+        // Réactiver les champs en mode création
+        this.form.get('game_publisher_id')?.enable();
+        this.form.get('festival_id')?.enable();
+
         this.form.reset({
           status: 'Contact pris',
           is_publisher_presenting: false,
@@ -105,8 +119,9 @@ export class ReservationForm {
         tablesArray.clear();
       }
     });
-
-    this.priceZoneService.getPriceZones();
+  this.gamePubService.getGamePubs();
+  this.festivalService.getFestivals();
+  this.priceZoneService.getPriceZones();
   }
 
   get isEditing(): boolean {
@@ -142,6 +157,7 @@ export class ReservationForm {
     event.preventDefault();
 
     if (this.form.invalid) {
+      console.warn('Formulaire invalide', this.form.errors);
       return;
     }
 
@@ -169,22 +185,37 @@ export class ReservationForm {
       tables: (formValue.tables as any[]) || []
     };
 
-    this.newReservation.emit(reservation);
-    this.form.reset({
-      status: 'Contact pris',
-      is_publisher_presenting: false,
-      game_list_requested: false,
-      game_list_received: false,
-      games_received: false
+    console.log('Envoi de la réservation:', reservation);
+
+    this.reservationService.create(reservation).subscribe({
+      next: (response) => {
+        console.log('Réservation créée:', response);
+        this.newReservation.emit(reservation);
+        this.form.reset({
+          status: 'Contact pris',
+          is_publisher_presenting: false,
+          game_list_requested: false,
+          game_list_received: false,
+          games_received: false
+        });
+        const tablesArray = this.form.get('tables') as FormArray;
+        tablesArray.clear();
+      },
+      error: (error) => {
+        console.error('Erreur lors de la création de la réservation:', error);
+      }
     });
-    const tablesArray = this.form.get('tables') as FormArray;
-    tablesArray.clear();
   }
 
   UpdateReservation(event: Event): void {
     event.preventDefault();
 
     if (this.form.invalid) {
+      return;
+    }
+
+    const editingRes = this.editingReservation();
+    if (!editingRes) {
       return;
     }
 
@@ -202,7 +233,15 @@ export class ReservationForm {
       tables: (formValue.tables as any[]) || []
     };
 
-    this.updatedReservation.emit(updatedReservation);
+    this.reservationService.update(editingRes.reservation_id, updatedReservation).subscribe({
+      next: (response) => {
+        console.log('Réservation mise à jour:', response);
+        this.updatedReservation.emit(updatedReservation);
+      },
+      error: (error) => {
+        console.error('Erreur lors de la mise à jour de la réservation:', error);
+      }
+    });
   }
 
   onSubmit(event: Event): void {
