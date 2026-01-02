@@ -1,0 +1,162 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit($event)" class="reservation-form">
+  <div class="form-section">
+    <h2>{{ isEditing ? 'Modifier la réservation' : 'Nouvelle réservation' }}</h2>
+
+    <div class="form-group">
+      <label for="game_publisher_id">Éditeur de jeu</label>
+      <input
+        type="number"
+        id="game_publisher_id"
+        formControlName="game_publisher_id"
+        placeholder="ID de l'éditeur"
+        [disabled]="isEditing"
+      />
+      <span class="error" *ngIf="form.get('game_publisher_id')?.hasError('required')">
+        L'éditeur de jeu est obligatoire
+      </span>
+    </div>
+
+    <div class="form-group">
+      <label for="festival_id">Festival</label>
+      <input
+        type="number"
+        id="festival_id"
+        formControlName="festival_id"
+        placeholder="ID du festival"
+        [disabled]="isEditing"
+      />
+      <span class="error" *ngIf="form.get('festival_id')?.hasError('required')">
+        Le festival est obligatoire
+      </span>
+    </div>
+
+    <div class="form-group">
+      <label for="status">Statut</label>
+      <input
+        type="text"
+        id="status"
+        formControlName="status"
+        placeholder="Statut de la réservation"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="comments">Commentaires</label>
+      <textarea
+        id="comments"
+        formControlName="comments"
+        placeholder="Commentaires"
+        rows="4"
+      ></textarea>
+    </div>
+
+    <div class="checkbox-group">
+      <label>
+        <input type="checkbox" formControlName="is_publisher_presenting" />
+        Éditeur présent
+      </label>
+      <label>
+        <input type="checkbox" formControlName="game_list_requested" />
+        Liste des jeux demandée
+      </label>
+      <label>
+        <input type="checkbox" formControlName="game_list_received" />
+        Liste des jeux reçue
+      </label>
+      <label>
+        <input type="checkbox" formControlName="games_received" />
+        Jeux reçus
+      </label>
+    </div>
+
+    <div class="form-group">
+      <label for="discount_amount">Montant de la réduction</label>
+      <input
+        type="number"
+        id="discount_amount"
+        formControlName="discount_amount"
+        placeholder="Montant de réduction"
+        step="0.01"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="discount_tables">Nombre de tables de réduction</label>
+      <input
+        type="number"
+        id="discount_tables"
+        formControlName="discount_tables"
+        placeholder="Nombre de tables"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="final_invoice_amount">Montant final de la facture</label>
+      <input
+        type="number"
+        id="final_invoice_amount"
+        formControlName="final_invoice_amount"
+        placeholder="Montant final"
+        step="0.01"
+      />
+    </div>
+  </div>
+
+  <div class="form-section">
+    <h3>Zones de prix</h3>
+    <div formArrayName="tables">
+      <div
+        *ngFor="let table of tablesArray.controls; let i = index"
+        [formGroupName]="i"
+        class="table-entry"
+      >
+        <div class="form-group">
+          <label [for]="'price_zone_' + i">Zone de prix</label>
+          <select
+            [id]="'price_zone_' + i"
+            formControlName="price_zone_id"
+          >
+            <option value="" disabled>Sélectionner une zone</option>
+            <option *ngFor="let zone of priceZones()" [value]="zone.id">
+              {{ zone.name }}
+            </option>
+          </select>
+          <span class="error" *ngIf="form.get('tables')?.get([i, 'price_zone_id'])?.hasError('required')">
+            La zone est obligatoire
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label [for]="'table_count_' + i">Nombre de tables</label>
+          <input
+            type="number"
+            [id]="'table_count_' + i"
+            formControlName="table_count"
+            placeholder="Nombre de tables"
+            min="1"
+          />
+          <span class="error" *ngIf="form.get('tables')?.get([i, 'table_count'])?.hasError('required')">
+            Le nombre de tables est obligatoire
+          </span>
+          <span class="error" *ngIf="form.get('tables')?.get([i, 'table_count'])?.hasError('min')">
+            Le nombre doit être au moins 1
+          </span>
+        </div>
+
+        <button type="button" (click)="removeTable(i)" class="btn-remove">
+          Supprimer
+        </button>
+      </div>
+    </div>
+
+    <button type="button" (click)="addTable()" class="btn-add">
+      + Ajouter une zone
+    </button>
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" [disabled]="form.invalid" class="btn-submit">
+      {{ isEditing ? 'Modifier' : 'Créer' }}
+    </button>
+  </div>
+</form>

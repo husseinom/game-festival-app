@@ -1,10 +1,19 @@
 <div class="reservation-list-container">
   <!-- Header Section -->
   <div class="header-section">
-    <button (click)="onAddReservation()" class="action-btn add-btn">
-      + Nouvelle Réservation
+    <button (click)="toggleForm()" class="action-btn add-btn">
+      {{ showForm() ? '✕ Fermer' : '+ Nouvelle Réservation' }}
     </button>
   </div>
+
+  <!-- Form Section -->
+  @if (showForm()) {
+    <div class="form-container">
+      <app-reservation-form 
+        (newReservation)="onNewReservation($event)"
+      ></app-reservation-form>
+    </div>
+  }
 
   <!-- Loading State -->
   @if (isLoading) {
@@ -29,7 +38,7 @@
     <div class="empty-state">
       <div class="empty-icon">📋</div>
       <p class="empty-message">Aucune réservation pour le moment.</p>
-      <button (click)="onAddReservation()" class="action-btn add-btn">
+      <button (click)="toggleForm()" class="action-btn add-btn">
         Créer la première réservation
       </button>
     </div>
