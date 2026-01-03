@@ -66,7 +66,7 @@ export const createFestival = async (festivalData: any) => {
 };
 
 export const updateFestival = async (id: number, festivalData: any) => {
-  const { name, location, total_tables, startDate, endDate } = festivalData;
+  const { name, location, total_tables, startDate, endDate, priceZoneTypeId } = festivalData;
 
   const existingFestival = await prisma.festival.findUnique({
     where: { id },
@@ -76,11 +76,11 @@ export const updateFestival = async (id: number, festivalData: any) => {
     throw new Error('Festival not found');
   }
 
+  // preserve previous conflict check (unchanged)
   const data: any = { ...festivalData };
   if (startDate) data.startDate = new Date(startDate);
   if (endDate) data.endDate = new Date(endDate);
 
-  // Check for conflict if unique fields are updated
   if (name || location || startDate) {
       const newName = name || existingFestival.name;
       const newLocation = location || existingFestival.location;
@@ -101,12 +101,66 @@ export const updateFestival = async (id: number, festivalData: any) => {
       }
   }
 
-  const updatedFestival = await prisma.festival.update({
-    where: { id },
-    data,
+  // Use a transaction so festival update + priceZone reconciliation are atomic
+  const result = await prisma.$transaction(async (tx) => {
+    const updatedFestival = await tx.festival.update({
+      where: { id },
+      data,
+    });
+
+    // Reconcile price zones if the selected priceZoneType changed
+    const oldPzTypeId = existingFestival.priceZoneTypeId ?? null;
+    const newPzTypeId = priceZoneTypeId ?? null;
+
+    if (oldPzTypeId !== newPzTypeId) {
+      if (newPzTypeId === null) {
+        // Remove all price zones when type is cleared
+        await tx.priceZone.deleteMany({ where: { festival_id: id } });
+      } else {
+        const pzType = await tx.priceZoneType.findUnique({ where: { id: Number(newPzTypeId) } });
+        if (!pzType) throw new Error('Selected price zone type not found');
+
+        const desired = PRESET_MAP[pzType.key] ?? [];
+        // current zones for this festival
+        const existingZones = await tx.priceZone.findMany({ where: { festival_id: id } });
+        const existingNames = existingZones.map(z => z.name);
+
+        // create missing zones
+        const toCreate = desired
+          .filter(d => !existingNames.includes(d.name))
+          .map(d => ({
+            festival_id: id,
+            name: d.name,
+            table_price: d.table_price,
+            total_tables: d.total_tables ?? null
+          }));
+        if (toCreate.length) {
+          await tx.priceZone.createMany({ data: toCreate });
+        }
+
+        // update matching zones (table_price / total_tables)
+        for (const d of desired) {
+          await tx.priceZone.updateMany({
+            where: { festival_id: id, name: d.name },
+            data: { table_price: d.table_price, total_tables: d.total_tables ?? null }
+          });
+        }
+
+        // delete extra zones that are not in desired preset
+        const desiredNames = desired.map(d => d.name);
+        const toDeleteNames = existingNames.filter(n => !desiredNames.includes(n));
+        if (toDeleteNames.length) {
+          await tx.priceZone.deleteMany({
+            where: { festival_id: id, name: { in: toDeleteNames } }
+          });
+        }
+      }
+    }
+
+    return updatedFestival;
   });
 
-  return updatedFestival;
+  return result;
 };
 
 export const deleteFestival = async (id: number) => {

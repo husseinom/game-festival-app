@@ -74,11 +74,13 @@ export class FestivalCard {
     });
   }
 
-  Ondelete(): void {
+  Ondelete(event: Event): void {
+    event.stopPropagation();
     this.remove.emit(this.festivals()!);
   }
 
-  onEdit(): void {
+  onEdit(event: Event): void {
+    event.stopPropagation();
     this.edit.emit(this.festivals()!);
   }
 
