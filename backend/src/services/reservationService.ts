@@ -137,7 +137,21 @@ export const updateReservation = async (id: number, data: any) => {
 };
 
 export const deleteReservation = async (id: number) => {
-  return prisma.reservation.delete({ where: { reservation_id: id } });
+  return prisma.$transaction(async (tx) => {
+    // Delete all related records in order of dependencies
+    await tx.contactLog.deleteMany({
+      where: { reservation_id: id }
+    });
+
+    await tx.zoneReservation.deleteMany({
+      where: { reservation_id: id }
+    });
+
+    // Finally delete the reservation
+    return tx.reservation.delete({
+      where: { reservation_id: id }
+    });
+  });
 };
 
 export default {

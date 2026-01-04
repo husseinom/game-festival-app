@@ -59,4 +59,15 @@ export class ReservationList implements OnInit {
       }
     });
   }
+
+  onDeleteReservation(id: number): void {
+    this.reservationService.delete(id).subscribe({
+      next: () => {
+        this.reservations = this.reservations.filter(r => r.reservation_id !== id);
+      },
+      error: (err) => {
+        console.error('Erreur suppression:', err);
+      }
+    });
+  }
 }

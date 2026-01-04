@@ -27,7 +27,10 @@
     <div class="reservations-grid">
       @for (resa of reservations; track resa.reservation_id) {
         <div (click)="onReservationClick(resa.reservation_id)">
-          <app-reservation-card [reservation]="resa"></app-reservation-card>
+          <app-reservation-card 
+            [reservation]="resa"
+            (delete)="onDeleteReservation($event)"
+          ></app-reservation-card>
         </div>
       }
     </div>

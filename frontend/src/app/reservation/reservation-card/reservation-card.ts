@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -13,6 +13,7 @@ import { Reservation } from '../../types/reservation';
 })
 export class ReservationCard {
   @Input() reservation!: Reservation;
+  @Output() delete = new EventEmitter<number>();
 
   get totalTables(): number {
     return this.reservation.zones?.reduce((acc, z) => acc + z.table_count, 0) || 0;
@@ -29,5 +30,10 @@ export class ReservationCard {
 
   onCardClick(event: Event): void {
     // Handle card click if needed
+  }
+
+  onDelete(event: Event): void {
+    event.stopPropagation();
+    this.delete.emit(this.reservation.reservation_id);
   }
 }
