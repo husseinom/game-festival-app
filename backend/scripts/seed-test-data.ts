@@ -39,11 +39,35 @@ async function main() {
     });
   }
 
-  // --- 3. Création des Reservants (Ceux qui saisissent les résas) ---
-  console.log('📝 Création des réservants...');
-  const reservantJustin = await prisma.reservant.create({
-    data: { name: 'Justin', type: 'Staff' }
-  });
+// --- 3. Création des Reservants (selon la nouvelle typologie) ---
+ console.log('📝 Création des réservants par typologie...');
+
+ // 1. Éditeur (Le cas principal)
+ const editeurAsmodee = await prisma.reservant.create({
+   data: { name: 'Asmodee', type: 'Éditeur' }
+ });
+
+ // 2. Prestataire (Animation pour le compte d'éditeurs)
+ const prestataireAnim = await prisma.reservant.create({
+   data: { name: 'Ludis Animation', type: 'Prestataire' }
+ });
+
+ // 3. Boutique (Facturation à zéro, commission externe)
+ const boutiquePhilibert = await prisma.reservant.create({
+   data: { name: 'Philibert', type: 'Boutique' }
+ });
+
+ // 4. Association (Partenaire avec remise totale)
+ const assoEchecs = await prisma.reservant.create({
+   data: { name: 'Club d’Échecs Local', type: 'Association' }
+ });
+
+ // 5. Animation / Zone Proto (Espace festival, pas de facturation)
+ const zoneProto = await prisma.reservant.create({
+   data: { name: 'Zone Prototypes / Festival', type: 'Animation / Zone Proto' }
+ });
+
+ console.log('✅ Réservants créés avec succès.');
 
   // --- 4. Récupération des Types de Zones (PriceZoneType) ---
   // On suppose qu'ils sont déjà là via le script CSV, sinon on les crée
@@ -138,7 +162,7 @@ async function main() {
       data: {
         game_publisher_id: publishers[0].id,
         festival_id: festival.id,
-        reservant_id: reservantJustin.reservant_id,
+        reservant_id: assoEchecs.reservant_id,
         status: 'En discussion',
         is_publisher_presenting: true,
         comments: 'Intéressé par le carré VIP mais trouve ça cher.',
@@ -165,7 +189,7 @@ async function main() {
         data: {
           game_publisher_id: publishers[1].id,
           festival_id: festival.id,
-          reservant_id: reservantJustin.reservant_id,
+          reservant_id: editeurAsmodee.reservant_id,
           status: 'Confirmé',
           is_publisher_presenting: false,
           discount_amount: 50,
@@ -185,7 +209,7 @@ async function main() {
         data: {
           game_publisher_id: publishers[2].id,
           festival_id: festival.id,
-          reservant_id: reservantJustin.reservant_id,
+          reservant_id: boutiquePhilibert.reservant_id,
           status: 'Facturé',
           is_publisher_presenting: true,
           zones: {

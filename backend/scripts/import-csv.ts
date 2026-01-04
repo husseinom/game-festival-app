@@ -53,21 +53,6 @@ async function importData() {
   try {
     console.log(' Début de l\'importation des données CSV...\n');
 
-    // --- Create admin user ---
-    console.log('Création de l\'utilisateur admin...');
-    const hashedPassword = await bcrypt.hash('admin', 10);
-    await prisma.user.upsert({
-      where: { email: 'admin@test.com' },
-      update: {},
-      create: {
-        name: 'Admin',
-        email: 'admin@test.com',
-        password: hashedPassword,
-        role: 'ADMIN'
-      }
-    });
-    console.log(' Admin créé\n');
-
     // Seed small static tables unconditionally (idempotent)
     await seedPriceZoneTypes();
 
