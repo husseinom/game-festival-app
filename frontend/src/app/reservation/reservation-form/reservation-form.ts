@@ -192,24 +192,19 @@ export class ReservationForm {
 
     console.log('Envoi de la réservation:', reservation);
 
-    this.reservationService.create(reservation).subscribe({
-      next: (response) => {
-        console.log('Réservation créée:', response);
-        this.newReservation.emit(reservation);
-        this.form.reset({
-          status: 'Contact pris',
-          is_publisher_presenting: false,
-          game_list_requested: false,
-          game_list_received: false,
-          games_received: false
-        });
-        const tablesArray = this.form.get('tables') as FormArray;
-        tablesArray.clear();
-      },
-      error: (error) => {
-        console.error('Erreur lors de la création de la réservation:', error);
-      }
+    // REMOVE the subscribe block - just emit the data
+    this.newReservation.emit(reservation);
+    
+    // Reset form after emitting
+    this.form.reset({
+      status: 'Contact pris',
+      is_publisher_presenting: false,
+      game_list_requested: false,
+      game_list_received: false,
+      games_received: false
     });
+    const tablesArray = this.form.get('tables') as FormArray;
+    tablesArray.clear();
   }
 
   UpdateReservation(event: Event): void {

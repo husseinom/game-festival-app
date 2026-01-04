@@ -51,8 +51,15 @@ export class ReservationList implements OnInit {
   onNewReservation(data: CreateReservationDTO): void {
     this.reservationService.create(data).subscribe({
       next: (response) => {
-        this.reservations.push(response.data);
-        this.closeForm();
+        this.reservationService.getById(response.data.reservation_id).subscribe({
+          next: (fullReservation) => {
+            this.reservations.push(fullReservation);
+            this.closeForm();
+          },
+          error: (err) => {
+            console.error('Erreur chargement réservation:', err);
+          }
+        });
       },
       error: (err) => {
         console.error('Erreur création:', err);
