@@ -243,7 +243,7 @@ mat-card-actions.card-actions {
 }
 
 /* Action button */
-.details-btn {
+.edit-btn {
   background: linear-gradient(45deg, #667eea, #764ba2) !important;
   color: white !important;
   border: none !important;
@@ -257,7 +257,7 @@ mat-card-actions.card-actions {
   transition: all 0.3s ease !important;
 }
 
-.details-btn:hover {
+.edit-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
 }
