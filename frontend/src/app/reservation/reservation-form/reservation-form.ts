@@ -4,6 +4,7 @@ import { FormGroup, FormControl, ReactiveFormsModule, Validators, FormArray } fr
 import { ReservationService } from '../services/reservation.service';
 import { PriceZoneServices } from '../../PriceZone/services/price-zone-services';
 import { GamePubListService } from '../../GamePublisher/service/game-pub-list-service';
+import { ReservantService } from '../../reservant/services/reservant-service';
 import { FestivalServices } from '../../festival/services/festival-services';
 import { AuthService } from '../../shared/auth/auth-service';
 import { CommonModule } from '@angular/common';
@@ -22,12 +23,14 @@ export class ReservationForm {
   private readonly reservationService = inject(ReservationService);
   private readonly priceZoneService = inject(PriceZoneServices);
   private readonly gamePubService = inject(GamePubListService);
+  private readonly reservantService = inject(ReservantService);
   private readonly festivalService = inject(FestivalServices);
   private readonly authService = inject(AuthService);
 
   priceZones = this.priceZoneService.priceZones;
   gamePublishers = this.gamePubService.gamePubs;
   festivals = this.festivalService.festivals;
+  reservants = this.reservantService.reservants;
 
   readonly form = new FormGroup({
     game_publisher_id: new FormControl<number | null>(null, {
@@ -35,6 +38,10 @@ export class ReservationForm {
       validators: [Validators.required]
     }),
     festival_id: new FormControl<number | null>(null, {
+      nonNullable: false,
+      validators: [Validators.required]
+    }),
+    reservant_id: new FormControl<number | null>(null, {
       nonNullable: false,
       validators: [Validators.required]
     }),
@@ -69,6 +76,7 @@ export class ReservationForm {
         this.form.patchValue({
           game_publisher_id: reservation.game_publisher_id,
           festival_id: reservation.festival_id,
+          reservant_id: reservation.reservant_id,
           status: reservation.status || 'Contact pris',
           comments: reservation.comments || '',
           is_publisher_presenting: reservation.is_publisher_presenting,
@@ -83,6 +91,7 @@ export class ReservationForm {
         // Désactiver les champs qui ne doivent pas être modifiés en édition
         this.form.get('game_publisher_id')?.disable();
         this.form.get('festival_id')?.disable();
+        this.form.get('reservant_id')?.disable();
 
         const tablesArray = this.form.get('tables') as FormArray;
         tablesArray.clear();
@@ -107,6 +116,7 @@ export class ReservationForm {
         // Réactiver les champs en mode création
         this.form.get('game_publisher_id')?.enable();
         this.form.get('festival_id')?.enable();
+        this.form.get('reservant_id')?.enable();
 
         this.form.reset({
           status: 'Contact pris',
@@ -122,6 +132,7 @@ export class ReservationForm {
   this.gamePubService.getGamePubs();
   this.festivalService.getFestivals();
   this.priceZoneService.getPriceZones();
+  this.reservantService.getReservants();
   }
 
   get isEditing(): boolean {
@@ -162,17 +173,11 @@ export class ReservationForm {
     }
 
     const formValue = this.form.value;
-    const currentUser = this.authService.currentUser();
-
-    if (!currentUser) {
-      console.error('Utilisateur non authentifié');
-      return;
-    }
 
     const reservation: CreateReservationDTO = {
       game_publisher_id: formValue.game_publisher_id!,
       festival_id: formValue.festival_id!,
-      reservant_id: currentUser.id,
+      reservant_id: formValue.reservant_id!,
       status: formValue.status || 'Contact pris',
       comments: formValue.comments || '',
       is_publisher_presenting: formValue.is_publisher_presenting || false,

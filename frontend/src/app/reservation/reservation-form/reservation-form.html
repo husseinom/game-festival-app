@@ -9,13 +9,17 @@
         formControlName="game_publisher_id"
       >
         <option value="" disabled>Sélectionner un éditeur</option>
-        <option *ngFor="let publisher of gamePublishers()" [value]="publisher.id">
-          {{ publisher.name }}
-        </option>
+        @for (publisher of gamePublishers(); track publisher.id) {
+          <option [value]="publisher.id">
+            {{ publisher.name }}
+          </option>
+        }
       </select>
-      <span class="error" *ngIf="form.get('game_publisher_id')?.hasError('required')">
-        L'éditeur de jeu est obligatoire
-      </span>
+      @if (form.get('game_publisher_id')?.hasError('required')) {
+        <span class="error">
+          L'éditeur de jeu est obligatoire
+        </span>
+      }
     </div>
 
     <div class="form-group">
@@ -25,13 +29,37 @@
         formControlName="festival_id"
       >
         <option value="" disabled>Sélectionner un festival</option>
-        <option *ngFor="let festival of festivals()" [value]="festival.id">
-          {{ festival.name }} - {{ festival.location }}
-        </option>
+        @for (festival of festivals(); track festival.id) {
+          <option [value]="festival.id">
+            {{ festival.name }} - {{ festival.location }}
+          </option>
+        }
       </select>
-      <span class="error" *ngIf="form.get('festival_id')?.hasError('required')">
-        Le festival est obligatoire
-      </span>
+      @if (form.get('festival_id')?.hasError('required')) {
+        <span class="error">
+          Le festival est obligatoire
+        </span>
+      }
+    </div>
+
+    <div class="form-group">
+      <label for="reservant_id">Réservant</label>
+      <select
+        id="reservant_id"
+        formControlName="reservant_id"
+      >
+        <option value="" disabled>Sélectionner un réservant</option>
+        @for (reservant of reservants(); track reservant.reservant_id) {
+          <option [value]="reservant.reservant_id">
+            {{ reservant.name }} - {{ reservant.type }}
+          </option>
+        }
+      </select>
+      @if (form.get('reservant_id')?.hasError('required')) {
+        <span class="error">
+          Le réservant est obligatoire
+        </span>
+      }
     </div>
 
     <div class="form-group">
@@ -109,25 +137,29 @@
   <div class="form-section">
     <h3>Zones de prix</h3>
     <div formArrayName="tables">
-      <div
-        *ngFor="let table of tablesArray.controls; let i = index"
-        [formGroupName]="i"
-        class="table-entry"
-      >
-        <div class="form-group">
+      @for (table of tablesArray.controls; track i; let i = $index) {
+        <div
+          [formGroupName]="i"
+          class="table-entry"
+        >
+          <div class="form-group">
           <label [for]="'price_zone_' + i">Zone de prix</label>
           <select
             [id]="'price_zone_' + i"
             formControlName="price_zone_id"
           >
             <option value="" disabled>Sélectionner une zone</option>
-            <option *ngFor="let zone of priceZones()" [value]="zone.id">
-              {{ zone.name }}
-            </option>
+            @for (zone of priceZones(); track zone.id) {
+              <option [value]="zone.id">
+                {{ zone.name }}
+              </option>
+            }
           </select>
-          <span class="error" *ngIf="form.get('tables')?.get([i, 'price_zone_id'])?.hasError('required')">
-            La zone est obligatoire
-          </span>
+          @if (form.get('tables')?.get([i, 'price_zone_id'])?.hasError('required')) {
+            <span class="error">
+              La zone est obligatoire
+            </span>
+          }
         </div>
 
         <div class="form-group">
@@ -139,18 +171,23 @@
             placeholder="Nombre de tables"
             min="1"
           />
-          <span class="error" *ngIf="form.get('tables')?.get([i, 'table_count'])?.hasError('required')">
-            Le nombre de tables est obligatoire
-          </span>
-          <span class="error" *ngIf="form.get('tables')?.get([i, 'table_count'])?.hasError('min')">
-            Le nombre doit être au moins 1
-          </span>
+          @if (form.get('tables')?.get([i, 'table_count'])?.hasError('required')) {
+            <span class="error">
+              Le nombre de tables est obligatoire
+            </span>
+          }
+          @if (form.get('tables')?.get([i, 'table_count'])?.hasError('min')) {
+            <span class="error">
+              Le nombre doit être au moins 1
+            </span>
+          }
         </div>
 
         <button type="button" (click)="removeTable(i)" class="btn-remove">
           Supprimer
         </button>
       </div>
+      }
     </div>
 
     <button type="button" (click)="addTable()" class="btn-add">
