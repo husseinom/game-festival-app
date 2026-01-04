@@ -1,0 +1,82 @@
+@if (reservation()) {
+  @let r = reservation()!;
+  <div class="details-grid">
+    <div class="meta">
+      <h2>Détails de la réservation</h2>
+      <p><strong>Id:</strong> {{ r.reservation_id }}</p>
+      <p><strong>Statut:</strong> <span class="status-badge" [class]="'status-' + (r.status || 'unknown')">{{ getStatusLabel(r.status) }}</span></p>
+      <p class="publisher-row">
+        <strong>Éditeur:</strong>
+        <span class="publisher-info">
+          @if (r.publisher && r.publisher.logoUrl) {
+            <img [src]="r.publisher.logoUrl" alt="Logo éditeur" class="publisher-logo">
+          }
+          {{ r.publisher?.name || 'Inconnu' }}
+        </span>
+      </p>
+      <p><strong>Festival:</strong> {{ r.festival?.name || 'Non défini' }}</p>
+      
+      <h3>Informations de réservation</h3>
+      <p><strong>Éditeur présent:</strong> {{ r.is_publisher_presenting ? 'Oui' : 'Non' }}</p>
+      <p><strong>Liste de jeux demandée:</strong> {{ r.game_list_requested ? 'Oui' : 'Non' }}</p>
+      <p><strong>Liste de jeux reçue:</strong> {{ r.game_list_received ? 'Oui' : 'Non' }}</p>
+      <p><strong>Jeux reçus:</strong> {{ r.games_received ? 'Oui' : 'Non' }}</p>
+
+      <h3>Détails financiers</h3>
+      <p><strong>Remise ($):</strong> {{ r.discount_amount || 0 }}</p>
+      <p><strong>Tables en remise:</strong> {{ r.discount_tables || 0 }}</p>
+      <p><strong>Montant final de la facture:</strong> {{ r.final_invoice_amount || 'N/A' }}</p>
+
+      @if (r.zones && r.zones.length > 0) {
+        <h3>Zones de prix</h3>
+        <div class="zones-list">
+          @for (zone of r.zones; track zone.id) {
+            <div class="zone-item">
+              <p><strong>Zone:</strong> {{ zone.priceZone?.name }}</p>
+              <p><strong>Tables:</strong> {{ zone.table_count }}</p>
+            </div>
+          }
+        </div>
+      }
+
+      @if (r.comments) {
+        <h3>Commentaires</h3>
+        <p class="comments">{{ r.comments }}</p>
+      }
+
+      <div class="actions">
+        <button class="btn btn-secondary" (click)="goBack()">Retour</button>
+      </div>
+    </div>
+
+    <aside class="aside">
+      <div class="info-card">
+        <h3>Résumé</h3>
+        <div class="summary">
+          @if (r.reservation_id) {
+            <div class="summary-item">
+              <span class="label">Réservation #</span>
+              <span class="value">{{ r.reservation_id }}</span>
+            </div>
+          }
+          @if (r.status) {
+            <div class="summary-item">
+              <span class="label">Statut</span>
+              <span class="value status-badge" [class]="'status-' + r.status">{{ getStatusLabel(r.status) }}</span>
+            </div>
+          }
+          @if (r.final_invoice_amount) {
+            <div class="summary-item">
+              <span class="label">Montant</span>
+              <span class="value">{{ r.final_invoice_amount }}$</span>
+            </div>
+          }
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="description">
+        <!-- optional additional content here -->
+      </div>
+    </aside>
+  </div>
+}
