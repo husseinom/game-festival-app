@@ -55,6 +55,23 @@ export class ReservantService {
     });
   }
 
+  update(id: number, type: string): Observable<Reservant> {
+    return this.http.patch<Reservant>(`${environment.apiUrl}/reservants/${id}`, { type }, { withCredentials: true });
+  }
+
+  onUpdateReservant(id: number, type: string): void {
+    this.update(id, type).subscribe({
+      next: (updatedReservant) => {
+        this._reservants.update(reservants => 
+          reservants.map(r => r.reservant_id === id ? updatedReservant : r)
+        );
+      },
+      error: (error) => {
+        console.error('Error updating reservant:', error);
+      }
+    });
+  }
+
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${environment.apiUrl}/reservants/${id}`, { withCredentials: true });
   }

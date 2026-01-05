@@ -21,6 +21,19 @@ export const getReservantById = async (id: number) => {
   return prisma.reservant.findUnique({ where: { reservant_id: id } });
 };
 
+export const updateReservant = async (id: number, data: any) => {
+  const { type } = data;
+
+  const updatedReservant = await prisma.reservant.update({
+    where: { reservant_id: id },
+    data: {
+      type,
+    },
+  });
+
+  return updatedReservant;
+};
+
 export const deleteReservant = async (id: number) => {
   return prisma.reservant.delete({ where: { reservant_id: id } });
 };
