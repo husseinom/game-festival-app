@@ -32,7 +32,7 @@
         <div class="zones-list">
           @for (zone of r.zones; track zone.id) {
             <div class="zone-item">
-              <p><strong>Zone:</strong> {{ zone.priceZone?.name }}</p>
+              <p><strong>Zone:</strong> {{ zone.priceZone.name }}</p>
               <p><strong>Tables:</strong> {{ zone.table_count }}</p>
             </div>
           }
