@@ -65,7 +65,6 @@ export class ReservationForm {
     }),
     discount_amount: new FormControl<number | null>(null),
     discount_tables: new FormControl<number | null>(null),
-    final_invoice_amount: new FormControl<number | null>(null),
     tables: new FormArray([])
   });
 
@@ -84,8 +83,7 @@ export class ReservationForm {
           game_list_received: reservation.game_list_received,
           games_received: reservation.games_received,
           discount_amount: reservation.discount_amount || null,
-          discount_tables: reservation.discount_tables || null,
-          final_invoice_amount: reservation.final_invoice_amount || null
+          discount_tables: reservation.discount_tables || null
         });
 
         // Désactiver les champs qui ne doivent pas être modifiés en édition
@@ -186,7 +184,6 @@ export class ReservationForm {
       games_received: formValue.games_received || false,
       discount_amount: formValue.discount_amount || undefined,
       discount_tables: formValue.discount_tables || undefined,
-      final_invoice_amount: formValue.final_invoice_amount || undefined,
       tables: (formValue.tables as any[]) || []
     };
 
@@ -229,7 +226,6 @@ export class ReservationForm {
       games_received: formValue.games_received,
       discount_amount: formValue.discount_amount || undefined,
       discount_tables: formValue.discount_tables || undefined,
-      final_invoice_amount: formValue.final_invoice_amount || undefined,
       tables: (formValue.tables as any[]) || []
     };
 

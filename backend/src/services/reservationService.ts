@@ -1,6 +1,8 @@
 import prisma from '../config/prisma.js';
 
 export const createReservation = async (data: any) => {
+  const final_invoice_amount = await calculateFinalInvoiceAmount(data);
+
   const {
     game_publisher_id,
     festival_id,
@@ -13,7 +15,6 @@ export const createReservation = async (data: any) => {
     games_received,
     discount_amount,
     discount_tables,
-    final_invoice_amount,
     tables
   } = data;
 
@@ -160,4 +161,48 @@ export default {
   getReservationById,
   updateReservation,
   deleteReservation,
+};
+
+const calculateFinalInvoiceAmount = async (data: any): Promise<number> => {
+  const {
+    tables,
+    discount_amount = 0,
+    discount_tables = 0
+  } = data;
+
+  let total = 0;
+  let remainingDiscount = discount_tables;
+
+  if (tables && Array.isArray(tables)) {
+    for (const t of tables) {
+      const zone = await prisma.priceZone.findUnique({
+        where: { id: Number(t.price_zone_id) }
+      });
+
+      if (zone) {
+        const tableCount = Number(t.table_count || t.quantity);
+        total += zone.table_price * tableCount;
+      }
+    }
+  }
+
+  total -= discount_amount;
+
+  if (remainingDiscount > 0 && tables && Array.isArray(tables)) {
+    for (const t of tables) {
+      if (remainingDiscount <= 0) break;
+
+      const zone = await prisma.priceZone.findUnique({
+        where: { id: Number(t.price_zone_id) }
+      });
+
+      if (zone) {
+        const tableCount = Math.min(Number(t.table_count || t.quantity), remainingDiscount);
+        total -= zone.table_price * tableCount;
+        remainingDiscount -= tableCount;
+      }
+    }
+  }
+
+  return total >= 0 ? total : 0;
 };
