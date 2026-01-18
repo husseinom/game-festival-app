@@ -1,7 +1,8 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
+import { Router } from '@angular/router';
 import { Reservation } from '../../types/reservation';
 
 @Component({
@@ -12,7 +13,10 @@ import { Reservation } from '../../types/reservation';
   styleUrls: ['./reservation-card.css']
 })
 export class ReservationCard {
+  private readonly router = inject(Router);
+  
   @Input() reservation!: Reservation;
+  @Output() delete = new EventEmitter<number>();
 
   get totalTables(): number {
     return this.reservation.zones?.reduce((acc, z) => acc + z.table_count, 0) || 0;
@@ -28,6 +32,12 @@ export class ReservationCard {
   }
 
   onCardClick(event: Event): void {
-    // Handle card click if needed
+    event.stopPropagation();
+    this.router.navigate(['/reservation', this.reservation.reservation_id]);
+  }
+
+  onDelete(event: Event): void {
+    event.stopPropagation();
+    this.delete.emit(this.reservation.reservation_id);
   }
 }

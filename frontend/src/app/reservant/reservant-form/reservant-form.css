@@ -1,0 +1,75 @@
+.form-container {
+  background: white;
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 25px;
+}
+
+.form-container h2 {
+  margin: 0 0 20px 0;
+  color: #333;
+  font-size: 1.3em;
+}
+
+.form-group {
+  margin-bottom: 18px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: #555;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1em;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #1976d2;
+  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+}
+
+.form-group input.invalid {
+  border-color: #c62828;
+}
+
+.error-msg {
+  display: block;
+  color: #c62828;
+  font-size: 0.85em;
+  margin-top: 5px;
+}
+
+.btn-submit {
+  width: 100%;
+  padding: 14px;
+  background: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-submit:hover:not(:disabled) {
+  background: #1565c0;
+}
+
+.btn-submit:disabled {
+  background: #90caf9;
+  cursor: not-allowed;
+}

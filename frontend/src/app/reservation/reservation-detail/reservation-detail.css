@@ -1,0 +1,259 @@
+:host {
+	display: block;
+	box-sizing: border-box;
+	max-width: 980px;
+	margin: 18px auto;
+	padding: 20px;
+	background: #ffffff;
+	border-radius: 10px;
+	box-shadow: 0 6px 18px rgba(10, 25, 47, 0.08);
+	color: #1f2937;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+}
+
+/* Heading */
+:host h2 {
+	margin: 0 0 12px 0;
+	font-size: 1.5rem;
+	color: #0f172a;
+}
+
+:host h3 {
+	margin: 16px 0 8px 0;
+	font-size: 1.1rem;
+	color: #1f2937;
+	border-bottom: 2px solid #e5e7eb;
+	padding-bottom: 6px;
+}
+
+/* Grid layout for details — will gracefully fall back to single column on small screens */
+:host .details-grid {
+	display: grid;
+	grid-template-columns: 1fr 320px;
+	gap: 18px;
+	align-items: start;
+}
+
+/* Left column: metadata list */
+:host .meta {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+:host .meta p {
+	margin: 0;
+	padding: 8px 12px;
+	background: rgba(15, 23, 42, 0.03);
+	border-radius: 6px;
+	font-size: 0.95rem;
+	display: flex;
+	gap: 8px;
+	align-items: center;
+}
+
+:host .meta p strong {
+	width: 180px;
+	color: #0b1220;
+	font-weight: 600;
+}
+
+/* Publisher row styling */
+:host .publisher-row {
+	align-items: flex-start;
+	flex-wrap: wrap;
+}
+
+:host .publisher-info {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+	flex: 1;
+}
+
+:host .publisher-logo {
+	width: 32px;
+	height: 32px;
+	border-radius: 4px;
+	object-fit: contain;
+}
+
+/* Status badge */
+:host .status-badge {
+	display: inline-block;
+	padding: 4px 10px;
+	border-radius: 12px;
+	font-size: 0.85rem;
+	font-weight: 600;
+	text-transform: uppercase;
+}
+
+:host .status-pending {
+	background-color: #fef3c7;
+	color: #92400e;
+}
+
+:host .status-confirmed {
+	background-color: #d1fae5;
+	color: #065f46;
+}
+
+:host .status-cancelled {
+	background-color: #fee2e2;
+	color: #7f1d1d;
+}
+
+:host .status-completed {
+	background-color: #c7d2fe;
+	color: #3730a3;
+}
+
+:host .status-unknown {
+	background-color: #f3f4f6;
+	color: #4b5563;
+}
+
+/* Zones list styling */
+:host .zones-list {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+:host .zone-item {
+	padding: 10px;
+	background: #f9fafb;
+	border-left: 3px solid #3b82f6;
+	border-radius: 4px;
+}
+
+:host .zone-item p {
+	margin: 4px 0;
+	font-size: 0.9rem;
+}
+
+:host .zone-item strong {
+	color: #1f2937;
+}
+
+/* Comments styling */
+:host .comments {
+	padding: 12px !important;
+	background: #f3f4f6 !important;
+	border-left: 3px solid #6b7280;
+	font-style: italic;
+	line-height: 1.5;
+}
+
+/* Right column: aside */
+:host .aside {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+:host .info-card {
+	padding: 16px;
+	background: #f9fafb;
+	border-radius: 8px;
+	border: 1px solid #e5e7eb;
+}
+
+:host .info-card h3 {
+	margin: 0 0 12px 0;
+	font-size: 1rem;
+}
+
+:host .summary {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+:host .summary-item {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 6px 0;
+	border-bottom: 1px solid #e5e7eb;
+}
+
+:host .summary-item:last-child {
+	border-bottom: none;
+}
+
+:host .summary-item .label {
+	font-size: 0.85rem;
+	color: #6b7280;
+	font-weight: 500;
+}
+
+:host .summary-item .value {
+	font-size: 0.95rem;
+	color: #1f2937;
+	font-weight: 600;
+}
+
+:host .divider {
+	height: 1px;
+	background: #e5e7eb;
+	margin: 8px 0;
+}
+
+:host .description {
+	padding: 12px;
+	background: #f3f4f6;
+	border-radius: 6px;
+	min-height: 100px;
+	font-size: 0.9rem;
+	color: #6b7280;
+}
+
+/* Actions */
+:host .actions {
+	display: flex;
+	gap: 8px;
+	margin-top: 12px;
+	flex-wrap: wrap;
+}
+
+:host .btn {
+	padding: 10px 20px;
+	border: none;
+	border-radius: 6px;
+	font-size: 0.95rem;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.3s ease;
+}
+
+:host .btn-secondary {
+	background-color: #e5e7eb;
+	color: #1f2937;
+}
+
+:host .btn-secondary:hover {
+	background-color: #d1d5db;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+	:host {
+		padding: 12px;
+		margin: 12px;
+	}
+
+	:host .details-grid {
+		grid-template-columns: 1fr;
+		gap: 12px;
+	}
+
+	:host .meta p {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+
+	:host .meta p strong {
+		width: auto;
+	}
+}

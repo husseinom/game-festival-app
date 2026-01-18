@@ -38,7 +38,12 @@
     @if (loggedIn() && isAdmin()) {
       <button mat-raised-button color="accent" class="nav-button">
         <a routerLink="/admin/users" routerLinkActive="active">
-          ⚙️ Admin
+          ⚙️ Users
+        </a>
+      </button>
+      <button mat-raised-button color="accent" class="nav-button">
+        <a routerLink="/admin/reservants" routerLinkActive="active">
+          ⚙️ Reservants
         </a>
       </button>
     }

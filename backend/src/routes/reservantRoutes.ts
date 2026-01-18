@@ -20,6 +20,14 @@ router.get('/all', reservantController.getAll);
 // GET /api/reservants/:id
 router.get('/:id', reservantController.getById);
 
+// PATCH /api/reservants/:id
+router.patch(
+  '/:id',
+  verifyToken,
+  requireRole(['ADMIN', 'SUPER_ORGANISATOR']),
+  reservantController.update
+);
+
 // DELETE /api/reservants/:id
 router.delete(
   '/:id',
