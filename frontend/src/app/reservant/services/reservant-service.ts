@@ -2,8 +2,10 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '@env/environment';
 import { signal, WritableSignal } from '@angular/core';
-import { Reservant, CreateReservantDTO } from '../../types/reservant';
-import { Observable } from 'rxjs';
+import { Reservant, CreateReservantDTO, UpdateReservantDTO } from '../../types/reservant';
+import { map, Observable } from 'rxjs';
+
+type ReservantApiResponse = { message?: string; data: Reservant } | Reservant;
 
 @Injectable({
   providedIn: 'root'
@@ -17,6 +19,10 @@ export class ReservantService {
   readonly reservants = this._reservants.asReadonly();
   readonly isLoading = this._isLoading.asReadonly();
   readonly error = this._error.asReadonly();
+
+  private unwrapReservant(response: ReservantApiResponse): Reservant {
+    return (response as any).data ?? (response as Reservant);
+  }
 
   getReservants(): void {
     this._isLoading.set(true);
@@ -41,7 +47,9 @@ export class ReservantService {
   }
 
   create(reservant: CreateReservantDTO): Observable<Reservant> {
-    return this.http.post<Reservant>(`${environment.apiUrl}/reservants/add`, reservant, { withCredentials: true });
+    return this.http
+      .post<ReservantApiResponse>(`${environment.apiUrl}/reservants/add`, reservant, { withCredentials: true })
+      .pipe(map(res => this.unwrapReservant(res)));
   }
 
   onNewReservant(reservant: CreateReservantDTO): void {
@@ -55,19 +63,20 @@ export class ReservantService {
     });
   }
 
-  update(id: number, type: string): Observable<Reservant> {
-    return this.http.patch<Reservant>(`${environment.apiUrl}/reservants/${id}`, { type }, { withCredentials: true });
+  update(id: number, payload: UpdateReservantDTO): Observable<Reservant> {
+    return this.http
+      .patch<ReservantApiResponse>(`${environment.apiUrl}/reservants/${id}`, payload, { withCredentials: true })
+      .pipe(map(res => this.unwrapReservant(res)));
   }
 
-  onUpdateReservant(id: number, type: string): void {
-    this.update(id, type).subscribe({
+  onUpdateReservant(id: number, payload: UpdateReservantDTO): void {
+    this.update(id, payload).subscribe({
       next: (updatedReservant) => {
-        this._reservants.update(reservants => 
-          reservants.map(r => r.reservant_id === id ? updatedReservant : r)
-        );
+        this._reservants.update(reservants => reservants.map(r => r.reservant_id === id ? updatedReservant : r));
       },
       error: (error) => {
         console.error('Error updating reservant:', error);
+        this._error.set('Failed to update reservant.');
       }
     });
   }

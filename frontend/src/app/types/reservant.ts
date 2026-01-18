@@ -8,3 +8,8 @@ export interface CreateReservantDTO {
   name: string;
   type: string;
 }
+
+export interface UpdateReservantDTO {
+  name?: string;
+  type?: string;
+}

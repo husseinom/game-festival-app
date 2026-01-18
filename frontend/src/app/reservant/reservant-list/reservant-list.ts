@@ -2,6 +2,7 @@ import { Component, inject, signal, computed } from '@angular/core';
 import { ReservantService } from '../services/reservant-service';
 import { ReservantCard } from '../reservant-card/reservant-card';
 import { ReservantForm } from '../reservant-form/reservant-form';
+import { Reservant } from '../../types/reservant';
 
 @Component({
   selector: 'app-reservant-list',
@@ -18,22 +19,30 @@ export class ReservantList {
   readonly error = this.reservantService.error;
 
   showForm = signal(false);
+  editingReservant = signal<Reservant | null>(null);
   reservantCount = computed(() => this.reservants().length);
 
   constructor() {
     this.reservantService.getReservants();
   }
 
+  trackByReservantId(index: number, reservant: Reservant): number {
+    return reservant.reservant_id;
+  }
+
   toggleForm() {
-    this.showForm.update(s => !s);
+    this.editingReservant.set(null);
+    this.showForm.update(isVisible => !isVisible);
   }
 
-  onReservantCreated() {
+  onReservantSaved() {
     this.showForm.set(false);
+    this.editingReservant.set(null);
   }
 
-  onUpdateType(data: { reservantId: number; type: string }) {
-    this.reservantService.onUpdateReservant(data.reservantId, data.type);
+  startEdit(reservant: Reservant) {
+    this.editingReservant.set(reservant);
+    this.showForm.set(true);
   }
 
   onDeleteReservant(reservantId: number) {

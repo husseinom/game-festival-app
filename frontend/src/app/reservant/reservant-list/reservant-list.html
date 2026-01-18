@@ -15,7 +15,10 @@
   }
 
   @if (showForm()) {
-    <app-reservant-form (reservantCreated)="onReservantCreated()"></app-reservant-form>
+    <app-reservant-form 
+      [reservant]="editingReservant()"
+      (reservantSaved)="onReservantSaved()">
+    </app-reservant-form>
   }
 
   @if (isLoading()) {
@@ -26,7 +29,7 @@
     @for (reservant of reservants(); track reservant.reservant_id) {
       <app-reservant-card 
         [reservant]="reservant"
-        (typeChanged)="onUpdateType($event)"
+        (editRequested)="startEdit($event)"
         (deleteRequested)="onDeleteReservant($event)">
       </app-reservant-card>
     } @empty {

@@ -1,30 +1,22 @@
 <div class="reservant-card">
-  @if (reservant()) {
+  @if (reservant() && reservant().name) {
     <div class="reservant-info">
-      <div class="reservant-avatar">{{ reservant().name.charAt(0).toUpperCase() }}</div>
       <div class="reservant-details">
         <h3>{{ reservant().name }}</h3>
         <span 
           class="type-badge"
-          [ngClass]="getTypeClass(reservant().type)"
+          [class]="typeClass()"
         >{{ reservant().type }}</span>
       </div>
     </div>
 
     <div class="reservant-actions">
-      <div class="type-selector">
-        <label for="type-{{ reservant().reservant_id }}">Type :</label>
-        <select 
-          id="type-{{ reservant().reservant_id }}" 
-          [value]="reservant().type"
-          (change)="onTypeChange($event)">
-          @for (type of types; track type.value) {
-            <option [value]="type.value">
-              {{ type.label }}
-            </option>
-          }
-        </select>
-      </div>
+      <button 
+        class="btn-edit"
+        (click)="onEdit()"
+        title="Modifier ce réservant">
+        Modifier
+      </button>
 
       <button 
         class="btn-delete" 

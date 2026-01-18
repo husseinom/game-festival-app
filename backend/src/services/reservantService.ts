@@ -22,16 +22,20 @@ export const getReservantById = async (id: number) => {
 };
 
 export const updateReservant = async (id: number, data: any) => {
-  const { type } = data;
+  const { name, type } = data;
+  const updateData: Record<string, any> = {};
 
-  const updatedReservant = await prisma.reservant.update({
+  if (name !== undefined) updateData.name = name;
+  if (type !== undefined) updateData.type = type;
+
+  if (Object.keys(updateData).length === 0) {
+    throw new Error('No fields provided for update');
+  }
+
+  return prisma.reservant.update({
     where: { reservant_id: id },
-    data: {
-      type,
-    },
+    data: updateData,
   });
-
-  return updatedReservant;
 };
 
 export const deleteReservant = async (id: number) => {
