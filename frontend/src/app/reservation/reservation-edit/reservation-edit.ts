@@ -1,21 +1,26 @@
-import { Component, output, inject } from '@angular/core';
-import { CreateReservationDTO, Reservation } from '../../types/reservation';
+import { Component, inject, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ReservationService } from '../services/reservation.service';
+import { CommonModule, Location } from '@angular/common';
 import { FormGroup, FormControl, ReactiveFormsModule, Validators, FormArray } from '@angular/forms';
 import { PriceZoneServices } from '../../PriceZone/services/price-zone-services';
 import { GamePubListService } from '../../GamePublisher/service/game-pub-list-service';
 import { ReservantService } from '../../reservant/services/reservant-service';
 import { FestivalServices } from '../../festival/services/festival-services';
-import { CommonModule } from '@angular/common';
+import { CreateReservationDTO, Reservation } from '../../types/reservation';
 
 @Component({
-  selector: 'app-reservation-form',
+  selector: 'app-reservation-edit',
+  standalone: true,
   imports: [ReactiveFormsModule, CommonModule],
-  templateUrl: './reservation-form.html',
-  styleUrl: './reservation-form.css',
+  templateUrl: './reservation-edit.html',
+  styleUrl: './reservation-edit.css'
 })
-export class ReservationForm {
-  newReservation = output<CreateReservationDTO>();
-
+export class ReservationEdit implements OnInit {
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly location = inject(Location);
+  private readonly reservationService = inject(ReservationService);
   private readonly priceZoneService = inject(PriceZoneServices);
   private readonly gamePubService = inject(GamePubListService);
   private readonly reservantService = inject(ReservantService);
@@ -25,6 +30,9 @@ export class ReservationForm {
   gamePublishers = this.gamePubService.gamePubs;
   festivals = this.festivalService.festivals;
   reservants = this.reservantService.reservants;
+
+  reservationId: number | null = null;
+  isLoading = true;
 
   readonly form = new FormGroup({
     festival_id: new FormControl<number | null>(null, {
@@ -62,7 +70,7 @@ export class ReservationForm {
       nonNullable: true,
       validators: [Validators.required, Validators.min(0)]
     }),
-    tables: new FormArray([])
+    tables: new FormArray<FormGroup>([])
   });
 
   constructor() {
@@ -70,6 +78,65 @@ export class ReservationForm {
     this.festivalService.getFestivals();
     this.priceZoneService.getPriceZones();
     this.reservantService.getReservants();
+  }
+
+  ngOnInit(): void {
+    const idParam = this.route.snapshot.paramMap.get('id');
+    if (idParam) {
+      this.reservationId = Number(idParam);
+      this.loadReservation(this.reservationId);
+    }
+  }
+
+  private loadReservation(id: number): void {
+    this.reservationService.getById(id).subscribe({
+      next: (reservation) => {
+        this.populateForm(reservation);
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('Erreur chargement réservation:', err);
+        this.isLoading = false;
+      }
+    });
+  }
+
+  private populateForm(reservation: Reservation): void {
+    this.form.patchValue({
+      festival_id: reservation.festival_id,
+      reservant_id: reservation.reservant_id,
+      game_publisher_id: reservation.game_publisher_id ?? null,
+      status: reservation.status ?? 'Contact pris',
+      comments: reservation.comments ?? '',
+      is_publisher_presenting: reservation.is_publisher_presenting,
+      game_list_requested: reservation.game_list_requested,
+      game_list_received: reservation.game_list_received,
+      games_received: reservation.games_received,
+      discount_amount: reservation.discount_amount ?? null,
+      discount_tables: reservation.discount_tables ?? null,
+      nb_electrical_outlets: reservation.nb_electrical_outlets ?? 0
+    });
+
+    // Clear and populate tables array
+    const tablesArray = this.form.get('tables') as FormArray;
+    tablesArray.clear();
+
+    if (reservation.zones && reservation.zones.length > 0) {
+      reservation.zones.forEach(zone => {
+        tablesArray.push(
+          new FormGroup({
+            price_zone_id: new FormControl<number | null>(zone.priceZone.id, {
+              nonNullable: false,
+              validators: [Validators.required]
+            }),
+            table_count: new FormControl<number | null>(zone.table_count, {
+              nonNullable: false,
+              validators: [Validators.required, Validators.min(1)]
+            })
+          })
+        );
+      });
+    }
   }
 
   get tablesArray(): FormArray {
@@ -97,18 +164,19 @@ export class ReservationForm {
     tablesArray.removeAt(index);
   }
 
-  AddReservation(event: Event): void {
+  onSubmit(event: Event): void {
+    console.log('Submitting form...');
     event.preventDefault();
 
-    if (this.form.invalid) {
+    if (this.form.invalid || !this.reservationId) {
       console.warn('Formulaire invalide', this.form.errors);
       return;
     }
 
     const formValue = this.form.value;
 
-    const reservation: CreateReservationDTO = {
-      game_publisher_id: formValue.game_publisher_id!,
+    const payload: Partial<CreateReservationDTO> = {
+      game_publisher_id: formValue.game_publisher_id ?? undefined,
       festival_id: formValue.festival_id!,
       reservant_id: formValue.reservant_id!,
       status: formValue.status || 'Contact pris',
@@ -123,23 +191,21 @@ export class ReservationForm {
       tables: (formValue.tables as any[]) || []
     };
 
-    console.log('Envoi de la réservation:', reservation);
-
-    this.newReservation.emit(reservation);
-    
-    this.form.reset({
-      status: 'Contact pris',
-      is_publisher_presenting: false,
-      game_list_requested: false,
-      game_list_received: false,
-      games_received: false,
-      nb_electrical_outlets: 0
+    this.reservationService.update(this.reservationId, payload).subscribe({
+      next: () => {
+        this.router.navigate(['/reservation', this.reservationId]);
+      },
+      error: (err) => {
+        console.error('Erreur mise à jour:', err);
+      }
     });
-    const tablesArray = this.form.get('tables') as FormArray;
-    tablesArray.clear();
   }
 
-  onSubmit(event: Event): void {
-    this.AddReservation(event);
+  goBack(): void {
+    if (window.history.length > 1) {
+      this.location.back();
+    } else {
+      this.router.navigate(['/reservations']);
+    }
   }
 }

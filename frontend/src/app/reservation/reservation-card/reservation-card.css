@@ -38,22 +38,7 @@ mat-card-header.card-header {
 
 /* Reservation logo (using mat-card-avatar) */
 .reservation-logo {
-  width: 60px !important;
-  height: 60px !important;
-  border-radius: 15px !important;
-  background: linear-gradient(45deg, #667eea, #764ba2) !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  font-size: 24px !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
-  flex-shrink: 0 !important;
-}
-
-.reservation-logo::before {
-  content: "📋";
-  color: white;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  display: none !important;
 }
 
 /* Status badge */
