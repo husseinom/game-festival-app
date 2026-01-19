@@ -1,7 +1,6 @@
 <mat-card class="reservation-card" (click)="onCardClick($event)">
   <!-- Card Header -->
   <mat-card-header class="card-header">
-    <div mat-card-avatar class="reservation-logo"></div>
     <div class="status-badge" [class]="getStatusClass()">
       {{ reservation.status }}
     </div>
@@ -9,7 +8,7 @@
 
   <!-- Reservation Info -->
   <mat-card-content class="reservation-info">
-    <mat-card-title class="publisher-name">{{ reservation.publisher?.name || 'Éditeur Inconnu' }}</mat-card-title>
+    <mat-card-title class="publisher-name">{{ reservation.reservant?.name }}</mat-card-title>
     <mat-card-subtitle class="festival-name">{{ reservation.festival?.name }}</mat-card-subtitle>
     
     <!-- Tables Info -->
@@ -50,7 +49,7 @@
         {{ reservation.final_invoice_amount | currency:'EUR':'symbol':'1.0-0' }}
       </span>
     </div>
-    <button mat-raised-button color="primary" class="edit-btn">
+    <button mat-raised-button color="primary" class="edit-btn" (click)="onEdit($event)">
       Edit
     </button>
     <button mat-raised-button color="warn" class="delete-btn" (click)="onDelete($event)">
