@@ -3,26 +3,6 @@
     <h2>{{ 'Nouvelle réservation' }}</h2>
 
     <div class="form-group">
-      <label for="game_publisher_id">Éditeur de jeu</label>
-      <select
-        id="game_publisher_id"
-        formControlName="game_publisher_id"
-      >
-        <option value="" disabled>Sélectionner un éditeur</option>
-        @for (publisher of gamePublishers(); track publisher.id) {
-          <option [value]="publisher.id">
-            {{ publisher.name }}
-          </option>
-        }
-      </select>
-      @if (form.get('game_publisher_id')?.hasError('required')) {
-        <span class="error">
-          L'éditeur de jeu est obligatoire
-        </span>
-      }
-    </div>
-
-    <div class="form-group">
       <label for="festival_id">Festival</label>
       <select
         id="festival_id"
@@ -58,6 +38,26 @@
       @if (form.get('reservant_id')?.hasError('required')) {
         <span class="error">
           Le réservant est obligatoire
+        </span>
+      }
+    </div>
+
+    <div class="form-group">
+      <label for="game_publisher_id">Éditeur de jeu</label>
+      <select
+        id="game_publisher_id"
+        formControlName="game_publisher_id"
+      >
+        <option value="" disabled>Sélectionner un éditeur</option>
+        @for (publisher of gamePublishers(); track publisher.id) {
+          <option [value]="publisher.id">
+            {{ publisher.name }}
+          </option>
+        }
+      </select>
+      @if (form.get('game_publisher_id')?.hasError('required')) {
+        <span class="error">
+          L'éditeur de jeu est obligatoire
         </span>
       }
     </div>

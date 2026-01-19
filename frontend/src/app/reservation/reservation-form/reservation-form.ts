@@ -27,10 +27,6 @@ export class ReservationForm {
   reservants = this.reservantService.reservants;
 
   readonly form = new FormGroup({
-    game_publisher_id: new FormControl<number | null>(null, {
-      nonNullable: false,
-      validators: [Validators.required]
-    }),
     festival_id: new FormControl<number | null>(null, {
       nonNullable: false,
       validators: [Validators.required]
@@ -38,6 +34,9 @@ export class ReservationForm {
     reservant_id: new FormControl<number | null>(null, {
       nonNullable: false,
       validators: [Validators.required]
+    }),
+    game_publisher_id: new FormControl<number | null>(null, {
+      nonNullable: false
     }),
     status: new FormControl('Contact pris', {
       nonNullable: true

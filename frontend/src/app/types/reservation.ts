@@ -1,9 +1,10 @@
 import { GamePublisherDto } from "./game-publisher-dto";
 import { Festival } from "./festival";
 import { PriceZone } from "./price-zone";
+import { Reservant } from "./reservant";
 
 export interface CreateReservationDTO {
-  game_publisher_id: number;
+  game_publisher_id?: number;
   festival_id: number;
   reservant_id: number;
   status?: string;
@@ -27,6 +28,7 @@ export interface Reservation extends CreateReservationDTO {
   reservation_id: number;
   publisher?: GamePublisherDto;
   festival?: Festival;
+  reservant?: Reservant;
   
   zones?: {
     id: number;
