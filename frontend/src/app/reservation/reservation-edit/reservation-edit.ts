@@ -7,7 +7,7 @@ import { PriceZoneServices } from '../../PriceZone/services/price-zone-services'
 import { GamePubListService } from '../../GamePublisher/service/game-pub-list-service';
 import { ReservantService } from '../../reservant/services/reservant-service';
 import { FestivalServices } from '../../festival/services/festival-services';
-import { CreateReservationDTO, Reservation } from '../../types/reservation';
+import { CreateReservationDTO, Reservation, ReservationStatus } from '../../types/reservation';
 
 @Component({
   selector: 'app-reservation-edit',
@@ -46,7 +46,7 @@ export class ReservationEdit implements OnInit {
     game_publisher_id: new FormControl<number | null>(null, {
       nonNullable: false
     }),
-    status: new FormControl('Contact pris', {
+    status: new FormControl<ReservationStatus>(ReservationStatus.NOT_CONTACTED, {
       nonNullable: true
     }),
     comments: new FormControl('', {
@@ -55,13 +55,10 @@ export class ReservationEdit implements OnInit {
     is_publisher_presenting: new FormControl(false, {
       nonNullable: true
     }),
-    game_list_requested: new FormControl(false, {
+    needs_festival_animators: new FormControl(false, {
       nonNullable: true
     }),
-    game_list_received: new FormControl(false, {
-      nonNullable: true
-    }),
-    games_received: new FormControl(false, {
+    large_table_request: new FormControl('', {
       nonNullable: true
     }),
     discount_amount: new FormControl<number | null>(null),
@@ -106,12 +103,11 @@ export class ReservationEdit implements OnInit {
       festival_id: reservation.festival_id,
       reservant_id: reservation.reservant_id,
       game_publisher_id: reservation.game_publisher_id ?? null,
-      status: reservation.status ?? 'Contact pris',
+      status: reservation.status ?? ReservationStatus.NOT_CONTACTED,
       comments: reservation.comments ?? '',
       is_publisher_presenting: reservation.is_publisher_presenting,
-      game_list_requested: reservation.game_list_requested,
-      game_list_received: reservation.game_list_received,
-      games_received: reservation.games_received,
+      needs_festival_animators: reservation.needs_festival_animators ?? false,
+      large_table_request: reservation.large_table_request ?? '',
       discount_amount: reservation.discount_amount ?? null,
       discount_tables: reservation.discount_tables ?? null,
       nb_electrical_outlets: reservation.nb_electrical_outlets ?? 0
@@ -179,12 +175,11 @@ export class ReservationEdit implements OnInit {
       game_publisher_id: formValue.game_publisher_id ?? undefined,
       festival_id: formValue.festival_id!,
       reservant_id: formValue.reservant_id!,
-      status: formValue.status || 'Contact pris',
+      status: formValue.status || ReservationStatus.NOT_CONTACTED,
       comments: formValue.comments || '',
       is_publisher_presenting: formValue.is_publisher_presenting || false,
-      game_list_requested: formValue.game_list_requested || false,
-      game_list_received: formValue.game_list_received || false,
-      games_received: formValue.games_received || false,
+      needs_festival_animators: formValue.needs_festival_animators || false,
+      large_table_request: formValue.large_table_request || undefined,
       discount_amount: formValue.discount_amount || undefined,
       discount_tables: formValue.discount_tables || undefined,
       nb_electrical_outlets: formValue.nb_electrical_outlets || 0,

@@ -1,4 +1,4 @@
-import { PrismaClient, Role } from '@prisma/client';
+import { PrismaClient, Role, ReservantType, TableSize, ReservationStatus, InvoiceStatus } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
@@ -40,34 +40,34 @@ async function main() {
   }
 
 // --- 3. Création des Reservants (selon la nouvelle typologie) ---
- console.log('📝 Création des réservants par typologie...');
+  console.log('📝 Création des réservants par typologie...');
 
- // 1. Éditeur (Le cas principal)
- const editeurAsmodee = await prisma.reservant.create({
-   data: { name: 'Asmodee', type: 'Éditeur' }
- });
+  // 1. Éditeur (Le cas principal)
+  const editeurAsmodee = await prisma.reservant.create({
+    data: { name: 'Asmodee', type: ReservantType.PUBLISHER }
+  });
 
- // 2. Prestataire (Animation pour le compte d'éditeurs)
- const prestataireAnim = await prisma.reservant.create({
-   data: { name: 'Ludis Animation', type: 'Prestataire' }
- });
+  // 2. Autre éditeur
+  const editeurDays = await prisma.reservant.create({
+    data: { name: 'Days of Wonder', type: ReservantType.PUBLISHER }
+  });
 
- // 3. Boutique (Facturation à zéro, commission externe)
- const boutiquePhilibert = await prisma.reservant.create({
-   data: { name: 'Philibert', type: 'Boutique' }
- });
+  // 3. Boutique (Facturation à zéro, commission externe)
+  const boutiquePhilibert = await prisma.reservant.create({
+    data: { name: 'Philibert', type: ReservantType.SHOP, is_partner: true }
+  });
 
- // 4. Association (Partenaire avec remise totale)
- const assoEchecs = await prisma.reservant.create({
-   data: { name: 'Club d’Échecs Local', type: 'Association' }
- });
+  // 4. Association (Partenaire avec remise totale)
+  const assoEchecs = await prisma.reservant.create({
+    data: { name: 'Club Echecs Local', type: ReservantType.ASSOCIATION, is_partner: true }
+  });
 
- // 5. Animation / Zone Proto (Espace festival, pas de facturation)
- const zoneProto = await prisma.reservant.create({
-   data: { name: 'Zone Prototypes / Festival', type: 'Animation / Zone Proto' }
- });
+  // 5. Autre (Animation / Zone Proto, Espace festival, pas de facturation)
+  const zoneProto = await prisma.reservant.create({
+    data: { name: 'Zone Prototypes / Festival', type: ReservantType.OTHER }
+  });
 
- console.log('✅ Réservants créés avec succès.');
+  console.log('✅ Réservants créés avec succès.');
 
   // --- 4. Récupération des Types de Zones (PriceZoneType) ---
   // On suppose qu'ils sont déjà là via le script CSV, sinon on les crée
@@ -127,8 +127,8 @@ async function main() {
       name: 'Hall A - Allée Centrale',
       tableTypes: {
         create: [
-          { name: 'Standard 2m', nb_total: 100, nb_total_player: 4 },
-          { name: 'Ronde XL', nb_total: 20, nb_total_player: 6 }
+          { name: TableSize.STANDARD, nb_total: 100, nb_available: 100, nb_total_player: 4 },
+          { name: TableSize.LARGE, nb_total: 20, nb_available: 20, nb_total_player: 6 }
         ]
       }
     }
@@ -142,7 +142,7 @@ async function main() {
       name: 'Carré Or',
       tableTypes: {
         create: [
-          { name: 'VIP Table (Nappe fournie)', nb_total: 50, nb_total_player: 5 }
+          { name: TableSize.STANDARD, nb_total: 50, nb_available: 50, nb_total_player: 5 }
         ]
       }
     }
@@ -163,7 +163,7 @@ async function main() {
         game_publisher_id: publishers[0].id,
         festival_id: festival.id,
         reservant_id: assoEchecs.reservant_id,
-        status: 'En discussion',
+        status: ReservationStatus.IN_DISCUSSION,
         is_publisher_presenting: true,
         nb_electrical_outlets: 2,
         comments: 'Intéressé par le carré VIP mais trouve ça cher.',
@@ -191,7 +191,7 @@ async function main() {
           game_publisher_id: publishers[1].id,
           festival_id: festival.id,
           reservant_id: editeurAsmodee.reservant_id,
-          status: 'Confirmé',
+          status: ReservationStatus.CONFIRMED,
           is_publisher_presenting: false,
           nb_electrical_outlets: 3,
           discount_amount: 50,
@@ -212,7 +212,8 @@ async function main() {
           game_publisher_id: publishers[2].id,
           festival_id: festival.id,
           reservant_id: boutiquePhilibert.reservant_id,
-          status: 'Facturé',
+          status: ReservationStatus.CONFIRMED,
+          invoice_status: InvoiceStatus.INVOICED,
           is_publisher_presenting: true,
           nb_electrical_outlets: 5,
           zones: {

@@ -1,25 +1,26 @@
 <div class="festival-list-container">
   <!-- Header Section -->
   
-  <div class="button-container">
-    @if(!showform()){
-        <button (click)="toggleform()" class="action-btn add-btn">Add festival</button>
-    }
-    @if(showform()){
-        <button (click)="hideform()" class="action-btn cancel-btn">Cancel</button>
-    }
-  </div>
-
-  <!-- Form Section -->
-  @if(showform()){
-    <div class="form-section">
-      <app-festival-form 
-        (newFestival)="add($event)" 
-        (updatedFestival)="update($event)"
-        [editingFestival]="editingFestival()"
-      ></app-festival-form>
+  @if (canManageFestivals()) {
+    <div class="button-container">
+      @if(!showform()){
+          <button (click)="toggleform()" class="action-btn add-btn">Add festival</button>
+      }
+      @if(showform()){
+          <button (click)="hideform()" class="action-btn cancel-btn">Cancel</button>
+      }
     </div>
-      
+
+    <!-- Form Section -->
+    @if(showform()){
+      <div class="form-section">
+        <app-festival-form 
+          (newFestival)="add($event)" 
+          (updatedFestival)="update($event)"
+          [editingFestival]="editingFestival()"
+        ></app-festival-form>
+      </div>
+    }
   }
  <!-- Festival Cards Grid -->
   <div class="festivals-grid">

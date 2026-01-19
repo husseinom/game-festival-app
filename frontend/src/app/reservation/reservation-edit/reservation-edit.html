@@ -14,7 +14,7 @@
           <select id="festival_id" formControlName="festival_id">
             <option value="" disabled>Sélectionner un festival</option>
             @for (festival of festivals(); track festival.id) {
-              <option [ngValue]="festival.id">
+              <option [value]="festival.id">
                 {{ festival.name }} - {{ festival.location }}
               </option>
             }
@@ -29,7 +29,7 @@
           <select id="reservant_id" formControlName="reservant_id">
             <option value="" disabled>Sélectionner un réservant</option>
             @for (reservant of reservants(); track reservant.reservant_id) {
-              <option [ngValue]="reservant.reservant_id">
+              <option [value]="reservant.reservant_id">
                 {{ reservant.name }} - {{ reservant.type }}
               </option>
             }
@@ -42,9 +42,9 @@
         <div class="form-group">
           <label for="game_publisher_id">Éditeur de jeu</label>
           <select id="game_publisher_id" formControlName="game_publisher_id">
-            <option [ngValue]="null">Aucun éditeur</option>
+            <option [value]="null">Aucun éditeur</option>
             @for (publisher of gamePublishers(); track publisher.id) {
-              <option [ngValue]="publisher.id">
+              <option [value]="publisher.id">
                 {{ publisher.name }}
               </option>
             }
@@ -53,12 +53,24 @@
 
         <div class="form-group">
           <label for="status">Statut</label>
-          <input type="text" id="status" formControlName="status" placeholder="Statut de la réservation" />
+          <select id="status" formControlName="status">
+            <option value="NOT_CONTACTED">Pas contacté</option>
+            <option value="CONTACTED">Contact pris</option>
+            <option value="IN_DISCUSSION">Discussion en cours</option>
+            <option value="CONFIRMED">Présent</option>
+            <option value="ABSENT">Absent</option>
+            <option value="CONSIDERED_ABSENT">Considéré absent</option>
+          </select>
         </div>
 
         <div class="form-group">
           <label for="comments">Commentaires</label>
           <textarea id="comments" formControlName="comments" placeholder="Commentaires" rows="4"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="large_table_request">Demande de grandes tables</label>
+          <textarea id="large_table_request" formControlName="large_table_request" placeholder="Détails de la demande de grandes tables" rows="2"></textarea>
         </div>
 
         <div class="checkbox-group">
@@ -67,16 +79,8 @@
             Éditeur présent
           </label>
           <label>
-            <input type="checkbox" formControlName="game_list_requested" />
-            Liste des jeux demandée
-          </label>
-          <label>
-            <input type="checkbox" formControlName="game_list_received" />
-            Liste des jeux reçue
-          </label>
-          <label>
-            <input type="checkbox" formControlName="games_received" />
-            Jeux reçus
+            <input type="checkbox" formControlName="needs_festival_animators" />
+            Besoin d'animateurs du festival
           </label>
         </div>
 
@@ -111,9 +115,9 @@
               <div class="form-group">
                 <label>Zone de prix</label>
                 <select formControlName="price_zone_id">
-                  <option [ngValue]="null" disabled>Sélectionner une zone</option>
+                  <option [value]="null" disabled>Sélectionner une zone</option>
                   @for (zone of priceZones(); track zone.id) {
-                    <option [ngValue]="zone.id">
+                    <option [value]="zone.id">
                       {{ zone.name }} - {{ zone.table_price }}€/table
                     </option>
                   }

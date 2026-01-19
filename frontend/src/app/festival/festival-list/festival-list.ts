@@ -20,6 +20,7 @@ export class FestivalList {
   readonly currentUser = this.authservice.currentUser;
   readonly loggedIn = this.authservice.isLoggedIn;
   readonly isAdmin = this.authservice.isAdmin;
+  readonly canManageFestivals = this.authservice.canManageFestivals;
   readonly showform = signal(false);
   readonly editingFestival = signal<Festival | undefined>(undefined);
 

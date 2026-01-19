@@ -15,6 +15,31 @@ enum Role {
     SUPER_ORGANISATOR
 }
 
+// Statut du workflow de réservation
+enum ReservationStatus {
+    NOT_CONTACTED      // Pas contacté
+    CONTACTED          // Contact pris
+    IN_DISCUSSION      // Discussion en cours
+    CONFIRMED          // Présent (réservation confirmée)
+    ABSENT             // Absent
+    CONSIDERED_ABSENT  // Considéré absent
+}
+
+// Statut de facturation
+enum InvoiceStatus {
+    PENDING   // En attente
+    INVOICED  // Facturée
+    PAID      // Payée
+}
+
+// Type de réservant (pour les remises partenaires)
+enum ReservantType {
+    PUBLISHER    // Éditeur classique
+    SHOP         // Boutique (partenaire)
+    ASSOCIATION  // Association (partenaire)
+    OTHER        // Autre
+}
+
 model User {
     id          Int         @id @default(autoincrement())
 
@@ -130,32 +155,48 @@ model Game {
 }
 
 model Reservant {
-    reservant_id    Int     @id @default(autoincrement())
+    reservant_id    Int           @id @default(autoincrement())
 
     name            String
-    type            String
+    type            ReservantType @default(PUBLISHER)
+    is_partner      Boolean       @default(false) // Partenaire = remise possible
     reservations    Reservation[]
 }
 
 model Reservation {
-    reservation_id           Int     @id @default(autoincrement())
+    reservation_id           Int               @id @default(autoincrement())
 
     game_publisher_id        Int?
     festival_id              Int
     reservant_id             Int
 
-    status                   String
-    comments                 String?
+    // Workflow de suivi
+    status                   ReservationStatus @default(NOT_CONTACTED)
+    comments                 String?           @db.Text
+    large_table_request      String?           @db.Text // Souhaits grandes tables (sans garantie)
 
-    is_publisher_presenting  Boolean @default(false)
-    game_list_requested      Boolean @default(false)
-    game_list_received       Boolean @default(false)
-    games_received           Boolean @default(false)
+    // Facturation
+    invoice_status           InvoiceStatus     @default(PENDING)
+    invoiced_at              DateTime?         // Date de facturation
+    paid_at                  DateTime?         // Date de paiement
+    discount_amount          Float?            // Remise en euros
+    discount_tables          Int?              // Remise en nombre de tables
+    nb_electrical_outlets    Int               @default(0) // Prises à 250€ HT chacune
+    final_invoice_amount     Float?            // Montant final calculé
 
-    discount_amount          Float?
-    discount_tables          Int?
-    nb_electrical_outlets    Int
-    final_invoice_amount     Float?
+    // Phase logistique
+    is_publisher_presenting  Boolean           @default(false) // Éditeur amène ses animateurs
+    needs_festival_animators Boolean           @default(false) // Festival doit fournir animateurs
+    game_list_requested      Boolean           @default(false)
+    game_list_requested_at   DateTime?
+    game_list_received       Boolean           @default(false)
+    game_list_received_at    DateTime?
+    games_received           Boolean           @default(false)
+    games_received_at        DateTime?
+
+    // Métadonnées
+    created_at               DateTime          @default(now())
+    updated_at               DateTime          @updatedAt
 
     // Relations
     publisher               GamePublisher? @relation(fields: [game_publisher_id], references: [id])
@@ -168,6 +209,8 @@ model Reservation {
     @@index([game_publisher_id])
     @@index([festival_id])
     @@index([reservant_id])
+    @@index([status])
+    @@index([invoice_status])
 }
 
 model ZoneReservation {
@@ -182,6 +225,13 @@ model ZoneReservation {
   @@unique([reservation_id, price_zone_id]) // Un éditeur ne peut pas avoir 2 lignes pour la même zone dans la même résa
 }
 
+// Type de table physique
+enum TableSize {
+    STANDARD  // Table standard
+    LARGE     // Grande table
+    CITY      // Table mairie
+}
+
 model FestivalGame {
   id              Int         @id @default(autoincrement())
   reservation_id  Int
@@ -189,21 +239,32 @@ model FestivalGame {
   map_zone_id     Int?        // Peut être null tant que l'orga ne l'a pas placé
   
   copy_count      Int         @default(1) // Nombre d'exemplaires du jeu
-  allocated_tables Int        @default(1) // Combien de tables ça prend
+  table_size      TableSize   @default(STANDARD) // Type de table utilisée
+  allocated_tables Float      @default(1) // Combien de tables ça prend (0.5 à 2)
+  is_received     Boolean     @default(false) // Pointage à réception
+  received_at     DateTime?   // Date de réception
 
   reservation     Reservation @relation(fields: [reservation_id], references: [reservation_id])
   game            Game        @relation(fields: [game_id], references: [id])
   mapZone         MapZone?    @relation(fields: [map_zone_id], references: [id])
+
+  @@index([reservation_id])
+  @@index([game_id])
+  @@index([map_zone_id])
 }
 
 model TableType {
-  id              Int      @id @default(autoincrement())
-  name            String   // "small", "large", "city"
-  nb_total        Int      // Stock total disponible
-  nb_total_player Int      // Capacité joueurs (ex: 4)
+  id              Int       @id @default(autoincrement())
+  name            TableSize // "STANDARD", "LARGE", "CITY"
+  nb_total        Int       // Stock total disponible
+  nb_available    Int       // Stock restant (décrémenté à l'affectation)
+  nb_total_player Int       // Capacité joueurs (ex: 4)
   
   map_zone_id     Int
-  mapZone         MapZone  @relation(fields: [map_zone_id], references: [id])
+  mapZone         MapZone   @relation(fields: [map_zone_id], references: [id])
+
+  @@index([map_zone_id])
+  @@index([name])
 }
 
 model Contact {

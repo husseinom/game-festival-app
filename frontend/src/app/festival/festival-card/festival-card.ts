@@ -1,7 +1,9 @@
-import { Component, input, output, signal } from '@angular/core';
+import { Component, inject, input, output, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { Festival } from '../../types/festival';
+import { AuthService } from '../../shared/auth/auth-service';
+
 @Component({
   selector: 'app-festival-card',
   imports: [MatCardModule, MatButtonModule],
@@ -9,13 +11,15 @@ import { Festival } from '../../types/festival';
   styleUrls: ['./festival-card.css'],
 })
 export class FestivalCard {
+  private readonly authService = inject(AuthService);
+  
   festivals = input<Festival>();
   remove = output<Festival>();
   edit = output<Festival>();
 
   card = output<number>();
 
-
+  readonly canManageFestivals = this.authService.canManageFestivals;
   isSelected = signal(false);
 
   get isGoingOn(): boolean {

@@ -2,7 +2,7 @@ import { Component, inject, computed } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ReservationService } from '../services/reservation.service';
 import { Location, CommonModule } from '@angular/common';
-import { Reservation } from '../../types/reservation';
+import { Reservation, ReservationStatus, RESERVATION_STATUS_LABELS, InvoiceStatus, INVOICE_STATUS_LABELS } from '../../types/reservation';
 import { toSignal } from '@angular/core/rxjs-interop'; // Requis
 import { map, switchMap, filter } from 'rxjs';
 
@@ -38,13 +38,11 @@ export class ReservationDetail {
     this.router.navigate(['/reservations']);
   }
 
-  getStatusLabel(status?: string): string {
-    const statusMap: Record<string, string> = {
-      'pending': 'En attente',
-      'confirmed': 'Confirmée',
-      'cancelled': 'Annulée',
-      'completed': 'Complétée'
-    };
-    return status ? statusMap[status] || status : 'Non défini';
+  getStatusLabel(status?: ReservationStatus): string {
+    return status ? RESERVATION_STATUS_LABELS[status] || status : 'Non défini';
+  }
+
+  getInvoiceStatusLabel(status?: InvoiceStatus): string {
+    return status ? INVOICE_STATUS_LABELS[status] || status : 'Non défini';
   }
 }

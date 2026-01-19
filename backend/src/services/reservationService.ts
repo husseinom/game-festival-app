@@ -1,19 +1,46 @@
 import prisma from '../config/prisma.js';
+import { ReservationStatus, InvoiceStatus, TableSize } from '@prisma/client';
+
+// Prix fixe d'une prise électrique (triplette) en euros HT
+const ELECTRICAL_OUTLET_PRICE = 250;
+
+// Include standard pour les requêtes
+const reservationInclude = {
+  publisher: true,
+  festival: true,
+  reservant: true,
+  zones: {
+    include: {
+      priceZone: true
+    }
+  },
+  games: {
+    include: {
+      game: true,
+      mapZone: true
+    }
+  },
+  contactLogs: {
+    orderBy: {
+      contact_date: 'desc' as const
+    }
+  }
+};
+
+// ============================================
+// CRUD de base
+// ============================================
 
 export const createReservation = async (data: any) => {
-  console.log('Creating reservation with data:', data);
-  const final_invoice_amount = await calculateFinalInvoiceAmount(data);
-
   const {
     game_publisher_id,
     festival_id,
     reservant_id,
     status,
     comments,
+    large_table_request,
     is_publisher_presenting,
-    game_list_requested,
-    game_list_received,
-    games_received,
+    needs_festival_animators,
     discount_amount,
     discount_tables,
     nb_electrical_outlets,
@@ -23,6 +50,7 @@ export const createReservation = async (data: any) => {
   const parsedGamePublisherId = game_publisher_id ? Number(game_publisher_id) : null;
 
   return prisma.$transaction(async (tx) => {
+    // Vérifier la disponibilité des tables dans chaque zone
     if (tables && Array.isArray(tables)) {
       for (const t of tables) {
         const zoneId = Number(t.price_zone_id);
@@ -39,17 +67,12 @@ export const createReservation = async (data: any) => {
 
         if (priceZone.total_tables !== null) {
           const aggregation = await tx.zoneReservation.aggregate({
-            _sum: {
-              table_count: true
-            },
-            where: {
-              price_zone_id: zoneId
-            }
+            _sum: { table_count: true },
+            where: { price_zone_id: zoneId }
           });
 
           const currentReserved = aggregation._sum.table_count || 0;
 
-          // C. Vérification finale
           if (currentReserved + requestedQty > priceZone.total_tables) {
             throw new Error(
               `Plus assez de tables disponibles dans la zone "${priceZone.name}". ` +
@@ -60,195 +83,499 @@ export const createReservation = async (data: any) => {
       }
     }
 
-    // ÉTAPE 2 : Si tout est bon, on crée la réservation
+    // Créer la réservation
     const reservation = await tx.reservation.create({
       data: {
         game_publisher_id: parsedGamePublisherId,
         festival_id: Number(festival_id),
         reservant_id: Number(reservant_id),
-        status: status || 'Contact pris',
+        status: status || 'NOT_CONTACTED',
         comments,
+        large_table_request,
         is_publisher_presenting: Boolean(is_publisher_presenting),
-        game_list_requested: Boolean(game_list_requested),
-        game_list_received: Boolean(game_list_received),
-        games_received: Boolean(games_received),
-        discount_amount,
-        discount_tables,
+        needs_festival_animators: Boolean(needs_festival_animators),
+        discount_amount: discount_amount ? Number(discount_amount) : null,
+        discount_tables: discount_tables ? Number(discount_tables) : null,
         nb_electrical_outlets: Number(nb_electrical_outlets) || 0,
-        final_invoice_amount,
-
         zones: {
-          create: tables && Array.isArray(tables) 
+          create: tables && Array.isArray(tables)
             ? tables.map((t: any) => ({
                 price_zone_id: Number(t.price_zone_id),
                 table_count: Number(t.table_count || t.quantity)
-              })) 
+              }))
             : []
         }
       },
-      include: {
-        zones: { 
-          include: { 
-            priceZone: true 
-          } 
-        },
-        games: {
-          include: {
-            game: true,
-            mapZone: true
-          }
-        },
-        contactLogs: true
-      }
+      include: reservationInclude
     });
 
-    return reservation;
+    // Calculer et mettre à jour le montant final
+    const finalAmount = await calculatePrice(reservation);
+    return tx.reservation.update({
+      where: { reservation_id: reservation.reservation_id },
+      data: { final_invoice_amount: finalAmount },
+      include: reservationInclude
+    });
   });
 };
 
 export const getAllReservations = async () => {
   return prisma.reservation.findMany({
-    include: {
-      publisher: true, 
-      festival: true,
-      reservant: true,
-      zones: { 
-        include: { 
-          priceZone: true 
-        } 
-      },
-      games: {
-        include: {
-          game: true,
-          mapZone: true
-        }
-      },
-      contactLogs: true
-    },
+    include: reservationInclude,
+    orderBy: { created_at: 'desc' }
   });
 };
 
 export const getReservationById = async (id: number) => {
   return prisma.reservation.findUnique({
     where: { reservation_id: id },
-    include: { 
-      publisher: true, 
-      festival: true, 
-      reservant: true,
-      zones: { 
-        include: { 
-          priceZone: true 
-        } 
-      },
-      games: {
-        include: {
-          game: true,
-          mapZone: true
-        }
-      },
-      contactLogs: true
-    },
+    include: reservationInclude
+  });
+};
+
+export const getReservationsByFestival = async (festivalId: number) => {
+  return prisma.reservation.findMany({
+    where: { festival_id: festivalId },
+    include: reservationInclude,
+    orderBy: { created_at: 'desc' }
   });
 };
 
 export const updateReservation = async (id: number, data: any) => {
-  // On sépare les tables du reste pour éviter les erreurs lors de l'update simple
   const { tables, ...restData } = data;
 
-  // Mise à jour des infos principales
-  return prisma.reservation.update({
+  const updated = await prisma.reservation.update({
     where: { reservation_id: id },
     data: restData,
-    include: { 
-      zones: { 
-        include: { 
-          priceZone: true 
-        } 
-      },
-      games: {
-        include: {
-          game: true,
-          mapZone: true
-        }
-      },
-      contactLogs: true
-    }
+    include: reservationInclude
   });
+
+  // Recalculer le montant si nécessaire
+  if (data.discount_amount !== undefined || data.discount_tables !== undefined || data.nb_electrical_outlets !== undefined) {
+    const finalAmount = await calculatePrice(updated);
+    return prisma.reservation.update({
+      where: { reservation_id: id },
+      data: { final_invoice_amount: finalAmount },
+      include: reservationInclude
+    });
+  }
+
+  return updated;
 };
 
 export const deleteReservation = async (id: number) => {
   return prisma.$transaction(async (tx) => {
-    // Delete all related records in order of dependencies
-    await tx.festivalGame.deleteMany({
-      where: { reservation_id: id }
+    await tx.festivalGame.deleteMany({ where: { reservation_id: id } });
+    await tx.contactLog.deleteMany({ where: { reservation_id: id } });
+    await tx.zoneReservation.deleteMany({ where: { reservation_id: id } });
+    return tx.reservation.delete({ where: { reservation_id: id } });
+  });
+};
+
+// ============================================
+// Workflow de suivi (statuts)
+// ============================================
+
+export const updateStatus = async (id: number, status: ReservationStatus) => {
+  return prisma.reservation.update({
+    where: { reservation_id: id },
+    data: { status },
+    include: reservationInclude
+  });
+};
+
+export const updateStatusBatch = async (ids: number[], status: ReservationStatus) => {
+  await prisma.reservation.updateMany({
+    where: { reservation_id: { in: ids } },
+    data: { status }
+  });
+  return prisma.reservation.findMany({
+    where: { reservation_id: { in: ids } },
+    include: reservationInclude
+  });
+};
+
+// ============================================
+// Facturation
+// ============================================
+
+export const markAsInvoiced = async (id: number) => {
+  return prisma.reservation.update({
+    where: { reservation_id: id },
+    data: {
+      invoice_status: 'INVOICED',
+      invoiced_at: new Date()
+    },
+    include: reservationInclude
+  });
+};
+
+export const markAsPaid = async (id: number) => {
+  return prisma.reservation.update({
+    where: { reservation_id: id },
+    data: {
+      invoice_status: 'PAID',
+      paid_at: new Date()
+    },
+    include: reservationInclude
+  });
+};
+
+export const updateInvoiceStatusBatch = async (ids: number[], invoiceStatus: InvoiceStatus) => {
+  const updateData: any = { invoice_status: invoiceStatus };
+  
+  if (invoiceStatus === 'INVOICED') {
+    updateData.invoiced_at = new Date();
+  } else if (invoiceStatus === 'PAID') {
+    updateData.paid_at = new Date();
+  }
+
+  await prisma.reservation.updateMany({
+    where: { reservation_id: { in: ids } },
+    data: updateData
+  });
+
+  return prisma.reservation.findMany({
+    where: { reservation_id: { in: ids } },
+    include: reservationInclude
+  });
+};
+
+export const applyPartnerDiscount = async (id: number) => {
+  const reservation = await prisma.reservation.findUnique({
+    where: { reservation_id: id },
+    include: { reservant: true, zones: { include: { priceZone: true } } }
+  });
+
+  if (!reservation) throw new Error('Réservation introuvable');
+  if (!reservation.reservant.is_partner) throw new Error('Ce réservant n\'est pas un partenaire');
+
+  // Calculer le prix total avant remise
+  const totalBeforeDiscount = await calculatePrice(reservation, false);
+
+  // Appliquer une remise égale au total pour arriver à 0€
+  return prisma.reservation.update({
+    where: { reservation_id: id },
+    data: {
+      discount_amount: totalBeforeDiscount,
+      final_invoice_amount: 0
+    },
+    include: reservationInclude
+  });
+};
+
+// ============================================
+// Phase logistique - Liste des jeux
+// ============================================
+
+export const requestGameList = async (id: number) => {
+  return prisma.reservation.update({
+    where: { reservation_id: id },
+    data: {
+      game_list_requested: true,
+      game_list_requested_at: new Date()
+    },
+    include: reservationInclude
+  });
+};
+
+export const markGameListReceived = async (id: number) => {
+  return prisma.reservation.update({
+    where: { reservation_id: id },
+    data: {
+      game_list_received: true,
+      game_list_received_at: new Date()
+    },
+    include: reservationInclude
+  });
+};
+
+export const addGamesToReservation = async (
+  reservationId: number,
+  games: Array<{ game_id: number; copy_count: number }>
+) => {
+  // Créer les entrées FestivalGame
+  await prisma.festivalGame.createMany({
+    data: games.map(g => ({
+      reservation_id: reservationId,
+      game_id: g.game_id,
+      copy_count: g.copy_count
+    }))
+  });
+
+  return getReservationById(reservationId);
+};
+
+export const markGamesReceived = async (id: number) => {
+  return prisma.reservation.update({
+    where: { reservation_id: id },
+    data: {
+      games_received: true,
+      games_received_at: new Date()
+    },
+    include: reservationInclude
+  });
+};
+
+export const markGameAsReceived = async (festivalGameId: number) => {
+  return prisma.festivalGame.update({
+    where: { id: festivalGameId },
+    data: {
+      is_received: true,
+      received_at: new Date()
+    },
+    include: {
+      game: true,
+      mapZone: true
+    }
+  });
+};
+
+// ============================================
+// Phase technique - Placement
+// ============================================
+
+export const placeGame = async (
+  festivalGameId: number,
+  mapZoneId: number,
+  tableSize: TableSize,
+  allocatedTables: number
+) => {
+  return prisma.$transaction(async (tx) => {
+    // Vérifier le stock disponible
+    const tableType = await tx.tableType.findFirst({
+      where: {
+        map_zone_id: mapZoneId,
+        name: tableSize
+      }
     });
 
-    await tx.contactLog.deleteMany({
-      where: { reservation_id: id }
+    if (!tableType) {
+      throw new Error(`Aucune table de type ${tableSize} dans cette zone`);
+    }
+
+    if (tableType.nb_available < allocatedTables) {
+      throw new Error(
+        `Stock insuffisant. Disponible: ${tableType.nb_available}, Demandé: ${allocatedTables}`
+      );
+    }
+
+    // Décrémenter le stock
+    await tx.tableType.update({
+      where: { id: tableType.id },
+      data: { nb_available: tableType.nb_available - allocatedTables }
     });
 
-    await tx.zoneReservation.deleteMany({
-      where: { reservation_id: id }
-    });
-
-    // Finally delete the reservation
-    return tx.reservation.delete({
-      where: { reservation_id: id }
+    // Mettre à jour le jeu
+    return tx.festivalGame.update({
+      where: { id: festivalGameId },
+      data: {
+        map_zone_id: mapZoneId,
+        table_size: tableSize,
+        allocated_tables: allocatedTables
+      },
+      include: {
+        game: true,
+        mapZone: true
+      }
     });
   });
+};
+
+export const unplaceGame = async (festivalGameId: number) => {
+  return prisma.$transaction(async (tx) => {
+    const game = await tx.festivalGame.findUnique({
+      where: { id: festivalGameId }
+    });
+
+    if (!game || !game.map_zone_id) {
+      throw new Error('Ce jeu n\'est pas placé');
+    }
+
+    // Rendre les tables au stock
+    const tableType = await tx.tableType.findFirst({
+      where: {
+        map_zone_id: game.map_zone_id,
+        name: game.table_size
+      }
+    });
+
+    if (tableType) {
+      await tx.tableType.update({
+        where: { id: tableType.id },
+        data: { nb_available: tableType.nb_available + game.allocated_tables }
+      });
+    }
+
+    // Retirer le placement
+    return tx.festivalGame.update({
+      where: { id: festivalGameId },
+      data: {
+        map_zone_id: null,
+        table_size: 'STANDARD',
+        allocated_tables: 1
+      },
+      include: {
+        game: true,
+        mapZone: true
+      }
+    });
+  });
+};
+
+// ============================================
+// Historique des contacts
+// ============================================
+
+export const addContactLog = async (reservationId: number, notes: string) => {
+  await prisma.contactLog.create({
+    data: {
+      reservation_id: reservationId,
+      notes
+    }
+  });
+
+  return getReservationById(reservationId);
+};
+
+export const getContactLogs = async (reservationId: number) => {
+  return prisma.contactLog.findMany({
+    where: { reservation_id: reservationId },
+    orderBy: { contact_date: 'desc' }
+  });
+};
+
+// ============================================
+// Calcul du prix
+// ============================================
+
+const calculatePrice = async (reservation: any, applyDiscount = true): Promise<number> => {
+  let total = 0;
+
+  // Prix des tables par zone
+  if (reservation.zones && Array.isArray(reservation.zones)) {
+    for (const zone of reservation.zones) {
+      const priceZone = zone.priceZone || await prisma.priceZone.findUnique({
+        where: { id: zone.price_zone_id }
+      });
+      
+      if (priceZone) {
+        total += priceZone.table_price * zone.table_count;
+      }
+    }
+  }
+
+  // Prix des prises électriques
+  total += (reservation.nb_electrical_outlets || 0) * ELECTRICAL_OUTLET_PRICE;
+
+  if (applyDiscount) {
+    // Remise en euros
+    total -= reservation.discount_amount || 0;
+
+    // Remise en tables (on enlève le prix des X premières tables)
+    let remainingDiscount = reservation.discount_tables || 0;
+    if (remainingDiscount > 0 && reservation.zones) {
+      for (const zone of reservation.zones) {
+        if (remainingDiscount <= 0) break;
+        
+        const priceZone = zone.priceZone || await prisma.priceZone.findUnique({
+          where: { id: zone.price_zone_id }
+        });
+        
+        if (priceZone) {
+          const tablesToDiscount = Math.min(zone.table_count, remainingDiscount);
+          total -= priceZone.table_price * tablesToDiscount;
+          remainingDiscount -= tablesToDiscount;
+        }
+      }
+    }
+  }
+
+  return Math.max(total, 0);
+};
+
+export const recalculatePrice = async (id: number) => {
+  const reservation = await prisma.reservation.findUnique({
+    where: { reservation_id: id },
+    include: { zones: { include: { priceZone: true } } }
+  });
+
+  if (!reservation) throw new Error('Réservation introuvable');
+
+  const finalAmount = await calculatePrice(reservation);
+  
+  return prisma.reservation.update({
+    where: { reservation_id: id },
+    data: { final_invoice_amount: finalAmount },
+    include: reservationInclude
+  });
+};
+
+// ============================================
+// Statistiques par festival
+// ============================================
+
+export const getReservationStats = async (festivalId: number) => {
+  const reservations = await prisma.reservation.findMany({
+    where: { festival_id: festivalId },
+    include: {
+      zones: { include: { priceZone: true } },
+      games: true
+    }
+  });
+
+  const stats = {
+    totalReservations: reservations.length,
+    byStatus: {} as Record<string, number>,
+    byInvoiceStatus: {} as Record<string, number>,
+    totalTables: 0,
+    totalElectricalOutlets: 0,
+    totalGames: 0,
+    totalRevenue: 0,
+    paidRevenue: 0
+  };
+
+  for (const r of reservations) {
+    // Comptage par statut
+    stats.byStatus[r.status] = (stats.byStatus[r.status] || 0) + 1;
+    stats.byInvoiceStatus[r.invoice_status] = (stats.byInvoiceStatus[r.invoice_status] || 0) + 1;
+
+    // Totaux
+    stats.totalTables += r.zones.reduce((sum, z) => sum + z.table_count, 0);
+    stats.totalElectricalOutlets += r.nb_electrical_outlets;
+    stats.totalGames += r.games.length;
+    stats.totalRevenue += r.final_invoice_amount || 0;
+
+    if (r.invoice_status === 'PAID') {
+      stats.paidRevenue += r.final_invoice_amount || 0;
+    }
+  }
+
+  return stats;
 };
 
 export default {
   createReservation,
   getAllReservations,
   getReservationById,
+  getReservationsByFestival,
   updateReservation,
   deleteReservation,
-};
-
-const calculateFinalInvoiceAmount = async (data: any): Promise<number> => {
-  const {
-    tables,
-    discount_amount = 0,
-    discount_tables = 0,
-    nb_electrical_outlets = 0
-  } = data;
-
-  let total = 0;
-  let remainingDiscount = discount_tables;
-
-  if (tables && Array.isArray(tables)) {
-    for (const t of tables) {
-      const zone = await prisma.priceZone.findUnique({
-        where: { id: Number(t.price_zone_id) }
-      });
-
-      if (zone) {
-        const tableCount = Number(t.table_count || t.quantity);
-        total += zone.table_price * tableCount;
-      }
-    }
-  }
-
-  total -= discount_amount;
-
-  if (remainingDiscount > 0 && tables && Array.isArray(tables)) {
-    for (const t of tables) {
-      if (remainingDiscount <= 0) break;
-
-      const zone = await prisma.priceZone.findUnique({
-        where: { id: Number(t.price_zone_id) }
-      });
-
-      if (zone) {
-        const tableCount = Math.min(Number(t.table_count || t.quantity), remainingDiscount);
-        total -= zone.table_price * tableCount;
-        remainingDiscount -= tableCount;
-      }
-    }
-  }
-
-  total += Number(nb_electrical_outlets) * 250;
-
-  return total >= 0 ? total : 0;
+  updateStatus,
+  updateStatusBatch,
+  markAsInvoiced,
+  markAsPaid,
+  updateInvoiceStatusBatch,
+  applyPartnerDiscount,
+  requestGameList,
+  markGameListReceived,
+  addGamesToReservation,
+  markGamesReceived,
+  markGameAsReceived,
+  placeGame,
+  unplaceGame,
+  addContactLog,
+  getContactLogs,
+  recalculatePrice,
+  getReservationStats
 };

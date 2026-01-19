@@ -64,12 +64,17 @@
 
     <div class="form-group">
       <label for="status">Statut</label>
-      <input
-        type="text"
+      <select
         id="status"
         formControlName="status"
-        placeholder="Statut de la réservation"
-      />
+      >
+        <option value="NOT_CONTACTED">Pas contacté</option>
+        <option value="CONTACTED">Contact pris</option>
+        <option value="IN_DISCUSSION">Discussion en cours</option>
+        <option value="CONFIRMED">Présent</option>
+        <option value="ABSENT">Absent</option>
+        <option value="CONSIDERED_ABSENT">Considéré absent</option>
+      </select>
     </div>
 
     <div class="form-group">
@@ -82,22 +87,24 @@
       ></textarea>
     </div>
 
+    <div class="form-group">
+      <label for="large_table_request">Demande de grandes tables</label>
+      <textarea
+        id="large_table_request"
+        formControlName="large_table_request"
+        placeholder="Détails de la demande de grandes tables (ex: 2 tables 180cm pour démo)"
+        rows="2"
+      ></textarea>
+    </div>
+
     <div class="checkbox-group">
       <label>
         <input type="checkbox" formControlName="is_publisher_presenting" />
         Éditeur présent
       </label>
       <label>
-        <input type="checkbox" formControlName="game_list_requested" />
-        Liste des jeux demandée
-      </label>
-      <label>
-        <input type="checkbox" formControlName="game_list_received" />
-        Liste des jeux reçue
-      </label>
-      <label>
-        <input type="checkbox" formControlName="games_received" />
-        Jeux reçus
+        <input type="checkbox" formControlName="needs_festival_animators" />
+        Besoin d'animateurs du festival
       </label>
     </div>
 

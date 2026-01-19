@@ -9,7 +9,7 @@ const router = Router();
 router.post(
     '/add',
     verifyToken,
-    // requireRole(['ADMIN', 'SUPER_ORGANISATOR']),
+    requireRole(['ADMIN', 'SUPER_ORGANISATOR']),
     festivalController.add
 );
 
