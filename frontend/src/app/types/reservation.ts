@@ -14,6 +14,7 @@ export interface CreateReservationDTO {
   games_received: boolean;
   discount_amount?: number;
   discount_tables?: number;
+  nb_electrical_outlets: number;
   final_invoice_amount?: number;
   
   tables: {
@@ -31,5 +32,19 @@ export interface Reservation extends CreateReservationDTO {
     id: number;
     table_count: number;
     priceZone: PriceZone;
+  }[];
+  
+  games?: {
+    id: number;
+    game_id: number;
+    map_zone_id?: number;
+    copy_count: number;
+    allocated_tables: number;
+  }[];
+  
+  contactLogs?: {
+    id: number;
+    contact_date: string;
+    notes?: string;
   }[];
 }

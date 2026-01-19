@@ -65,6 +65,10 @@ export class ReservationForm {
     }),
     discount_amount: new FormControl<number | null>(null),
     discount_tables: new FormControl<number | null>(null),
+    nb_electrical_outlets: new FormControl<number>(0, {
+      nonNullable: true,
+      validators: [Validators.required, Validators.min(0)]
+    }),
     tables: new FormArray([])
   });
 
@@ -83,7 +87,8 @@ export class ReservationForm {
           game_list_received: reservation.game_list_received,
           games_received: reservation.games_received,
           discount_amount: reservation.discount_amount || null,
-          discount_tables: reservation.discount_tables || null
+          discount_tables: reservation.discount_tables || null,
+          nb_electrical_outlets: reservation.nb_electrical_outlets || 0
         });
 
         // Désactiver les champs qui ne doivent pas être modifiés en édition
@@ -121,7 +126,8 @@ export class ReservationForm {
           is_publisher_presenting: false,
           game_list_requested: false,
           game_list_received: false,
-          games_received: false
+          games_received: false,
+          nb_electrical_outlets: 0
         });
         const tablesArray = this.form.get('tables') as FormArray;
         tablesArray.clear();
@@ -184,6 +190,7 @@ export class ReservationForm {
       games_received: formValue.games_received || false,
       discount_amount: formValue.discount_amount || undefined,
       discount_tables: formValue.discount_tables || undefined,
+      nb_electrical_outlets: formValue.nb_electrical_outlets || 0,
       tables: (formValue.tables as any[]) || []
     };
 
@@ -198,7 +205,8 @@ export class ReservationForm {
       is_publisher_presenting: false,
       game_list_requested: false,
       game_list_received: false,
-      games_received: false
+      games_received: false,
+      nb_electrical_outlets: 0
     });
     const tablesArray = this.form.get('tables') as FormArray;
     tablesArray.clear();
@@ -226,6 +234,7 @@ export class ReservationForm {
       games_received: formValue.games_received,
       discount_amount: formValue.discount_amount || undefined,
       discount_tables: formValue.discount_tables || undefined,
+      nb_electrical_outlets: formValue.nb_electrical_outlets || 0,
       tables: (formValue.tables as any[]) || []
     };
 
