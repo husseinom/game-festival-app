@@ -15,6 +15,7 @@ export const createReservation = async (data: any) => {
     games_received,
     discount_amount,
     discount_tables,
+    nb_electrical_outlets,
     tables
   } = data;
 
@@ -70,6 +71,7 @@ export const createReservation = async (data: any) => {
         games_received: Boolean(games_received),
         discount_amount,
         discount_tables,
+        nb_electrical_outlets: Number(nb_electrical_outlets) || 0,
         final_invoice_amount,
 
         zones: {
@@ -86,7 +88,14 @@ export const createReservation = async (data: any) => {
           include: { 
             priceZone: true 
           } 
-        }
+        },
+        games: {
+          include: {
+            game: true,
+            mapZone: true
+          }
+        },
+        contactLogs: true
       }
     });
 
@@ -105,13 +114,20 @@ export const getAllReservations = async () => {
           priceZone: true 
         } 
       },
+      games: {
+        include: {
+          game: true,
+          mapZone: true
+        }
+      },
+      contactLogs: true
     },
   });
 };
 
 export const getReservationById = async (id: number) => {
   return prisma.reservation.findUnique({
-    where: { reservation_id: id }, // CORRECTION : utilisation de reservation_id 
+    where: { reservation_id: id },
     include: { 
       publisher: true, 
       festival: true, 
@@ -120,7 +136,14 @@ export const getReservationById = async (id: number) => {
         include: { 
           priceZone: true 
         } 
-      }
+      },
+      games: {
+        include: {
+          game: true,
+          mapZone: true
+        }
+      },
+      contactLogs: true
     },
   });
 };
@@ -131,15 +154,32 @@ export const updateReservation = async (id: number, data: any) => {
 
   // Mise à jour des infos principales
   return prisma.reservation.update({
-    where: { reservation_id: id }, // CORRECTION : reservation_id
+    where: { reservation_id: id },
     data: restData,
-    include: { zones: true }
+    include: { 
+      zones: { 
+        include: { 
+          priceZone: true 
+        } 
+      },
+      games: {
+        include: {
+          game: true,
+          mapZone: true
+        }
+      },
+      contactLogs: true
+    }
   });
 };
 
 export const deleteReservation = async (id: number) => {
   return prisma.$transaction(async (tx) => {
     // Delete all related records in order of dependencies
+    await tx.festivalGame.deleteMany({
+      where: { reservation_id: id }
+    });
+
     await tx.contactLog.deleteMany({
       where: { reservation_id: id }
     });
@@ -167,7 +207,8 @@ const calculateFinalInvoiceAmount = async (data: any): Promise<number> => {
   const {
     tables,
     discount_amount = 0,
-    discount_tables = 0
+    discount_tables = 0,
+    nb_electrical_outlets = 0
   } = data;
 
   let total = 0;
@@ -203,6 +244,8 @@ const calculateFinalInvoiceAmount = async (data: any): Promise<number> => {
       }
     }
   }
+
+  total += Number(nb_electrical_outlets) * 250;
 
   return total >= 0 ? total : 0;
 };

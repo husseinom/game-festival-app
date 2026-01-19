@@ -154,6 +154,7 @@ model Reservation {
 
     discount_amount          Float?
     discount_tables          Int?
+    nb_electrical_outlets    Int
     final_invoice_amount     Float?
 
     // Relations
