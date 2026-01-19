@@ -14,6 +14,7 @@ import { FestivalDetails } from './festival/festival-details/festival-details';
 import { PriceZoneCard } from './PriceZone/price-zone-card/price-zone-card';
 import { ReservationList } from './reservation/reservation-list/reservation-list';
 import { ReservationDetail } from './reservation/reservation-detail/reservation-detail';
+import { ReservationEdit } from './reservation/reservation-edit/reservation-edit';
 import { ReservantList } from './reservant/reservant-list/reservant-list';
 
 
@@ -32,6 +33,7 @@ export const routes: Routes = [
 	{ path: 'publisher/:id', component: PublisherDetails, canActivate:[authGuard]},
     { path: 'reservations', component: ReservationList, canActivate:[authGuard]},
     { path: 'reservation/:id', component: ReservationDetail, canActivate:[authGuard]},
+    { path: 'reservation/:id/edit', component: ReservationEdit, canActivate:[authGuard]},
     { path: '**', redirectTo: 'login' },
 
 ];

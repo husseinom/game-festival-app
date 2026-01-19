@@ -43,6 +43,6 @@ export class ReservationCard {
 
   onEdit(event: Event): void {
     event.stopPropagation();
-    console.log('Edit clicked for reservation', this.reservation.reservation_id);
+    this.router.navigate(['/reservation', this.reservation.reservation_id, 'edit']);
   }
 }
