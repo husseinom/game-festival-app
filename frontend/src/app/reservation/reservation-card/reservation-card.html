@@ -1,7 +1,6 @@
 <mat-card class="reservation-card" (click)="onCardClick($event)">
   <!-- Card Header -->
   <mat-card-header class="card-header">
-    <div mat-card-avatar class="reservation-logo"></div>
     <div class="status-badge" [class]="getStatusClass()">
       {{ reservation.status }}
     </div>
