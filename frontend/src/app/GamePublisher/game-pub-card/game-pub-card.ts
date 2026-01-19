@@ -1,9 +1,10 @@
-import { Component, input, output,computed } from '@angular/core';
+import { Component, inject, input, output, computed } from '@angular/core';
 import { GamePublisherDto } from '../../types/game-publisher-dto';
 import { GameDto } from '../../types/game-dto';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { RoleService } from '../../shared/services/role.service';
 
 @Component({
   selector: 'app-game-pub-card',
@@ -13,8 +14,11 @@ import { MatIconModule } from '@angular/material/icon';
   styleUrl: './game-pub-card.css'
 })
 export class GamePubCard {
+  private readonly roleService = inject(RoleService);
+  
   public gamePub = input<GamePublisherDto | null>(null);
   public games = input<GameDto[]>([]);
+  readonly canEdit = this.roleService.canEditPublishers;
 
   remove = output<number>(); 
   card = output<number>();

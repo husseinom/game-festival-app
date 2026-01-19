@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterModule, RouterOutlet } from '@angular/router';
 import { AuthService } from './shared/auth/auth-service';
+import { RoleService } from './shared/services/role.service';
 import { MatToolbar, MatToolbarRow } from '@angular/material/toolbar';
 import { MatButton, MatButtonModule } from '@angular/material/button';
 
@@ -14,10 +15,13 @@ export class App {
   protected readonly title = signal('frontend');
 
   private authService = inject(AuthService);
+  private roleService = inject(RoleService);
   readonly router = inject(Router);
 
   readonly loggedIn = this.authService.isLoggedIn;
-  readonly isAdmin = this.authService.isAdmin;
+  readonly isAdmin = this.roleService.isAdmin;
+  readonly isSuperOrganisator = this.roleService.isSuperOrganisator;
+  readonly isOrganisator = this.roleService.isOrganisator;
   readonly currentUser = this.authService.currentUser;
   readonly isLoading = this.authService.isLoading;
   

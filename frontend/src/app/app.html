@@ -3,68 +3,75 @@
     <!-- Logo / Brand -->
     <span class="app-title">
       <a routerLink="/festival-list" class="brand-link">
-        🎮 Game Festival
+        Game Festival
       </a>
     </span>
     
     <span class="spacer"></span>
     
-    <!-- Navigation buttons -->
+    <!-- Navigation publique (tous) -->
     <button mat-raised-button color="accent" class="nav-button">
       <a routerLink="/festival-list" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
-        🎪 Festivals
+        Festivals
       </a>
     </button>
 
     <button mat-raised-button color="accent" class="nav-button">
       <a routerLink="/games" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
-        🎮 Games
+        Games
       </a>
     </button>
 
     <button mat-raised-button color="accent" class="nav-button">
       <a routerLink="/publishers" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
-         🏢 Games Publishers
+        Publishers
       </a>
     </button>
 
-    <button mat-raised-button color="accent" class="nav-button">
-      <a routerLink="/reservations" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
-         Reservations
-      </a>
-    </button>
-
-    <!-- Bouton Admin (si admin connecté) -->
-    @if (loggedIn() && isAdmin()) {
+    <!-- Navigation : Super-Organisateur (réservations + réservants) -->
+    @if (loggedIn() && isSuperOrganisator()) {
       <button mat-raised-button color="accent" class="nav-button">
-        <a routerLink="/admin/users" routerLinkActive="active">
-          ⚙️ Users
+        <a routerLink="/reservations" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
+          Reservations
         </a>
       </button>
       <button mat-raised-button color="accent" class="nav-button">
-        <a routerLink="/admin/reservants" routerLinkActive="active">
-          ⚙️ Reservants
+        <a routerLink="/reservants" routerLinkActive="active">
+          Reservants
+        </a>
+      </button>
+    }
+
+    <!-- Navigation : Admin uniquement (gestion utilisateurs) -->
+    @if (loggedIn() && isAdmin()) {
+      <button mat-raised-button color="accent" class="nav-button">
+        <a routerLink="/admin/users" routerLinkActive="active">
+          Users
         </a>
       </button>
     }
 
     <!-- Section authentification -->
     @if (loggedIn()) {
-      <button mat-raised-button color="warn"  (click)="LoggedOut()" class="nav-button">
-        🚪 Déconnexion
+      <span class="user-role">{{ currentUser()?.role }}</span>
+      <button mat-raised-button color="warn" (click)="LoggedOut()" class="nav-button">
+        Déconnexion
       </button>
     } @else {
-      <!-- Utilisateur non connecté -->
       <button mat-raised-button color="accent" class="nav-button">
         <a routerLink="/login" routerLinkActive="active">
-          🔑 Connexion
+          Connexion
+        </a>
+      </button>
+      <button mat-raised-button color="accent" class="nav-button">
+        <a routerLink="/register" routerLinkActive="active">
+          Register
         </a>
       </button>
     }
   </mat-toolbar-row>
 </mat-toolbar>
 
-<!-- Wrap router-outlet in main-content for better control -->
 <main class="main-content">
   <router-outlet />
 </main>

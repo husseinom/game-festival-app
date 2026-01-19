@@ -17,7 +17,6 @@ export class UserCard {
   deleteRequested = output<number>();
 
   readonly roles: { value: Role; label: string }[] = [
-    { value: 'VISITOR', label: 'Visitor' },
     { value: 'VOLUNTEER', label: 'Volunteer' },
     { value: 'ORGANISATOR', label: 'Organisator' },
     { value: 'SUPER_ORGANISATOR', label: 'Super Organisator' },

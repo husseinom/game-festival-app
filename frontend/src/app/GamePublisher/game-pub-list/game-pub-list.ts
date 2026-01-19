@@ -6,6 +6,7 @@ import { GamePublisherDto } from '../../types/game-publisher-dto';
 import { PublisherForm } from '../publisher-form/publisher-form';
 import { GamePubCard } from '../game-pub-card/game-pub-card';
 import { GameListService } from '../../Game/service/game-list-service';
+import { RoleService } from '../../shared/services/role.service';
 
 @Component({
   selector: 'app-game-pub-list',
@@ -18,9 +19,12 @@ export class GamePubList {
   readonly gls = inject(GamePubListService)
   readonly gamePubs = this.gls.gamePubs
   private readonly gm = inject(GameListService)
+  private readonly roleService = inject(RoleService)
   readonly games = this.gm.games
   router = inject(Router)
   showForm = signal(false)
+
+  readonly canEdit = this.roleService.canEditPublishers
 
   // Signaux pour la sélection/édition
   selectedId = signal<number | null>(null)

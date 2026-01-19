@@ -12,14 +12,16 @@
         <p style="color: red; text-align: center;">Erreur : {{ gls.error() }}</p>
     }
 
-    <div class="button-container">
-        <button (click)="toggleForm()" class="action-btn" [class.add-btn]="!showForm()" [class.cancel-btn]="showForm()">
-            @if (showForm()) { Cancel } @else { Add Game }
-        </button>
-    </div>
+    @if (canEdit()) {
+        <div class="button-container">
+            <button (click)="toggleForm()" class="action-btn" [class.add-btn]="!showForm()" [class.cancel-btn]="showForm()">
+                @if (showForm()) { Cancel } @else { Add Game }
+            </button>
+        </div>
+    }
 
     <!-- Form Section -->
-    @if (showForm()){
+    @if (showForm() && canEdit()){
         <div class="form-section">
             <app-game-form 
                 [editingGame]="selectedGame()"

@@ -1,8 +1,9 @@
-import { Component, input, output } from '@angular/core';
+import { Component, inject, input, output } from '@angular/core';
 import { GameDto } from '../../types/game-dto';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { RoleService } from '../../shared/services/role.service';
 
 @Component({
   selector: 'app-game-card',
@@ -12,7 +13,10 @@ import { MatIconModule } from '@angular/material/icon';
   styleUrl: './game-card.css'
 })
 export class GameCard {
+  private readonly roleService = inject(RoleService);
+  
   public game = input<GameDto | null>(null);
+  readonly canEdit = this.roleService.canEditGames;
 
   remove = output<number>();
 
