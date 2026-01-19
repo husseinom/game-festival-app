@@ -19,23 +19,19 @@ export class ReservationDetail {
   private readonly location = inject(Location);
   private readonly router = inject(Router);
 
-  // 1. On récupère l'ID de l'URL sous forme d'Observable
   private readonly id$ = this.route.paramMap.pipe(
     map(params => params.get('id')),
-    filter((id): id is string => id !== null), // On ne continue que si l'ID existe
+    filter((id): id is string => id !== null),
     map(id => Number(id))
   );
 
-  // 2. On transforme cet ID en Signal de Réservation
-  // switchMap va appeler le service à chaque changement d'ID
   readonly reservation = toSignal(
     this.id$.pipe(
       switchMap(id => this.reservationService.getById(id))
     ),
-    { initialValue: null } // Valeur par défaut en attendant la réponse de l'API
+    { initialValue: null }
   );
 
-  // 3. Les autres computed restent simples car ils dépendent du signal 'reservation'
   readonly publisher = computed(() => this.reservation()?.publisher ?? null);
 
   goBack(): void {

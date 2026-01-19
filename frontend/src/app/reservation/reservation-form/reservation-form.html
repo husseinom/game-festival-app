@@ -1,6 +1,6 @@
 <form [formGroup]="form" (ngSubmit)="onSubmit($event)" class="reservation-form">
   <div class="form-section">
-    <h2>{{ isEditing ? 'Modifier la réservation' : 'Nouvelle réservation' }}</h2>
+    <h2>{{ 'Nouvelle réservation' }}</h2>
 
     <div class="form-group">
       <label for="game_publisher_id">Éditeur de jeu</label>
@@ -208,7 +208,7 @@
 
   <div class="form-actions">
     <button type="submit" [disabled]="form.invalid" class="btn-submit">
-      {{ isEditing ? 'Modifier' : 'Créer' }}
+      {{ 'Créer' }}
     </button>
   </div>
 </form>
