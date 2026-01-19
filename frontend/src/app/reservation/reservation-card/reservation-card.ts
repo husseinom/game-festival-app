@@ -40,4 +40,9 @@ export class ReservationCard {
     event.stopPropagation();
     this.delete.emit(this.reservation.reservation_id);
   }
+
+  onEdit(event: Event): void {
+    event.stopPropagation();
+    this.router.navigate(['/reservation', this.reservation.reservation_id, 'edit']);
+  }
 }

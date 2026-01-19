@@ -165,6 +165,7 @@ async function main() {
         reservant_id: assoEchecs.reservant_id,
         status: 'En discussion',
         is_publisher_presenting: true,
+        nb_electrical_outlets: 2,
         comments: 'Intéressé par le carré VIP mais trouve ça cher.',
         contactLogs: {
           create: { notes: 'Appel téléphonique le 20/09 : hésite encore.' }
@@ -172,7 +173,7 @@ async function main() {
       }
     });
 
-// 8b. Éditeur 2 : Réservation confirmée avec tables + Ajout contact
+    // 8b. Éditeur 2 : Réservation confirmée avec tables + Ajout contact
     if (publishers.length > 1) {
       // 1. D'abord on ajoute le contact à l'éditeur (séparément)
       await prisma.contact.create({
@@ -192,6 +193,7 @@ async function main() {
           reservant_id: editeurAsmodee.reservant_id,
           status: 'Confirmé',
           is_publisher_presenting: false,
+          nb_electrical_outlets: 3,
           discount_amount: 50,
           final_invoice_amount: 450,
           zones: {
@@ -212,6 +214,7 @@ async function main() {
           reservant_id: boutiquePhilibert.reservant_id,
           status: 'Facturé',
           is_publisher_presenting: true,
+          nb_electrical_outlets: 5,
           zones: {
             create: [
               { price_zone_id: zoneStandard.id, table_count: 5 } // 5 tables standard

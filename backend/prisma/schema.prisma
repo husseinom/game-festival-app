@@ -140,7 +140,7 @@ model Reservant {
 model Reservation {
     reservation_id           Int     @id @default(autoincrement())
 
-    game_publisher_id        Int
+    game_publisher_id        Int?
     festival_id              Int
     reservant_id             Int
 
@@ -154,10 +154,11 @@ model Reservation {
 
     discount_amount          Float?
     discount_tables          Int?
+    nb_electrical_outlets    Int
     final_invoice_amount     Float?
 
     // Relations
-    publisher               GamePublisher @relation(fields: [game_publisher_id], references: [id])
+    publisher               GamePublisher? @relation(fields: [game_publisher_id], references: [id])
     festival                Festival       @relation(fields: [festival_id], references: [id], onDelete: Cascade)
     reservant               Reservant      @relation(fields: [reservant_id], references: [reservant_id])
     zones                   ZoneReservation[]

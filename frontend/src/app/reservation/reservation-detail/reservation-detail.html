@@ -25,6 +25,7 @@
       <h3>Détails financiers</h3>
       <p><strong>Remise ($):</strong> {{ r.discount_amount || 0 }}</p>
       <p><strong>Tables en remise:</strong> {{ r.discount_tables || 0 }}</p>
+      <p><strong>Prises électriques:</strong> {{ r.nb_electrical_outlets }} ({{ r.nb_electrical_outlets * 250 }}$)</p>
       <p><strong>Montant final de la facture:</strong> {{ r.final_invoice_amount || 'N/A' }}</p>
 
       @if (r.zones && r.zones.length > 0) {
@@ -75,7 +76,6 @@
       </div>
       <div class="divider"></div>
       <div class="description">
-        <!-- optional additional content here -->
       </div>
     </aside>
   </div>
