@@ -12,6 +12,10 @@ router.get('/zones', priceZoneControlleer.getAllZones)
 
 router.get('/festival/:festivalId', priceZoneControlleer.getZonesByFestival)
 
+router.get('/:priceZoneId/reservations', verifyToken, priceZoneControlleer.getReservationsByPriceZone)
+
+router.get('/:priceZoneId/games', verifyToken, priceZoneControlleer.getGamesByPriceZone)
+
 router.post(
     '/add',
     verifyToken,

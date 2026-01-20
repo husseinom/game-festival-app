@@ -28,7 +28,15 @@ export class FestivalForm {
       nonNullable: true, 
       validators: [Validators.required, Validators.minLength(2)]
     }),
-    total_tables: new FormControl<number>(1, {
+    small_tables: new FormControl<number>(1, {
+      nonNullable: true, 
+      validators: [Validators.min(1), Validators.max(1000)]
+    }),
+    large_tables: new FormControl<number>(1, {
+      nonNullable: true, 
+      validators: [Validators.min(1), Validators.max(1000)]
+    }),
+    city_tables: new FormControl<number>(1, {
       nonNullable: true, 
       validators: [Validators.min(1), Validators.max(1000)]
     }),
@@ -50,7 +58,9 @@ export class FestivalForm {
         this.form.patchValue({
           name: festival.name,
           location: festival.location,
-          total_tables: festival.total_tables || 1,
+          small_tables: festival.small_tables || 1,
+          large_tables: festival.large_tables || 1,
+          city_tables: festival.city_tables || 1,
           startDate: this.formatDateForInput(festival.startDate),
           endDate: this.formatDateForInput(festival.endDate),
           priceZoneTypeId: festival.priceZoneTypeId
@@ -102,7 +112,9 @@ export class FestivalForm {
     const festival: Omit<Festival, 'id'> = {
       name: this.form.value.name!,
       location: this.form.value.location!,
-      total_tables: this.form.value.total_tables!,
+      small_tables: this.form.value.small_tables!,
+      large_tables: this.form.value.large_tables!,
+      city_tables: this.form.value.city_tables!,
       startDate: new Date(this.form.value.startDate!),
       endDate: new Date(this.form.value.endDate!),
       priceZoneTypeId: Number(this.form.value.priceZoneTypeId!)
@@ -123,7 +135,9 @@ export class FestivalForm {
       ...this.editingFestival()!,
       name: this.form.value.name!,
       location: this.form.value.location!,
-      total_tables: this.form.value.total_tables!,
+      small_tables: this.form.value.small_tables!,
+      large_tables: this.form.value.large_tables!,
+      city_tables: this.form.value.city_tables!,
       startDate: new Date(this.form.value.startDate!),
       endDate: new Date(this.form.value.endDate!),
       priceZoneTypeId: Number(this.form.value.priceZoneTypeId!)

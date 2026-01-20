@@ -165,7 +165,7 @@ mat-card-subtitle.festival-location::before {
   font-size: 16px;
 }
 
-.table-info span {
+.table-info strong {
   color: white;
   font-weight: 500;
 }

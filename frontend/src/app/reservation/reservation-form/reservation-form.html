@@ -8,14 +8,14 @@
         id="festival_id"
         formControlName="festival_id"
       >
-        <option value="" disabled>Sélectionner un festival</option>
+        <option [value]="null" disabled>Sélectionner un festival</option>
         @for (festival of festivals(); track festival.id) {
           <option [value]="festival.id">
             {{ festival.name }} - {{ festival.location }}
           </option>
         }
       </select>
-      @if (form.get('festival_id')?.hasError('required')) {
+      @if (form.get('festival_id')?.hasError('required') && form.get('festival_id')?.touched) {
         <span class="error">
           Le festival est obligatoire
         </span>
@@ -23,19 +23,19 @@
     </div>
 
     <div class="form-group">
-      <label for="reservant_id">Réservant</label>
+      <label for="reservant_id">Réservant *</label>
       <select
         id="reservant_id"
         formControlName="reservant_id"
       >
-        <option value="" disabled>Sélectionner un réservant</option>
+        <option [value]="null" disabled>Sélectionner un réservant</option>
         @for (reservant of reservants(); track reservant.reservant_id) {
           <option [value]="reservant.reservant_id">
             {{ reservant.name }} - {{ reservant.type }}
           </option>
         }
       </select>
-      @if (form.get('reservant_id')?.hasError('required')) {
+      @if (form.get('reservant_id')?.hasError('required') && form.get('reservant_id')?.touched) {
         <span class="error">
           Le réservant est obligatoire
         </span>
@@ -43,33 +43,29 @@
     </div>
 
     <div class="form-group">
-      <label for="game_publisher_id">Éditeur de jeu</label>
+      <label for="game_publisher_id">Éditeur de jeu (optionnel)</label>
       <select
         id="game_publisher_id"
         formControlName="game_publisher_id"
       >
-        <option value="" disabled>Sélectionner un éditeur</option>
+        <option [value]="null">Aucun éditeur</option>
         @for (publisher of gamePublishers(); track publisher.id) {
           <option [value]="publisher.id">
             {{ publisher.name }}
           </option>
         }
       </select>
-      @if (form.get('game_publisher_id')?.hasError('required')) {
-        <span class="error">
-          L'éditeur de jeu est obligatoire
-        </span>
-      }
     </div>
 
     <div class="form-group">
       <label for="status">Statut</label>
-      <input
-        type="text"
-        id="status"
-        formControlName="status"
-        placeholder="Statut de la réservation"
-      />
+      <select id="status" formControlName="status">
+        <option value="Contact pris">Contact pris</option>
+        <option value="En discussion">En discussion</option>
+        <option value="Confirmé">Confirmé</option>
+        <option value="Facturé">Facturé</option>
+        <option value="Annulé">Annulé</option>
+      </select>
     </div>
 
     <div class="form-group">
@@ -101,38 +97,42 @@
       </label>
     </div>
 
-    <div class="form-group">
-      <label for="discount_amount">Montant de la réduction</label>
-      <input
-        type="number"
-        id="discount_amount"
-        formControlName="discount_amount"
-        placeholder="Montant de réduction"
-        step="0.01"
-      />
+    <div class="form-row">
+      <div class="form-group">
+        <label for="discount_amount">Montant de la réduction (€)</label>
+        <input
+          type="number"
+          id="discount_amount"
+          formControlName="discount_amount"
+          placeholder="0.00"
+          step="0.01"
+          min="0"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="discount_tables">Nombre de tables de réduction</label>
+        <input
+          type="number"
+          id="discount_tables"
+          formControlName="discount_tables"
+          placeholder="0"
+          min="0"
+        />
+      </div>
     </div>
 
     <div class="form-group">
-      <label for="discount_tables">Nombre de tables de réduction</label>
-      <input
-        type="number"
-        id="discount_tables"
-        formControlName="discount_tables"
-        placeholder="Nombre de tables"
-      />
-    </div>
-
-    <div class="form-group">
-      <label for="nb_electrical_outlets">Nombre de prises électriques</label>
+      <label for="nb_electrical_outlets">Nombre de prises électriques *</label>
       <input
         type="number"
         id="nb_electrical_outlets"
         formControlName="nb_electrical_outlets"
-        placeholder="Nombre de prises électriques"
+        placeholder="0"
         min="0"
       />
       <small class="form-text">250€ par prise électrique</small>
-      @if (form.get('nb_electrical_outlets')?.hasError('required')) {
+      @if (form.get('nb_electrical_outlets')?.hasError('required') && form.get('nb_electrical_outlets')?.touched) {
         <span class="error">
           Le nombre de prises est obligatoire
         </span>
@@ -146,7 +146,15 @@
   </div>
 
   <div class="form-section">
-    <h3>Zones de prix</h3>
+    <div class="section-header">
+      <h3>Zones de prix et tables</h3>
+      @if (!selectedFestivalId) {
+        <p class="warning-message">
+          ⚠️ Veuillez d'abord sélectionner un festival pour ajouter des zones
+        </p>
+      }
+    </div>
+
     <div formArrayName="tables">
       @for (table of tablesArray.controls; track i; let i = $index) {
         <div
@@ -154,61 +162,82 @@
           class="table-entry"
         >
           <div class="form-group">
-          <label [for]="'price_zone_' + i">Zone de prix</label>
-          <select
-            [id]="'price_zone_' + i"
-            formControlName="price_zone_id"
-          >
-            <option value="" disabled>Sélectionner une zone</option>
-            @for (zone of priceZones(); track zone.id) {
-              <option [value]="zone.id">
-                {{ zone.name }}
-              </option>
+            <label [for]="'price_zone_' + i">Zone de prix *</label>
+            <select
+              [id]="'price_zone_' + i"
+              formControlName="price_zone_id"
+            >
+              <option [value]="null" disabled>Sélectionner une zone</option>
+              @for (zone of filteredPriceZones(); track zone.id) {
+                <option [value]="zone.id">
+                  {{ zone.name }} - {{ zone.table_price }}€/table ({{ zone.total_tables }} tables disponibles)
+                </option>
+              }
+            </select>
+            @if (form.get('tables')?.get([i, 'price_zone_id'])?.hasError('required') && form.get('tables')?.get([i, 'price_zone_id'])?.touched) {
+              <span class="error">
+                La zone est obligatoire
+              </span>
             }
-          </select>
-          @if (form.get('tables')?.get([i, 'price_zone_id'])?.hasError('required')) {
-            <span class="error">
-              La zone est obligatoire
-            </span>
-          }
-        </div>
+          </div>
 
-        <div class="form-group">
-          <label [for]="'table_count_' + i">Nombre de tables</label>
-          <input
-            type="number"
-            [id]="'table_count_' + i"
-            formControlName="table_count"
-            placeholder="Nombre de tables"
-            min="1"
-          />
-          @if (form.get('tables')?.get([i, 'table_count'])?.hasError('required')) {
-            <span class="error">
-              Le nombre de tables est obligatoire
-            </span>
-          }
-          @if (form.get('tables')?.get([i, 'table_count'])?.hasError('min')) {
-            <span class="error">
-              Le nombre doit être au moins 1
-            </span>
-          }
-        </div>
+          <div class="form-group">
+            <label [for]="'table_count_' + i">
+              Nombre de tables * 
+              @if (tablesArray.at(i).get('price_zone_id')?.value) {
+                <span class="max-info">(Max: {{ getMaxTablesForZone(tablesArray.at(i).get('price_zone_id')?.value) }})</span>
+              }
+            </label>
+            <input
+              type="number"
+              [id]="'table_count_' + i"
+              formControlName="table_count"
+              placeholder="1"
+              min="1"
+              [max]="getMaxTablesForZone(tablesArray.at(i).get('price_zone_id')?.value)"
+            />
+            @if (form.get('tables')?.get([i, 'table_count'])?.hasError('required') && form.get('tables')?.get([i, 'table_count'])?.touched) {
+              <span class="error">
+                Le nombre de tables est obligatoire
+              </span>
+            }
+            @if (form.get('tables')?.get([i, 'table_count'])?.hasError('min')) {
+              <span class="error">
+                Le nombre doit être au moins 1
+              </span>
+            }
+            @if (tablesArray.at(i).get('table_count')?.value > getMaxTablesForZone(tablesArray.at(i).get('price_zone_id')?.value)) {
+              <span class="error">
+                Maximum {{ getMaxTablesForZone(tablesArray.at(i).get('price_zone_id')?.value) }} tables disponibles dans {{ getPriceZoneName(tablesArray.at(i).get('price_zone_id')?.value) }}
+              </span>
+            }
+          </div>
 
-        <button type="button" (click)="removeTable(i)" class="btn-remove">
-          Supprimer
-        </button>
-      </div>
+          <button type="button" (click)="removeTable(i)" class="btn-remove" title="Supprimer cette zone">
+            🗑️ Supprimer
+          </button>
+        </div>
+      }
+
+      @if (tablesArray.length === 0) {
+        <p class="empty-message">Aucune zone ajoutée. Cliquez sur "Ajouter une zone" pour commencer.</p>
       }
     </div>
 
-    <button type="button" (click)="addTable()" class="btn-add">
+    <button 
+      type="button" 
+      (click)="addTable()" 
+      class="btn-add"
+      [disabled]="!selectedFestivalId"
+      [title]="!selectedFestivalId ? 'Sélectionnez d\'abord un festival' : 'Ajouter une zone de prix'"
+    >
       + Ajouter une zone
     </button>
   </div>
 
   <div class="form-actions">
     <button type="submit" [disabled]="form.invalid" class="btn-submit">
-      {{ 'Créer' }}
+      Créer la réservation
     </button>
   </div>
 </form>

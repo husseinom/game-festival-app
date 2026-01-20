@@ -40,6 +40,14 @@
   position: relative;
 }
 
+.form-group label {
+  display: block;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 8px;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
 /* Inputs */
 .festival-form input {
   width: 100%;

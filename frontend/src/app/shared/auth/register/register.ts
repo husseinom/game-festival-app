@@ -1,11 +1,15 @@
-import { Component, effect, inject } from '@angular/core';
+import { Component, effect, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../auth-service';
 import { Router, RouterModule } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
 
 @Component({
   selector: 'app-register',
-  imports: [RouterModule, ReactiveFormsModule],
+  imports: [RouterModule, ReactiveFormsModule, MatButtonModule, MatFormFieldModule, MatIconModule, MatInputModule],
   templateUrl: './register.html',
   styleUrl: './register.css',
 })
@@ -47,6 +51,14 @@ export class Register {
 
     this.loggingService.register(name, email, password);
   }
+
+  hide = signal(true);
+
+  clickEvent(event: Event) {
+    event.preventDefault();
+    this.hide.update(value => !value);
+  }
+
   get NameControl(){return this.form.controls.name;}
   get EmailControl(){ return this.form.controls.email;}
   get passwordControl() {return this.form.controls.password;}    
