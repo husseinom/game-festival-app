@@ -4,7 +4,9 @@ export interface Festival {
     id: number,
     name: string,
     location: string,
-    total_tables: number | undefined,
+    small_tables: number;
+    large_tables: number;
+    city_tables: number;    
     startDate: Date,
     endDate: Date,
     priceZoneTypeId?: number;

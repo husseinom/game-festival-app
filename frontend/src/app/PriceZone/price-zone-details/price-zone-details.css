@@ -1,0 +1,447 @@
+.price-zone-details-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.back-btn {
+  color: white !important;
+}
+
+.back-btn .mat-icon {
+  color: white !important;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 28px;
+  color: #faf8f8;
+}
+
+/* Zone Info Card */
+.zone-info-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  margin-bottom: 24px;
+}
+
+.zone-info-card ::ng-deep .mat-mdc-card-content {
+  padding: 24px;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.info-item .label {
+  font-size: 14px;
+  opacity: 0.9;
+  font-weight: 500;
+}
+
+.info-item .value {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.info-item.total {
+  grid-column: 1 / -1;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.info-item.total .value {
+  font-size: 32px;
+}
+
+/* Tabs */
+.tabs-container {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.tab-content {
+  padding: 24px;
+  min-height: 400px;
+}
+
+.tab-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+
+/* Reservations Grid */
+.reservations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.reservation-card {
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  border-left: 4px solid #007bff;
+}
+
+.reservation-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.reservation-card ::ng-deep .mat-mdc-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.status {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-confirmé,
+.status-confirmed { background: #d4edda; color: #155724; }
+.status-en-discussion { background: #fff3cd; color: #856404; }
+.status-facturé { background: #d1ecf1; color: #0c5460; }
+.status-annulé { background: #f8d7da; color: #721c24; }
+
+.comments {
+  font-style: italic;
+  color: #666;
+  margin-top: 8px;
+}
+
+/* Games Grid */
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.game-card {
+  border-left: 4px solid #28a745;
+}
+
+.game-card.unassigned {
+  border-left-color: #ffc107;
+  background: #fff9e6;
+}
+
+.game-card ::ng-deep .mat-mdc-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.warning-icon {
+  color: #ffc107;
+}
+
+.map-zone {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #28a745;
+  font-weight: 500;
+}
+
+.map-zone mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+.unassigned-label {
+  color: #856404;
+  font-weight: 500;
+}
+
+/* Map Zone Form */
+.map-zone-form {
+  margin-bottom: 24px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: #333;
+  font-size: 14px;
+}
+
+.form-control {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.total-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #e9ecef;
+  padding: 12px;
+  border-radius: 4px;
+  font-weight: 600;
+  color: #333;
+  margin: 16px 0;
+}
+
+.games-selection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 12px;
+  background: #f8f9fa;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.game-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.game-checkbox:hover {
+  background: white;
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+/* Map Zones Grid */
+.map-zones-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.map-zone-card {
+  border-left: 4px solid #17a2b8;
+}
+
+.map-zone-card ::ng-deep .mat-mdc-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.map-zone-tables {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  margin-bottom: 12px;
+}
+
+.map-zone-tables span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #555;
+}
+
+.map-zone-tables mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.map-zone-games {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #dee2e6;
+}
+
+.map-zone-games p {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px 0;
+  color: #333;
+  font-size: 14px;
+}
+
+.map-zone-games ul {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 14px;
+  color: #555;
+}
+
+.map-zone-games li {
+  margin: 4px 0;
+}
+
+/* Empty State */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  color: #6c757d;
+}
+
+.empty-state mat-icon {
+  font-size: 64px;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.empty-state p {
+  font-style: italic;
+  font-size: 16px;
+}
+
+/* Loading */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  color: #6c757d;
+}
+
+.loading mat-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 16px;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* No Games */
+.no-games {
+  color: #6c757d;
+  font-style: italic;
+  margin: 12px 0 0 0;
+}
+
+/* Available Tables Info */
+.available-tables-info {
+  background: #e7f3ff;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  border-left: 4px solid #2196f3;
+}
+
+.available-tables-info h4 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px 0;
+  color: #1976d2;
+  font-size: 16px;
+}
+
+.tables-availability {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.table-type {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+  color: #333;
+}
+
+.table-type mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  color: #2196f3;
+}
+
+.validation-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffebee;
+  color: #c62828;
+  padding: 12px;
+  border-radius: 4px;
+  border-left: 4px solid #f44336;
+  margin-bottom: 16px;
+  font-weight: 500;
+}
+
+.validation-error mat-icon {
+  color: #f44336;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .reservations-grid,
+  .games-grid,
+  .map-zones-grid {
+    grid-template-columns: 1fr;
+  }
+}

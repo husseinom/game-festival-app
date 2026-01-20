@@ -56,7 +56,9 @@ model Festival {
     
     name            String
     location        String
-    total_tables    Int
+    small_tables    Int         @default(0)
+    large_tables    Int         @default(0)
+    city_tables     Int         @default(0)
     startDate       DateTime
     endDate         DateTime
     priceZoneTypeId  Int?
@@ -91,35 +93,39 @@ model GameType {
 }
 
 model MapZone{
-    id     Int  @id @default(autoincrement())
-    festival_id Int
-    festival Festival  @relation(fields: [festival_id], references: [id], onDelete: Cascade)
+    id            Int  @id @default(autoincrement())
+    festival_id   Int
+    festival      Festival  @relation(fields: [festival_id], references: [id], onDelete: Cascade)
     price_zone_id Int
-    price_zone PriceZone @relation(fields: [price_zone_id], references: [id])
-    name String
+    price_zone    PriceZone @relation(fields: [price_zone_id], references: [id])
+    name          String
+    small_tables  Int       @default(0)
+    large_tables  Int       @default(0)
+    city_tables   Int       @default(0)
 
-    festivalGames  FestivalGame[]
-    tableTypes     TableType[]
+    festivalGames FestivalGame[]
 }
 
 model PriceZoneType{
-    id     Int     @id @default(autoincrement())
-    key    String  @unique
-    name   String
+    id        Int     @id @default(autoincrement())
+    key       String  @unique
+    name      String
     festivals Festival[]
 }
 
 model PriceZone{
-    id  Int   @id @default(autoincrement())
-    festival_id Int
-    festival Festival @relation(fields: [festival_id], references: [id], onDelete: Cascade)
-    name  String
-    table_price Float
+    id            Int   @id @default(autoincrement())
+    festival_id   Int
+    festival      Festival @relation(fields: [festival_id], references: [id], onDelete: Cascade)
+    name          String
+    table_price   Float
+    small_tables  Int   @default(0)
+    large_tables  Int   @default(0)
+    city_tables   Int   @default(0)
     total_tables  Int?
 
-    mapZones MapZone[]
+    mapZones         MapZone[]
     zoneReservations ZoneReservation[]
-
 }
 
 model GameMechanism {
@@ -148,10 +154,10 @@ model Game {
     publisherId Int?
     publisher   GamePublisher? @relation(fields: [publisherId], references: [id])
 
-    typeId      Int?
-    type        GameType?      @relation(fields: [typeId], references: [id])
+    typeId        Int?
+    type          GameType?      @relation(fields: [typeId], references: [id])
 
-    mechanisms  GameMechanism[]
+    mechanisms    GameMechanism[]
     festivalGames FestivalGame[]
 }
 
@@ -218,7 +224,7 @@ model ZoneReservation {
   id             Int         @id @default(autoincrement())
   reservation_id Int
   price_zone_id  Int
-  table_count    Int         @default(0) // "table_nb"
+  table_count    Int         @default(0)
 
   reservation    Reservation @relation(fields: [reservation_id], references: [reservation_id])
   priceZone      PriceZone   @relation(fields: [price_zone_id], references: [id])

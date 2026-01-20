@@ -22,6 +22,13 @@ export class FestivalCard {
   readonly canManageFestivals = this.authService.canManageFestivals;
   isSelected = signal(false);
 
+  // Computed total tables from all table types
+  totalTables = computed(() => {
+    const fest = this.festivals();
+    if (!fest) return 0;
+    return (fest.small_tables || 0) + (fest.large_tables || 0) + (fest.city_tables || 0);
+  });
+
   get isGoingOn(): boolean {
     const now = new Date();
     const fest = this.festivals();

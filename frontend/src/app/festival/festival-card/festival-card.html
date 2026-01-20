@@ -27,12 +27,17 @@
         </div>
       </div>
 
-      <!-- Table Info -->
-      @if (ft.total_tables) {
-        <div class="table-info">
-          <span>{{ ft.total_tables }} Tables Available</span>
+      <!-- Table Info with breakdown -->
+      <div class="table-info">
+        <div class="table-summary">
+          <strong>Total Tables: {{ totalTables() }}</strong>
         </div>
-      }
+        <!-- <div class="table-breakdown">
+          <span class="table-type">Small: {{ ft.small_tables }}</span>
+          <span class="table-type">Large: {{ ft.large_tables }}</span>
+          <span class="table-type">City: {{ ft.city_tables }}</span>
+        </div> -->
+      </div>
     </mat-card-content>
 
     <!-- Action Buttons -->

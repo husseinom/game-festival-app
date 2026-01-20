@@ -23,10 +23,20 @@ export class ReservationForm {
   private readonly reservantService = inject(ReservantService);
   private readonly festivalService = inject(FestivalServices);
 
-  priceZones = this.priceZoneService.priceZones;
+  allPriceZones = this.priceZoneService.priceZones;
   gamePublishers = this.gamePubService.gamePubs;
   festivals = this.festivalService.festivals;
   reservants = this.reservantService.reservants;
+
+  // Computed signal to filter price zones by selected festival
+  filteredPriceZones = computed(() => {
+    const festivalId = this.form.get('festival_id')?.value;
+    if (!festivalId) {
+      return [];
+    }
+    // Price zones are already filtered by festival from the service
+    return this.allPriceZones();
+  });
 
   // Option "l'éditeur réserve pour lui-même"
   publisherIsReservant = signal(false);
@@ -70,9 +80,26 @@ export class ReservationForm {
   constructor() {
     this.gamePubService.getGamePubs();
     this.festivalService.getFestivals();
-    this.priceZoneService.getPriceZones();
     this.reservantService.getReservants();
+
+    // Watch for festival changes and load corresponding price zones
+    this.form.get('festival_id')?.valueChanges.subscribe((festivalId) => {
+      const tablesArray = this.tablesArray;
+      // Clear all existing table entries when festival changes
+      while (tablesArray.length > 0) {
+        tablesArray.removeAt(0);
+      }
+
+      // Load price zones for the selected festival
+      if (festivalId) {
+        this.priceZoneService.getPriceZoneByFestivalId(festivalId);
+      } else {
+        this.priceZoneService.clearPriceZones();
+      }
+    });
   }
+
+
 
   togglePublisherIsReservant(): void {
     this.publisherIsReservant.update(v => !v);
@@ -96,7 +123,33 @@ export class ReservationForm {
     return this.form.get('tables') as FormArray;
   }
 
+  get selectedFestivalId(): number | null {
+    return this.form.get('festival_id')?.value!;
+  }
+
+  getMaxTablesForZone(priceZoneId: number | null): number {
+    if (!priceZoneId) return 0;
+    const zone = this.allPriceZones().find(z => z.id === priceZoneId);
+    return zone?.total_tables!;
+  }
+
+  getPriceZoneName(priceZoneId: number | null): string {
+    if (!priceZoneId) return '';
+    const zone = this.allPriceZones().find(z => z.id === priceZoneId);
+    return zone?.name ? String(zone.name) : '';
+  }
+
   addTable(): void {
+    if (!this.selectedFestivalId) {
+      alert('Veuillez d\'abord sélectionner un festival');
+      return;
+    }
+
+    if (this.filteredPriceZones().length === 0) {
+      alert('Aucune zone de prix disponible pour ce festival');
+      return;
+    }
+
     const tablesArray = this.form.get('tables') as FormArray;
     tablesArray.push(
       new FormGroup({
@@ -122,6 +175,12 @@ export class ReservationForm {
 
     if (this.form.invalid) {
       console.warn('Formulaire invalide', this.form.errors);
+      Object.keys(this.form.controls).forEach(key => {
+        const control = this.form.get(key);
+        if (control?.invalid) {
+          console.warn(`${key} is invalid:`, control.errors);
+        }
+      });
       return;
     }
 
@@ -130,7 +189,7 @@ export class ReservationForm {
     // Si l'éditeur réserve pour lui-même, on passe publisher_is_reservant=true
     // Le backend créera automatiquement le réservant
     const reservation: CreateReservationDTO = {
-      game_publisher_id: formValue.game_publisher_id!,
+      game_publisher_id: formValue.game_publisher_id || undefined,
       festival_id: formValue.festival_id!,
       reservant_id: this.publisherIsReservant() ? undefined : formValue.reservant_id!,
       publisher_is_reservant: this.publisherIsReservant(),
@@ -159,6 +218,7 @@ export class ReservationForm {
     this.publisherIsReservant.set(false);
     const tablesArray = this.form.get('tables') as FormArray;
     tablesArray.clear();
+    this.priceZoneService.clearPriceZones();
   }
 
   onSubmit(event: Event): void {
