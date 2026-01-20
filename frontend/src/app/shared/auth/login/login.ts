@@ -1,12 +1,16 @@
-import { Component, effect, inject, output } from '@angular/core';
+import { Component, effect, inject, output, signal } from '@angular/core';
 import { AuthService } from '../auth-service';
 import { Router } from '@angular/router';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { UserDto } from '../../../types/user-dto';
+import {MatButtonModule} from '@angular/material/button';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatIconModule} from '@angular/material/icon';
+import {MatInputModule} from '@angular/material/input';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, MatButtonModule, MatFormFieldModule, MatIconModule, MatInputModule],
   templateUrl: './login.html',
   styleUrl: './login.css'
 })
@@ -47,6 +51,12 @@ export class Login {
     this.loggingService.login(email, password);
   }
   get EmailControl(){ return this.form.controls.email;}
-  get passwordControl() {return this.form.controls.password;}    
+  get passwordControl() {return this.form.controls.password;}
+  
+  hide = signal(true);
+  clickEvent(event: MouseEvent) {
+    this.hide.set(!this.hide());
+    event.stopPropagation();
+  }
 
 }
