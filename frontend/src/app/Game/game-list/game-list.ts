@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { inject, signal, computed, effect } from '@angular/core';
 import { Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { GameListService } from '../service/game-list-service';
 import { GameDto } from '../../types/game-dto';
 import { GameForm } from '../game-form/game-form';
@@ -11,13 +12,13 @@ import { RoleService } from '../../shared/services/role.service';
 @Component({
   selector: 'app-game-list',
   standalone: true,
-  imports: [GameForm, GameCard],
+  imports: [GameForm, GameCard, FormsModule],
   templateUrl: './game-list.html',
   styleUrl: './game-list.css'
 })
 export class GameList {
   readonly gls = inject(GameListService)
-  readonly games = this.gls.games
+  readonly allGames = this.gls.games
   private readonly pubService = inject(GamePubListService)
   private readonly roleService = inject(RoleService)
   publishers = this.pubService.gamePubs
@@ -26,14 +27,45 @@ export class GameList {
 
   readonly canEdit = this.roleService.canEditGames
 
+  // Filtres
+  searchQuery = signal('')
+  selectedCategory = signal<string>('')
+
+  // Types de jeux (catégories)
+  gameTypes = this.gls.gameTypes
+
+  // Jeux filtrés
+  games = computed(() => {
+    let filtered = this.allGames();
+    const query = this.searchQuery().toLowerCase().trim();
+    const category = this.selectedCategory();
+
+    // Filtre par nom
+    if (query) {
+      filtered = filtered.filter((game: GameDto) => 
+        game.name.toLowerCase().includes(query) ||
+        game.publisher?.name?.toLowerCase().includes(query)
+      );
+    }
+
+    // Filtre par catégorie
+    if (category) {
+      filtered = filtered.filter((game: GameDto) => game.type === category);
+    }
+
+    return filtered;
+  })
+
   // Signaux pour la sélection/édition
   selectedId = signal<number | null>(null)
   selectedGame = signal<GameDto | null>(null)
 
   gameCount = computed(() => this.games().length)
+  totalCount = computed(() => this.allGames().length)
 
   constructor(){
     this.gls.getGames();
+    this.gls.getGameTypes();
     this.pubService.getGamePubs(); // Afin d'avoir les éditeurs disponibles
     // Effect pour mettre à jour selectedGame quand selectedId change
     effect(() => {
@@ -47,8 +79,23 @@ export class GameList {
     })
   }
 
+  onSearchChange(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.searchQuery.set(value);
+  }
+
+  onCategoryChange(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value;
+    this.selectedCategory.set(value);
+  }
+
+  clearFilters(): void {
+    this.searchQuery.set('');
+    this.selectedCategory.set('');
+  }
+
   toggleForm(){
-    this.showForm.update(s => !s)
+    this.showForm.update((s: boolean) => !s)
     // Réinitialiser la sélection quand on ferme le formulaire
     if (!this.showForm()) {
       this.selectedId.set(null);

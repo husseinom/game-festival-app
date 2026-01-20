@@ -36,6 +36,7 @@ export const createReservation = async (data: any) => {
     game_publisher_id,
     festival_id,
     reservant_id,
+    publisher_is_reservant,
     status,
     comments,
     large_table_request,
@@ -50,6 +51,46 @@ export const createReservation = async (data: any) => {
   const parsedGamePublisherId = game_publisher_id ? Number(game_publisher_id) : null;
 
   return prisma.$transaction(async (tx) => {
+    // Si publisher_is_reservant est true, créer ou récupérer un réservant basé sur l'éditeur
+    let finalReservantId = reservant_id ? Number(reservant_id) : null;
+    
+    if (publisher_is_reservant && parsedGamePublisherId) {
+      // Récupérer l'éditeur
+      const publisher = await tx.gamePublisher.findUnique({
+        where: { id: parsedGamePublisherId }
+      });
+      
+      if (!publisher) {
+        throw new Error(`L'éditeur avec l'ID ${parsedGamePublisherId} n'existe pas.`);
+      }
+      
+      // Chercher un réservant existant avec le même nom et type PUBLISHER
+      let existingReservant = await tx.reservant.findFirst({
+        where: {
+          name: publisher.name,
+          type: 'PUBLISHER'
+        }
+      });
+      
+      if (existingReservant) {
+        finalReservantId = existingReservant.reservant_id;
+      } else {
+        // Créer un nouveau réservant basé sur l'éditeur
+        const newReservant = await tx.reservant.create({
+          data: {
+            name: publisher.name,
+            type: 'PUBLISHER',
+            is_partner: false
+          }
+        });
+        finalReservantId = newReservant.reservant_id;
+      }
+    }
+    
+    if (!finalReservantId) {
+      throw new Error('Un réservant est requis pour créer une réservation.');
+    }
+
     // Vérifier la disponibilité des tables dans chaque zone
     if (tables && Array.isArray(tables)) {
       for (const t of tables) {
@@ -88,7 +129,7 @@ export const createReservation = async (data: any) => {
       data: {
         game_publisher_id: parsedGamePublisherId,
         festival_id: Number(festival_id),
-        reservant_id: Number(reservant_id),
+        reservant_id: finalReservantId,
         status: status || 'NOT_CONTACTED',
         comments,
         large_table_request,
@@ -172,9 +213,9 @@ export const deleteReservation = async (id: number) => {
   });
 };
 
-// ============================================
+
 // Workflow de suivi (statuts)
-// ============================================
+
 
 export const updateStatus = async (id: number, status: ReservationStatus) => {
   return prisma.reservation.update({
@@ -195,9 +236,9 @@ export const updateStatusBatch = async (ids: number[], status: ReservationStatus
   });
 };
 
-// ============================================
+
 // Facturation
-// ============================================
+
 
 export const markAsInvoiced = async (id: number) => {
   return prisma.reservation.update({
@@ -264,9 +305,8 @@ export const applyPartnerDiscount = async (id: number) => {
   });
 };
 
-// ============================================
 // Phase logistique - Liste des jeux
-// ============================================
+
 
 export const requestGameList = async (id: number) => {
   return prisma.reservation.update({
@@ -331,9 +371,9 @@ export const markGameAsReceived = async (festivalGameId: number) => {
   });
 };
 
-// ============================================
+
 // Phase technique - Placement
-// ============================================
+
 
 export const placeGame = async (
   festivalGameId: number,
@@ -423,9 +463,8 @@ export const unplaceGame = async (festivalGameId: number) => {
   });
 };
 
-// ============================================
+
 // Historique des contacts
-// ============================================
 
 export const addContactLog = async (reservationId: number, notes: string) => {
   await prisma.contactLog.create({
@@ -445,9 +484,8 @@ export const getContactLogs = async (reservationId: number) => {
   });
 };
 
-// ============================================
+
 // Calcul du prix
-// ============================================
 
 const calculatePrice = async (reservation: any, applyDiscount = true): Promise<number> => {
   let total = 0;
@@ -511,10 +549,8 @@ export const recalculatePrice = async (id: number) => {
   });
 };
 
-// ============================================
-// Statistiques par festival
-// ============================================
 
+// Statistiques par festival
 export const getReservationStats = async (festivalId: number) => {
   const reservations = await prisma.reservation.findMany({
     where: { festival_id: festivalId },

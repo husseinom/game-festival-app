@@ -129,6 +129,45 @@
   accent-color: #4facfe;
 }
 
+/* Publisher is Reservant Option */
+.publisher-reservant-option {
+  background: rgba(79, 172, 254, 0.15);
+  border: 2px solid rgba(79, 172, 254, 0.4);
+  border-radius: 12px;
+  padding: 15px 20px;
+  margin-bottom: 20px;
+}
+
+.publisher-reservant-option .toggle-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: white;
+  font-weight: 500;
+}
+
+.publisher-reservant-option input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  margin-right: 12px;
+  cursor: pointer;
+  accent-color: #4facfe;
+}
+
+.publisher-reservant-option .toggle-text {
+  font-size: 1.05rem;
+}
+
+.publisher-reservant-option .option-hint {
+  margin: 10px 0 0 32px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
 /* Table Entry */
 .table-entry {
   background: rgba(255, 255, 255, 0.05);

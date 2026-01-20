@@ -6,6 +6,7 @@ import { GamePublisherDto } from '../../types/game-publisher-dto';
 import { GameDto } from '../../types/game-dto';
 import { GameForm } from '../../Game/game-form/game-form';
 import { GameCard } from '../../Game/game-card/game-card';
+import { RoleService } from '../../shared/services/role.service';
 
 @Component({
   selector: 'app-publisher-details',
@@ -19,6 +20,9 @@ export class PublisherDetails {
   private readonly router = inject(Router)
   private readonly pubService = inject(GamePubListService)
   private readonly gameService = inject(GameListService)
+  private readonly roleService = inject(RoleService)
+
+  readonly canEdit = this.roleService.canEditGames
 
   publisherId = signal<number | null>(null)
   showForm = signal(false)

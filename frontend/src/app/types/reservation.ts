@@ -56,7 +56,8 @@ export const TABLE_SIZE_LABELS: Record<TableSize, string> = {
 export interface CreateReservationDTO {
   game_publisher_id?: number;
   festival_id: number;
-  reservant_id: number;
+  reservant_id?: number;
+  publisher_is_reservant?: boolean;
   status?: ReservationStatus;
   comments?: string;
   large_table_request?: string;

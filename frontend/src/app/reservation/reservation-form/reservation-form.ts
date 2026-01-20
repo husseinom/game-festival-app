@@ -1,4 +1,4 @@
-import { Component, output, inject } from '@angular/core';
+import { Component, output, inject, signal, computed, effect } from '@angular/core';
 import { CreateReservationDTO, Reservation, ReservationStatus } from '../../types/reservation';
 import { FormGroup, FormControl, ReactiveFormsModule, Validators, FormArray } from '@angular/forms';
 import { PriceZoneServices } from '../../PriceZone/services/price-zone-services';
@@ -7,6 +7,7 @@ import { ReservantService } from '../../reservant/services/reservant-service';
 import { FestivalServices } from '../../festival/services/festival-services';
 import { CommonModule } from '@angular/common';
 import { ReservantTypeLabelPipe } from '../../shared/pipes/reservant-type-label.pipe';
+import { ReservantType } from '../../types/reservant';
 
 @Component({
   selector: 'app-reservation-form',
@@ -26,6 +27,9 @@ export class ReservationForm {
   gamePublishers = this.gamePubService.gamePubs;
   festivals = this.festivalService.festivals;
   reservants = this.reservantService.reservants;
+
+  // Option "l'éditeur réserve pour lui-même"
+  publisherIsReservant = signal(false);
 
   readonly form = new FormGroup({
     festival_id: new FormControl<number | null>(null, {
@@ -70,6 +74,24 @@ export class ReservationForm {
     this.reservantService.getReservants();
   }
 
+  togglePublisherIsReservant(): void {
+    this.publisherIsReservant.update(v => !v);
+    
+    if (this.publisherIsReservant()) {
+      // Désactiver la validation du reservant_id
+      this.form.get('reservant_id')?.clearValidators();
+      this.form.get('reservant_id')?.setValue(null);
+      // Rendre l'éditeur obligatoire
+      this.form.get('game_publisher_id')?.setValidators([Validators.required]);
+    } else {
+      // Réactiver la validation du reservant_id
+      this.form.get('reservant_id')?.setValidators([Validators.required]);
+      this.form.get('game_publisher_id')?.clearValidators();
+    }
+    this.form.get('reservant_id')?.updateValueAndValidity();
+    this.form.get('game_publisher_id')?.updateValueAndValidity();
+  }
+
   get tablesArray(): FormArray {
     return this.form.get('tables') as FormArray;
   }
@@ -105,10 +127,13 @@ export class ReservationForm {
 
     const formValue = this.form.value;
 
+    // Si l'éditeur réserve pour lui-même, on passe publisher_is_reservant=true
+    // Le backend créera automatiquement le réservant
     const reservation: CreateReservationDTO = {
       game_publisher_id: formValue.game_publisher_id!,
       festival_id: formValue.festival_id!,
-      reservant_id: formValue.reservant_id!,
+      reservant_id: this.publisherIsReservant() ? undefined : formValue.reservant_id!,
+      publisher_is_reservant: this.publisherIsReservant(),
       status: formValue.status || ReservationStatus.NOT_CONTACTED,
       comments: formValue.comments || '',
       is_publisher_presenting: formValue.is_publisher_presenting || false,
@@ -131,6 +156,7 @@ export class ReservationForm {
       large_table_request: '',
       nb_electrical_outlets: 0
     });
+    this.publisherIsReservant.set(false);
     const tablesArray = this.form.get('tables') as FormArray;
     tablesArray.clear();
   }

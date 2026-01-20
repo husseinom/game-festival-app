@@ -4,6 +4,38 @@
         <!-- Title is handled by CSS ::before -->
     </div>
 
+    <!-- Filtres et recherche -->
+    <div class="filters-section">
+        <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input 
+                type="text" 
+                placeholder="Rechercher par nom ou éditeur..."
+                [value]="searchQuery()"
+                (input)="onSearchChange($event)"
+                class="search-input"
+            />
+        </div>
+        <div class="filter-box">
+            <select 
+                [value]="selectedCategory()"
+                (change)="onCategoryChange($event)"
+                class="filter-select"
+            >
+                <option value="">Toutes les catégories</option>
+                @for (type of gameTypes(); track type.id) {
+                    <option [value]="type.label">{{ type.label }}</option>
+                }
+            </select>
+        </div>
+        @if (searchQuery() || selectedCategory()) {
+            <button class="clear-btn" (click)="clearFilters()">✕ Effacer</button>
+        }
+        <div class="results-count">
+            {{ gameCount() }} @if (gameCount() !== totalCount()) { / {{ totalCount() }} } jeu(x)
+        </div>
+    </div>
+
     @if (gls.isLoading()) {
         <p style="color: white; text-align: center;">Chargement des jeux...</p>
     }
@@ -42,6 +74,13 @@
                 [game] = "game"
                 (remove)="onDelete($event)">
             </app-game-card>
+        } @empty {
+            <div class="no-results">
+                <p>🎮 Aucun jeu trouvé</p>
+                @if (searchQuery() || selectedCategory()) {
+                    <p class="hint">Essayez de modifier vos filtres</p>
+                }
+            </div>
         }
     </div>
 </div>

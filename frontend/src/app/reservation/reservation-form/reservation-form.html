@@ -23,26 +23,6 @@
     </div>
 
     <div class="form-group">
-      <label for="reservant_id">Réservant</label>
-      <select
-        id="reservant_id"
-        formControlName="reservant_id"
-      >
-        <option value="" disabled>Sélectionner un réservant</option>
-        @for (reservant of reservants(); track reservant.reservant_id) {
-          <option [value]="reservant.reservant_id">
-            {{ reservant.name }} ({{ reservant.type | reservantTypeLabel }})
-          </option>
-        }
-      </select>
-      @if (form.get('reservant_id')?.hasError('required')) {
-        <span class="error">
-          Le réservant est obligatoire
-        </span>
-      }
-    </div>
-
-    <div class="form-group">
       <label for="game_publisher_id">Éditeur de jeu (provenance des jeux)</label>
       <select
         id="game_publisher_id"
@@ -55,12 +35,51 @@
           </option>
         }
       </select>
-      @if (form.get('game_publisher_id')?.hasError('required')) {
+      @if (form.get('game_publisher_id')?.hasError('required') && publisherIsReservant()) {
         <span class="error">
-          L'éditeur de jeu est obligatoire
+          L'éditeur est obligatoire quand il réserve pour lui-même
         </span>
       }
     </div>
+
+    <!-- Option: L'éditeur réserve pour lui-même -->
+    <div class="publisher-reservant-option">
+      <label class="toggle-label">
+        <input 
+          type="checkbox" 
+          [checked]="publisherIsReservant()"
+          (change)="togglePublisherIsReservant()"
+        />
+        <span class="toggle-text">🏢 L'éditeur réserve pour lui-même</span>
+      </label>
+      @if (publisherIsReservant()) {
+        <p class="option-hint">
+          Un réservant sera automatiquement créé avec le nom et le type "Éditeur" de l'éditeur sélectionné ci-dessus.
+        </p>
+      }
+    </div>
+
+    @if (!publisherIsReservant()) {
+      <div class="form-group">
+        <label for="reservant_id">Réservant</label>
+        <select
+          id="reservant_id"
+          formControlName="reservant_id"
+        >
+          <option value="" disabled>Sélectionner un réservant</option>
+          @for (reservant of reservants(); track reservant.reservant_id) {
+            <option [value]="reservant.reservant_id">
+              {{ reservant.name }} ({{ reservant.type | reservantTypeLabel }})
+            </option>
+          }
+        </select>
+        @if (form.get('reservant_id')?.hasError('required')) {
+          <span class="error">
+            Le réservant est obligatoire
+          </span>
+        }
+      </div>
+    }
 
     <div class="form-group">
       <label for="status">Statut</label>
