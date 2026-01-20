@@ -42,24 +42,77 @@
   </div>
 
   <div class="form-group">
+    <label for="small_tables">Small Tables Number</label>
     <input 
       type="number" 
-      formControlName="total_tables" 
-      placeholder="Number of Tables"
-      [class.error]="form.controls.total_tables.invalid && form.controls.total_tables.touched"
+      formControlName="small_tables" 
+      placeholder="Number of Small Tables"
+      [class.error]="form.controls.small_tables.invalid && form.controls.small_tables.touched"
       min="1"
       max="1000"
       required
     />
-    @if(form.controls.total_tables.invalid && form.controls.total_tables.touched) {
+    @if(form.controls.small_tables.invalid && form.controls.small_tables.touched) {
       <div class="error-message">
-        @if (form.controls.total_tables.errors?.['required']) {
+        @if (form.controls.small_tables.errors?.['required']) {
           Number of tables is required
         }
-        @if(form.controls.total_tables.errors?.['min']){
+        @if(form.controls.small_tables.errors?.['min']){
           Minimum 1 table required
         }
-        @if(form.controls.total_tables.errors?.['max']){
+        @if(form.controls.small_tables.errors?.['max']){
+          Maximum 1000 tables allowed
+        }
+      </div>
+    }
+  </div>
+
+  <div class="form-group">
+    <label for="large_tables">large Tables Number</label>
+    <input 
+      type="number" 
+      formControlName="large_tables" 
+      placeholder="Number of Large Tables"
+      [class.error]="form.controls.large_tables.invalid && form.controls.large_tables.touched"
+      min="1"
+      max="1000"
+      required
+    />
+    @if(form.controls.large_tables.invalid && form.controls.large_tables.touched) {
+      <div class="error-message">
+        @if (form.controls.large_tables.errors?.['required']) {
+          Number of tables is required
+        }
+        @if(form.controls.large_tables.errors?.['min']){
+          Minimum 1 table required
+        }
+        @if(form.controls.large_tables.errors?.['max']){
+          Maximum 1000 tables allowed
+        }
+      </div>
+    }
+  </div>
+
+  <div class="form-group">
+    <label for="city_tables">City Tables Number</label>
+    <input 
+      type="number" 
+      formControlName="city_tables" 
+      placeholder="Number of City Tables"
+      [class.error]="form.controls.city_tables.invalid && form.controls.city_tables.touched"
+      min="1"
+      max="1000"
+      required
+    />
+    @if(form.controls.city_tables.invalid && form.controls.city_tables.touched) {
+      <div class="error-message">
+        @if (form.controls.city_tables.errors?.['required']) {
+          Number of tables is required
+        }
+        @if(form.controls.city_tables.errors?.['min']){
+          Minimum 1 table required
+        }
+        @if(form.controls.city_tables.errors?.['max']){
           Maximum 1000 tables allowed
         }
       </div>

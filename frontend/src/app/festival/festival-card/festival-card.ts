@@ -1,4 +1,4 @@
-import { Component, input, output, signal } from '@angular/core';
+import { Component, computed, input, output, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { Festival } from '../../types/festival';
@@ -17,6 +17,13 @@ export class FestivalCard {
 
 
   isSelected = signal(false);
+
+  // Computed total tables from all table types
+  totalTables = computed(() => {
+    const fest = this.festivals();
+    if (!fest) return 0;
+    return (fest.small_tables || 0) + (fest.large_tables || 0) + (fest.city_tables || 0);
+  });
 
   get isGoingOn(): boolean {
     const now = new Date();
