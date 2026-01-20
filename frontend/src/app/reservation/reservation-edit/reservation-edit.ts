@@ -8,11 +8,12 @@ import { GamePubListService } from '../../GamePublisher/service/game-pub-list-se
 import { ReservantService } from '../../reservant/services/reservant-service';
 import { FestivalServices } from '../../festival/services/festival-services';
 import { CreateReservationDTO, Reservation, ReservationStatus } from '../../types/reservation';
+import { ReservantTypeLabelPipe } from '../../shared/pipes/reservant-type-label.pipe';
 
 @Component({
   selector: 'app-reservation-edit',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [ReactiveFormsModule, CommonModule, ReservantTypeLabelPipe],
   templateUrl: './reservation-edit.html',
   styleUrl: './reservation-edit.css'
 })

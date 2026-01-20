@@ -35,9 +35,10 @@ enum InvoiceStatus {
 // Type de réservant (pour les remises partenaires)
 enum ReservantType {
     PUBLISHER    // Éditeur classique
+    PROVIDER     // Prestataire (représente plusieurs éditeurs)
     SHOP         // Boutique (partenaire)
     ASSOCIATION  // Association (partenaire)
-    OTHER        // Autre
+    ANIMATION    // Espace d'animation / Zone Proto
 }
 
 model User {

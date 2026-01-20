@@ -5,6 +5,16 @@
       <h2>Détails de la réservation</h2>
       <p><strong>Id:</strong> {{ r.reservation_id }}</p>
       <p><strong>Statut:</strong> <span class="status-badge" [class]="'status-' + (r.status || 'unknown')">{{ getStatusLabel(r.status) }}</span></p>
+      
+      <!-- Réservant -->
+      <h3>Réservant</h3>
+      <p><strong>Nom:</strong> {{ r.reservant?.name || 'Non défini' }}</p>
+      <p><strong>Type:</strong> {{ (r.reservant?.type || 'PUBLISHER') | reservantTypeLabel }}</p>
+      @if (isPartner) {
+        <p class="partner-badge">🤝 Partenaire</p>
+      }
+      
+      <!-- Éditeur -->
       <p class="publisher-row">
         <strong>Éditeur:</strong>
         <span class="publisher-info">
@@ -23,10 +33,11 @@
       <p><strong>Jeux reçus:</strong> {{ r.games_received ? 'Oui' : 'Non' }}</p>
 
       <h3>Détails financiers</h3>
+      <p><strong>Statut facture:</strong> <span class="invoice-badge" [class]="'invoice-' + (r.invoice_status || 'PENDING')">{{ getInvoiceStatusLabel(r.invoice_status) }}</span></p>
       <p><strong>Remise ($):</strong> {{ r.discount_amount || 0 }}</p>
       <p><strong>Tables en remise:</strong> {{ r.discount_tables || 0 }}</p>
       <p><strong>Prises électriques:</strong> {{ r.nb_electrical_outlets }} ({{ r.nb_electrical_outlets * 250 }}$)</p>
-      <p><strong>Montant final de la facture:</strong> {{ r.final_invoice_amount || 'N/A' }}</p>
+      <p><strong>Montant final de la facture:</strong> {{ r.final_invoice_amount || 'N/A' }}$</p>
 
       @if (r.zones && r.zones.length > 0) {
         <h3>Zones de prix</h3>
@@ -45,12 +56,149 @@
         <p class="comments">{{ r.comments }}</p>
       }
 
+      <!-- Section Jeux -->
+      <h3>Jeux ({{ r.games?.length || 0 }})</h3>
+      
+      <!-- Workflow jeux -->
+      <div class="games-workflow">
+        @if (canRequestGameList) {
+          <button class="btn btn-primary" (click)="requestGameList()" [disabled]="isLoading()">
+            📋 Demander la liste des jeux
+          </button>
+        }
+        @if (canMarkGameListReceived) {
+          <p class="workflow-status">⏳ En attente de la liste des jeux...</p>
+          <button class="btn btn-success" (click)="markGameListReceived()" [disabled]="isLoading()">
+            ✅ Liste des jeux reçue
+          </button>
+        }
+        @if (canAddGames) {
+          <button class="btn btn-secondary" (click)="toggleAddGames()">
+            {{ isAddingGames() ? '❌ Annuler' : '➕ Ajouter un jeu' }}
+          </button>
+        }
+      </div>
+
+      <!-- Formulaire ajout jeu -->
+      @if (isAddingGames() && canAddGames) {
+        <div class="add-game-form">
+          <h4>Ajouter un jeu du catalogue</h4>
+          <div class="form-row">
+            <select [(ngModel)]="selectedGameId" class="form-control">
+              <option [ngValue]="null">-- Sélectionner un jeu --</option>
+              @for (game of publisherGames(); track game.id) {
+                <option [ngValue]="game.id">{{ game.name }}</option>
+              }
+            </select>
+            <input type="number" [(ngModel)]="selectedCopyCount" min="1" max="20" class="form-control copy-count" placeholder="Nb">
+            <button class="btn btn-primary" (click)="addSelectedGame()" [disabled]="!selectedGameId() || isLoading()">
+              Ajouter
+            </button>
+          </div>
+          @if (publisherGames().length === 0) {
+            <p class="no-games-warning">⚠️ Aucun jeu dans le catalogue de cet éditeur</p>
+          }
+        </div>
+      }
+
+      <!-- Liste des jeux ajoutés -->
+      @if (r.games && r.games.length > 0) {
+        <div class="games-list">
+          <table class="games-table">
+            <thead>
+              <tr>
+                <th>Jeu</th>
+                <th>Exemplaires</th>
+                <th>Tables allouées</th>
+                <th>Reçu</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (fg of r.games; track fg.id) {
+                <tr [class.received]="fg.is_received">
+                  <td>{{ fg.game?.name || 'Jeu #' + fg.game_id }}</td>
+                  <td>{{ fg.copy_count }}</td>
+                  <td>{{ fg.allocated_tables || '-' }}</td>
+                  <td>
+                    @if (fg.is_received) {
+                      <span class="received-badge">✅</span>
+                    } @else {
+                      <span class="pending-badge">⏳</span>
+                    }
+                  </td>
+                  <td>
+                    @if (!fg.is_received) {
+                      <button class="btn btn-sm btn-success" (click)="markGameAsReceived(fg.id)" [disabled]="isLoading()">
+                        Pointer
+                      </button>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+          <div class="games-summary">
+            <p><strong>Total jeux:</strong> {{ r.games.length }}</p>
+            <p><strong>Jeux reçus:</strong> {{ getReceivedGamesCount() }} / {{ r.games.length }}</p>
+            <p><strong>Tables allouées:</strong> {{ getTotalAllocatedTables() }}</p>
+          </div>
+          @if (canMarkGamesReceived) {
+            <button class="btn btn-success" (click)="markGamesReceived()" [disabled]="isLoading()">
+              ✅ Tous les jeux reçus
+            </button>
+          }
+        </div>
+      }
+
       <div class="actions">
         <button class="btn btn-secondary" (click)="goBack()">Retour</button>
+        <button class="btn btn-primary" (click)="goToEdit()">Modifier</button>
       </div>
     </div>
 
     <aside class="aside">
+      <!-- Statuts -->
+      <div class="info-card">
+        <h3>Statut commercial</h3>
+        <div class="status-actions">
+          <button class="btn btn-sm" [class.active]="r.status === 'NOT_CONTACTED'" (click)="updateStatus('NOT_CONTACTED')" [disabled]="isLoading()">Non contacté</button>
+          <button class="btn btn-sm" [class.active]="r.status === 'CONTACTED'" (click)="updateStatus('CONTACTED')" [disabled]="isLoading()">Contacté</button>
+          <button class="btn btn-sm" [class.active]="r.status === 'IN_DISCUSSION'" (click)="updateStatus('IN_DISCUSSION')" [disabled]="isLoading()">En discussion</button>
+          <button class="btn btn-sm" [class.active]="r.status === 'CONFIRMED'" (click)="updateStatus('CONFIRMED')" [disabled]="isLoading()">Confirmé</button>
+          <button class="btn btn-sm" [class.active]="r.status === 'ABSENT'" (click)="updateStatus('ABSENT')" [disabled]="isLoading()">Absent</button>
+        </div>
+      </div>
+      
+      <div class="divider"></div>
+
+      <!-- Facturation -->
+      <div class="info-card">
+        <h3>Facturation</h3>
+        <div class="invoice-actions">
+          @if (r.invoice_status === 'PENDING') {
+            <button class="btn btn-primary" (click)="markAsInvoiced()" [disabled]="isLoading()">
+              📄 Marquer comme facturé
+            </button>
+          }
+          @if (r.invoice_status === 'INVOICED') {
+            <button class="btn btn-success" (click)="markAsPaid()" [disabled]="isLoading()">
+              💰 Marquer comme payé
+            </button>
+          }
+          @if (r.invoice_status === 'PAID') {
+            <p class="paid-badge">✅ Payé</p>
+          }
+          @if (isPartner && !r.discount_amount) {
+            <button class="btn btn-secondary" (click)="applyPartnerDiscount()" [disabled]="isLoading()">
+              🤝 Appliquer remise partenaire
+            </button>
+          }
+        </div>
+      </div>
+
+      <div class="divider"></div>
+      
       <div class="info-card">
         <h3>Résumé</h3>
         <div class="summary">
@@ -74,9 +222,10 @@
           }
         </div>
       </div>
-      <div class="divider"></div>
-      <div class="description">
-      </div>
     </aside>
+  </div>
+} @else {
+  <div class="loading">
+    <p>Chargement de la réservation...</p>
   </div>
 }

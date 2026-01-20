@@ -52,19 +52,24 @@ async function main() {
     data: { name: 'Days of Wonder', type: ReservantType.PUBLISHER }
   });
 
-  // 3. Boutique (Facturation à zéro, commission externe)
+  // 3. Prestataire (représente plusieurs éditeurs)
+  const prestataireAnim = await prisma.reservant.create({
+    data: { name: 'Ludis Animation', type: ReservantType.PROVIDER }
+  });
+
+  // 4. Boutique (Facturation à zéro, commission externe)
   const boutiquePhilibert = await prisma.reservant.create({
     data: { name: 'Philibert', type: ReservantType.SHOP, is_partner: true }
   });
 
-  // 4. Association (Partenaire avec remise totale)
+  // 5. Association (Partenaire avec remise totale)
   const assoEchecs = await prisma.reservant.create({
     data: { name: 'Club Echecs Local', type: ReservantType.ASSOCIATION, is_partner: true }
   });
 
-  // 5. Autre (Animation / Zone Proto, Espace festival, pas de facturation)
+  // 6. Animation / Zone Proto (Espace festival, pas de facturation)
   const zoneProto = await prisma.reservant.create({
-    data: { name: 'Zone Prototypes / Festival', type: ReservantType.OTHER }
+    data: { name: 'Zone Prototypes / Festival', type: ReservantType.ANIMATION, is_partner: true }
   });
 
   console.log('✅ Réservants créés avec succès.');

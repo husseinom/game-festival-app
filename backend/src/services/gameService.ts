@@ -272,3 +272,32 @@ export const getGameById = async (id: number) => {
   return game;
 };
 
+export const getGamesByPublisher = async (publisherId: number) => {
+  const games = await prisma.game.findMany({
+    where: { publisherId },
+    include: {
+      publisher: true,
+      type: true
+    },
+    orderBy: { name: 'asc' }
+  });
+  
+  return games.map(game => ({
+    id: game.id,
+    name: game.name,
+    type: game.type?.label || '',
+    minAge: game.minAge,
+    maxPlayers: game.maxPlayers,
+    minPlayers: game.minPlayers,
+    duration: game.duration,
+    imageUrl: game.imageUrl,
+    prototype: game.prototype,
+    publisherId: game.publisherId,
+    publisher: game.publisher ? {
+      id: game.publisher.id,
+      name: game.publisher.name,
+      logoUrl: game.publisher.logoUrl
+    } : undefined
+  }));
+};
+

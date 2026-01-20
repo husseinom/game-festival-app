@@ -6,10 +6,11 @@ import { GamePubListService } from '../../GamePublisher/service/game-pub-list-se
 import { ReservantService } from '../../reservant/services/reservant-service';
 import { FestivalServices } from '../../festival/services/festival-services';
 import { CommonModule } from '@angular/common';
+import { ReservantTypeLabelPipe } from '../../shared/pipes/reservant-type-label.pipe';
 
 @Component({
   selector: 'app-reservation-form',
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [ReactiveFormsModule, CommonModule, ReservantTypeLabelPipe],
   templateUrl: './reservation-form.html',
   styleUrl: './reservation-form.css',
 })

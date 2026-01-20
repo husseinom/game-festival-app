@@ -31,7 +31,7 @@
         <option value="" disabled>Sélectionner un réservant</option>
         @for (reservant of reservants(); track reservant.reservant_id) {
           <option [value]="reservant.reservant_id">
-            {{ reservant.name }} - {{ reservant.type }}
+            {{ reservant.name }} ({{ reservant.type | reservantTypeLabel }})
           </option>
         }
       </select>
@@ -43,7 +43,7 @@
     </div>
 
     <div class="form-group">
-      <label for="game_publisher_id">Éditeur de jeu</label>
+      <label for="game_publisher_id">Éditeur de jeu (provenance des jeux)</label>
       <select
         id="game_publisher_id"
         formControlName="game_publisher_id"
