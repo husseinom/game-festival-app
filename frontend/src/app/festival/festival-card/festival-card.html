@@ -18,11 +18,11 @@
       <!-- Festival Dates -->
       <div class="festival-dates">
         <div class="date-item">
-          <div class="date-label">Start Date</div>
+          <div class="date-label">Date de Début</div>
           <div class="date-value">{{ formatDate(ft.startDate) }}</div>
         </div>
         <div class="date-item">
-          <div class="date-label">End Date</div>
+          <div class="date-label">Date de Fin</div>
           <div class="date-value">{{ formatDate(ft.endDate) }}</div>
         </div>
       </div>
@@ -30,12 +30,12 @@
       <!-- Table Info with breakdown -->
       <div class="table-info">
         <div class="table-summary">
-          <strong>Total Tables: {{ totalTables() }}</strong>
+          <strong>Total Tables : {{ totalTables() }}</strong>
         </div>
         <!-- <div class="table-breakdown">
-          <span class="table-type">Small: {{ ft.small_tables }}</span>
-          <span class="table-type">Large: {{ ft.large_tables }}</span>
-          <span class="table-type">City: {{ ft.city_tables }}</span>
+          <span class="table-type">Petites : {{ ft.small_tables }}</span>
+          <span class="table-type">Grandes : {{ ft.large_tables }}</span>
+          <span class="table-type">Ville : {{ ft.city_tables }}</span>
         </div> -->
       </div>
     </mat-card-content>
@@ -43,10 +43,10 @@
     <!-- Action Buttons -->
     <mat-card-actions class="card-actions">
       <button mat-raised-button color="primary" class="edit-btn" (click)="onEdit($event)">
-        Edit
+        Modifier
       </button>
       <button mat-raised-button color="warn" class="delete-btn" (click)="Ondelete($event)">
-        Delete
+        Supprimer
       </button>
     </mat-card-actions>
 

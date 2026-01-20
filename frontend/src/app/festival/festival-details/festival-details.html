@@ -11,7 +11,7 @@
             <div class="festival-info">{{fest.location}}</div>
         </div>
 
-        <h3 class="priceZone-section-title">Festival's Price Zones </h3>
+        <h3 class="priceZone-section-title">Zones de Prix du Festival</h3>
         
         <div class="priceZone-grid">
             @for (pz of priceZones(); track pz.id) {
@@ -27,7 +27,7 @@
     } 
     @else {
         <div class="state-message">
-            <p>Unknown Festival.</p>
+            <p>Festival inconnu.</p>
         </div>
     }
 </div>

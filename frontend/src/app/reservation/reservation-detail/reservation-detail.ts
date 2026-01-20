@@ -35,8 +35,13 @@ export class ReservationDetail {
   readonly publisher = computed(() => this.reservation()?.publisher ?? null);
 
   goBack(): void {
-    this.router.navigate(['/reservations']);
+    if (window.history.length > 1) {
+      this.location.back();
+    } else {
+      this.router.navigate(['/reservations']);
+    }
   }
+
 
   getStatusLabel(status?: string): string {
     const statusMap: Record<string, string> = {

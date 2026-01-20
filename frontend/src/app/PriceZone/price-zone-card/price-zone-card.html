@@ -7,7 +7,7 @@
 
   <mat-card-content class="pz-info">
     <div class="pz-row">
-      <strong>Table price: </strong>
+      <strong>Prix de la table: </strong>
       <span>{{ zone?.table_price }} €</span>
     </div>
 
@@ -17,14 +17,14 @@
     </div>
 
     <div class="pz-row">
-      <strong>Map zones: </strong>
+      <strong>Zones Plan: </strong>
       <span>
         @if(zone?.mapZones?.length) {
           @for(mapZone of zone.mapZones; track mapZone.id) {
             <div>{{ mapZone.name }}</div>
           }
         } @else {
-          <span>No map zones</span>
+          <span>Aucune zone Plan</span>
         }
       </span>
     </div>

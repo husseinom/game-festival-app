@@ -22,7 +22,7 @@
 
 /* Page title */
 .header-section::before {
-  content: "🎮 Games";
+  content: "🎮 Jeux";
   font-size: 2rem;
   font-weight: bold;
   color: white;

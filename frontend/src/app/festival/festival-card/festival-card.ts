@@ -58,10 +58,10 @@ export class FestivalCard {
   getStatusText(): string {
     const status = this.getStatusClass();
     switch (status) {
-      case 'ongoing': return '🔴 Live Now';
-      case 'upcoming': return '⏰ Upcoming';
-      case 'ended': return '✅ Ended';
-      default: return 'Unknown';
+      case 'ongoing': return '🔴 En Cours';
+      case 'upcoming': return '⏰ À Venir';
+      case 'ended': return '✅ Terminé';
+      default: return 'Inconnu';
     }
   }
 
@@ -71,10 +71,10 @@ export class FestivalCard {
     
     // Check if it's a valid date
     if (!dateObj || isNaN(dateObj.getTime())) {
-      return 'Invalid Date';
+      return 'Date Invalide';
     }
     
-    return dateObj.toLocaleDateString('en-US', {
+    return dateObj.toLocaleDateString('fr-FR', {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
