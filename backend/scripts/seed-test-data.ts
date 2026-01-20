@@ -13,7 +13,6 @@ async function main() {
   await prisma.contactLog.deleteMany();
   await prisma.festivalGame.deleteMany();
   await prisma.reservation.deleteMany();
-  await prisma.tableType.deleteMany();
   await prisma.mapZone.deleteMany();
   await prisma.priceZone.deleteMany();
   await prisma.festival.deleteMany();
@@ -39,35 +38,30 @@ async function main() {
     });
   }
 
-// --- 3. Création des Reservants (selon la nouvelle typologie) ---
- console.log('📝 Création des réservants par typologie...');
+  // --- 3. Création des Reservants (selon la nouvelle typologie) ---
+  console.log('📝 Création des réservants par typologie...');
 
- // 1. Éditeur (Le cas principal)
- const editeurAsmodee = await prisma.reservant.create({
-   data: { name: 'Asmodee', type: 'Éditeur' }
- });
+  const editeurAsmodee = await prisma.reservant.create({
+    data: { name: 'Asmodee', type: 'Éditeur' }
+  });
 
- // 2. Prestataire (Animation pour le compte d'éditeurs)
- const prestataireAnim = await prisma.reservant.create({
-   data: { name: 'Ludis Animation', type: 'Prestataire' }
- });
+  const prestataireAnim = await prisma.reservant.create({
+    data: { name: 'Ludis Animation', type: 'Prestataire' }
+  });
 
- // 3. Boutique (Facturation à zéro, commission externe)
- const boutiquePhilibert = await prisma.reservant.create({
-   data: { name: 'Philibert', type: 'Boutique' }
- });
+  const boutiquePhilibert = await prisma.reservant.create({
+    data: { name: 'Philibert', type: 'Boutique' }
+  });
 
- // 4. Association (Partenaire avec remise totale)
- const assoEchecs = await prisma.reservant.create({
-   data: { name: 'Club d’Échecs Local', type: 'Association' }
- });
+  const assoEchecs = await prisma.reservant.create({
+    data: { name: 'Club d\'Échecs Local', type: 'Association' }
+  });
 
- // 5. Animation / Zone Proto (Espace festival, pas de facturation)
- const zoneProto = await prisma.reservant.create({
-   data: { name: 'Zone Prototypes / Festival', type: 'Animation / Zone Proto' }
- });
+  const zoneProto = await prisma.reservant.create({
+    data: { name: 'Zone Prototypes / Festival', type: 'Animation / Zone Proto' }
+  });
 
- console.log('✅ Réservants créés avec succès.');
+  console.log('✅ Réservants créés avec succès.');
 
   // --- 4. Récupération des Types de Zones (PriceZoneType) ---
   // On suppose qu'ils sont déjà là via le script CSV, sinon on les crée
@@ -83,54 +77,77 @@ async function main() {
     create: { key: 'vip', name: 'VIP' }
   });
 
+  const typeStandardVIP = await prisma.priceZoneType.upsert({
+    where: { key: 'standard_vip' },
+    update: {},
+    create: { key: 'standard_vip', name: 'Standard + VIP' }
+  });
+
   // --- 5. Création d'un Festival "Montpellier Game Fest 2025" ---
   console.log('🎪 Création du Festival...');
   const festival = await prisma.festival.create({
     data: {
       name: 'Montpellier Game Fest 2025',
       location: 'Parc des Expositions',
-      total_tables: 200,
+      small_tables: 100,
+      large_tables: 80,
+      city_tables: 20,
       startDate: new Date('2025-09-12'),
       endDate: new Date('2025-09-14'),
-      priceZoneTypeId: typeStandard.id // Type par défaut
+      priceZoneTypeId: typeStandardVIP.id // Type Standard + VIP
     }
   });
 
   // --- 6. Création des Zones Tarifaires (PriceZone) ---
+  // Ces zones seront créées automatiquement par festivalService.ts
+  // mais on peut les créer manuellement ici pour le test
   console.log('💰 Création des Zones Tarifaires...');
   const zoneStandard = await prisma.priceZone.create({
     data: {
       festival_id: festival.id,
-      name: 'Zone Standard (Grand Hall)',
-      table_price: 100.0,
-      total_tables: 150
+      name: 'Standard',
+      table_price: 20.0,
+      small_tables: 70,
+      large_tables: 56,
+      city_tables: 14,
+      total_tables: 140
     }
   });
 
   const zoneVIP = await prisma.priceZone.create({
     data: {
       festival_id: festival.id,
-      name: 'Zone VIP (Entrée)',
-      table_price: 250.0,
-      total_tables: 50
+      name: 'VIP',
+      table_price: 60.0,
+      small_tables: 9,
+      large_tables: 24,
+      city_tables: 4,
+      total_tables: 37
     }
   });
 
-  // --- 7. Création des Zones du Plan (MapZone) et Types de Tables ---
+  // --- 7. Création des Zones du Plan (MapZone) ---
   console.log('🗺️  Création des Zones Physiques (MapZone)...');
   
-  // Zone Physique 1 : Le Hall Principal (Lié au tarif Standard)
   const mapZoneHallA = await prisma.mapZone.create({
     data: {
       festival_id: festival.id,
       price_zone_id: zoneStandard.id,
       name: 'Hall A - Allée Centrale',
-      tableTypes: {
-        create: [
-          { name: 'Standard 2m', nb_total: 100, nb_total_player: 4 },
-          { name: 'Ronde XL', nb_total: 20, nb_total_player: 6 }
-        ]
-      }
+      small_tables: 50,
+      large_tables: 30,
+      city_tables: 10
+    }
+  });
+
+  const mapZoneHallB = await prisma.mapZone.create({
+    data: {
+      festival_id: festival.id,
+      price_zone_id: zoneStandard.id,
+      name: 'Hall B - Côté Jardin',
+      small_tables: 20,
+      large_tables: 26,
+      city_tables: 4
     }
   });
 
@@ -140,11 +157,9 @@ async function main() {
       festival_id: festival.id,
       price_zone_id: zoneVIP.id,
       name: 'Carré Or',
-      tableTypes: {
-        create: [
-          { name: 'VIP Table (Nappe fournie)', nb_total: 50, nb_total_player: 5 }
-        ]
-      }
+      small_tables: 9,
+      large_tables: 24,
+      city_tables: 4
     }
   });
 
@@ -158,7 +173,7 @@ async function main() {
     console.warn('⚠️  Aucun éditeur trouvé en base. Avez-vous lancé import-csv.ts ? Pas de réservations créées.');
   } else {
     // 8a. Éditeur 1 : Réservation simple, en cours de discussion
-    await prisma.reservation.create({
+    const reservation1 = await prisma.reservation.create({
       data: {
         game_publisher_id: publishers[0].id,
         festival_id: festival.id,
@@ -178,15 +193,14 @@ async function main() {
       // 1. D'abord on ajoute le contact à l'éditeur (séparément)
       await prisma.contact.create({
         data: {
-            game_publisher_id: publishers[1].id,
-            name: 'Jean-Michel Contact', 
-            email: 'jm@editeur.com', 
-            tel: '0601020304'
+          game_publisher_id: publishers[1].id,
+          name: 'Jean-Michel Contact', 
+          email: 'jm@editeur.com', 
+          tel: '0601020304'
         }
       });
 
-      // 2. Ensuite on crée la réservation
-      await prisma.reservation.create({
+      const reservation2 = await prisma.reservation.create({
         data: {
           game_publisher_id: publishers[1].id,
           festival_id: festival.id,
@@ -203,11 +217,30 @@ async function main() {
           }
         }
       });
+
+      // Add some games to this reservation
+      const games = await prisma.game.findMany({ 
+        where: { publisherId: publishers[1].id },
+        take: 3 
+      });
+
+      if (games.length > 0) {
+        for (const game of games) {
+          await prisma.festivalGame.create({
+            data: {
+              reservation_id: reservation2.reservation_id,
+              game_id: game.id,
+              copy_count: 2,
+              allocated_tables: 1
+            }
+          });
+        }
+      }
     }
 
     // 8c. Éditeur 3 : Réservation Facturée
     if (publishers.length > 2) {
-      await prisma.reservation.create({
+      const reservation3 = await prisma.reservation.create({
         data: {
           game_publisher_id: publishers[2].id,
           festival_id: festival.id,
@@ -217,15 +250,63 @@ async function main() {
           nb_electrical_outlets: 5,
           zones: {
             create: [
-              { price_zone_id: zoneStandard.id, table_count: 5 } // 5 tables standard
+              { price_zone_id: zoneStandard.id, table_count: 5 }
             ]
-          }
+          },
+          final_invoice_amount: 500
         }
       });
+
+      // Add games
+      const games = await prisma.game.findMany({ 
+        where: { publisherId: publishers[2].id },
+        take: 5 
+      });
+
+      if (games.length > 0) {
+        for (const game of games) {
+          await prisma.festivalGame.create({
+            data: {
+              reservation_id: reservation3.reservation_id,
+              game_id: game.id,
+              map_zone_id: mapZoneHallA.id,
+              copy_count: 1,
+              allocated_tables: 1
+            }
+          });
+        }
+      }
     }
+
+    // 8d. Prestataire reservation (no publisher)
+    await prisma.reservation.create({
+      data: {
+        game_publisher_id: null,
+        festival_id: festival.id,
+        reservant_id: prestataireAnim.reservant_id,
+        status: 'Confirmé',
+        is_publisher_presenting: false,
+        nb_electrical_outlets: 1,
+        comments: 'Animation pour le compte de plusieurs éditeurs',
+        zones: {
+          create: [
+            { price_zone_id: zoneStandard.id, table_count: 3 }
+          ]
+        }
+      }
+    });
   }
 
   console.log('✅ Seeding terminé avec succès !');
+  console.log(`
+  📊 Résumé:
+  - ${users.length} utilisateurs créés
+  - 5 réservants créés
+  - 1 festival créé avec ${festival.small_tables + festival.large_tables + festival.city_tables} tables
+  - 2 zones tarifaires créées
+  - 3 zones physiques (map zones) créées
+  - ${publishers.length > 0 ? 'Plusieurs' : '0'} réservations créées
+  `);
 }
 
 main()

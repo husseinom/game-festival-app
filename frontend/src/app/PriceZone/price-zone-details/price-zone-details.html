@@ -1,1 +1,324 @@
-<p>price-zone-details works!</p>
+<div class="price-zone-details-container">
+  @if (priceZone(); as zone) {
+    <!-- Header -->
+    <div class="header">
+      <button mat-icon-button class="back-btn" (click)="back()">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <h1>{{ zone.name }} - Zone Details</h1>
+    </div>
+
+    <!-- Zone Info Card -->
+    <mat-card class="zone-info-card">
+      <mat-card-content>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="label">Table Price:</span>
+            <span class="value">${{ zone.table_price }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Small Tables:</span>
+            <span class="value">{{ zone.small_tables }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Large Tables:</span>
+            <span class="value">{{ zone.large_tables }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">City Tables:</span>
+            <span class="value">{{ zone.city_tables }}</span>
+          </div>
+          <div class="info-item total">
+            <span class="label">Total Tables:</span>
+            <span class="value">{{ zone.total_tables || (zone.small_tables + zone.large_tables + zone.city_tables) }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Tabs -->
+    <mat-tab-group class="tabs-container" animationDuration="300ms">
+      
+      <!-- Tab 1: Reservations -->
+      <mat-tab label="Reservations ({{ reservations().length }})">
+        <div class="tab-content">
+          @if (reservations().length > 0) {
+            <div class="reservations-grid">
+              @for (reservation of reservations(); track reservation.reservation_id) {
+                <mat-card class="reservation-card" (click)="viewReservation(reservation.reservation_id)">
+                  <mat-card-header>
+                    <mat-card-title>{{ reservation.publisher?.name || reservation.reservant?.name || 'No Publisher' }}</mat-card-title>
+                    <div class="status" [class]="'status-' + reservation.status.toLowerCase().replace(' ', '-')">
+                      {{ reservation.status }}
+                    </div>
+                  </mat-card-header>
+                  <mat-card-content>
+                    <p><strong>Tables:</strong> {{ reservation.table_count || 0 }}</p>
+                    <p><strong>Type:</strong> {{ reservation.reservant?.type || 'N/A' }}</p>
+                    @if (reservation.discount_amount) {
+                      <p><strong>Discount:</strong> ${{ reservation.discount_amount }}</p>
+                    }
+                    @if (reservation.nb_electrical_outlets) {
+                      <p><strong>Outlets:</strong> {{ reservation.nb_electrical_outlets }}</p>
+                    }
+                    @if (reservation.comments) {
+                      <p class="comments">{{ reservation.comments }}</p>
+                    }
+                  </mat-card-content>
+                </mat-card>
+              }
+            </div>
+          } @else {
+            <div class="empty-state">
+              <mat-icon>event_seat</mat-icon>
+              <p>No reservations for this zone yet.</p>
+            </div>
+          }
+        </div>
+      </mat-tab>
+
+      <!-- Tab 2: Games -->
+      <mat-tab label="Games ({{ games().length }})">
+        <div class="tab-content">
+          @if (games().length > 0) {
+            <div class="games-grid">
+              @for (game of games(); track game.id) {
+                <mat-card class="game-card" [class.unassigned]="!game.map_zone_id">
+                  <mat-card-header>
+                    <mat-card-title>{{ game.game?.name || 'Unknown Game' }}</mat-card-title>
+                    @if (!game.map_zone_id) {
+                      <mat-icon class="warning-icon">warning</mat-icon>
+                    }
+                  </mat-card-header>
+                  <mat-card-content>
+                    <p><strong>Publisher:</strong> {{ game.reservation?.publisher?.name || 'N/A' }}</p>
+                    <p><strong>Copies:</strong> {{ game.copy_count }}</p>
+                    <p><strong>Tables:</strong> {{ game.allocated_tables }}</p>
+                    @if (game.mapZone) {
+                      <p class="map-zone"><mat-icon>place</mat-icon> {{ game.mapZone.name }}</p>
+                    } @else {
+                      <p class="unassigned-label">Not assigned to map zone</p>
+                    }
+                  </mat-card-content>
+                </mat-card>
+              }
+            </div>
+          } @else {
+            <div class="empty-state">
+              <mat-icon>casino</mat-icon>
+              <p>No games assigned to this zone yet.</p>
+            </div>
+          }
+        </div>
+      </mat-tab>
+
+      <!-- Tab 3: Map Zones -->
+      <mat-tab label="Map Zones ({{ mapZones().length }})">
+        <div class="tab-content">
+          <div class="tab-header">
+            <button mat-raised-button color="primary" (click)="openMapZoneForm()">
+              <mat-icon>add</mat-icon>
+              Create Map Zone
+            </button>
+          </div>
+
+          <!-- Map Zone Form -->
+          @if (showMapZoneForm()) {
+            <mat-card class="map-zone-form">
+              <mat-card-header>
+                <mat-card-title>Create New Map Zone</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <!-- Available Tables Info -->
+                <div class="available-tables-info">
+                  <h4><mat-icon>info</mat-icon> Table Availability</h4>
+                  <div class="tables-availability">
+                    <div class="table-type-info">
+                      <span class="table-type">
+                        <mat-icon>grid_view</mat-icon>
+                        <strong>Small Tables:</strong>
+                      </span>
+                      <span class="table-numbers">
+                        Available: {{ availableTables().small }} / Total: {{ priceZone()?.small_tables }}
+                      </span>
+                      @if (newMapZone().small_tables > 0) {
+                        <span class="remaining">Remaining after: {{ remainingTables().small }}</span>
+                      }
+                    </div>
+
+                    <div class="table-type-info">
+                      <span class="table-type">
+                        <mat-icon>table_chart</mat-icon>
+                        <strong>Large Tables:</strong>
+                      </span>
+                      <span class="table-numbers">
+                        Available: {{ availableTables().large }} / Total: {{ priceZone()?.large_tables }}
+                      </span>
+                      @if (newMapZone().large_tables > 0) {
+                        <span class="remaining">Remaining after: {{ remainingTables().large }}</span>
+                      }
+                    </div>
+
+                    <div class="table-type-info">
+                      <span class="table-type">
+                        <mat-icon>location_city</mat-icon>
+                        <strong>City Tables:</strong>
+                      </span>
+                      <span class="table-numbers">
+                        Available: {{ availableTables().city }} / Total: {{ priceZone()?.city_tables }}
+                      </span>
+                      @if (newMapZone().city_tables > 0) {
+                        <span class="remaining">Remaining after: {{ remainingTables().city }}</span>
+                      }
+                    </div>
+                  </div>
+                </div>
+
+                @if (validationError()) {
+                  <div class="validation-error">
+                    <mat-icon>error</mat-icon>
+                    {{ validationError() }}
+                  </div>
+                }
+
+                <form (ngSubmit)="createMapZone()">
+                  <div class="form-group">
+                    <label>Zone Name</label>
+                    <input 
+                      type="text" 
+                      class="form-control"
+                      [value]="newMapZone().name"
+                      (input)="updateMapZoneName($event)"
+                      placeholder="e.g., Hall A - Section 1"
+                      required
+                    />
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>Small Tables (Max: {{ availableTables().small }})</label>
+                      <input 
+                        type="number" 
+                        class="form-control"
+                        [value]="newMapZone().small_tables"
+                        (input)="updateSmallTables($event)"
+                        [max]="availableTables().small"
+                        min="0"
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label>Large Tables (Max: {{ availableTables().large }})</label>
+                      <input 
+                        type="number" 
+                        class="form-control"
+                        [value]="newMapZone().large_tables"
+                        (input)="updateLargeTables($event)"
+                        [max]="availableTables().large"
+                        min="0"
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label>City Tables (Max: {{ availableTables().city }})</label>
+                      <input 
+                        type="number" 
+                        class="form-control"
+                        [value]="newMapZone().city_tables"
+                        (input)="updateCityTables($event)"
+                        [max]="availableTables().city"
+                        min="0"
+                      />
+                    </div>
+                  </div>
+
+                  <div class="total-info">
+                    <mat-icon>calculate</mat-icon>
+                    Total: {{ totalTables() }} tables
+                  </div>
+
+                  @if (unassignedGames().length > 0) {
+                    <div class="form-group">
+                      <label>Assign Games (Optional)</label>
+                      <div class="games-selection">
+                        @for (game of unassignedGames(); track game.id) {
+                          <label class="game-checkbox">
+                            <input 
+                              type="checkbox"
+                              [checked]="isGameSelected(game.id)"
+                              (change)="toggleGameSelection(game.id)"
+                            />
+                            {{ game.game?.name || 'Unknown' }} ({{ game.copy_count }} copies)
+                          </label>
+                        }
+                      </div>
+                    </div>
+                  }
+
+                  <div class="form-actions">
+                    <button 
+                      mat-raised-button 
+                      color="primary" 
+                      type="submit" 
+                      [disabled]="!newMapZone().name.trim() || totalTables() === 0 || !!validationError()"
+                    >
+                      Create Zone
+                    </button>
+                    <button mat-button type="button" (click)="toggleMapZoneForm()">
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </mat-card-content>
+            </mat-card>
+          }
+
+          <!-- Map Zones List -->
+          @if (mapZones().length > 0) {
+            <div class="map-zones-grid">
+              @for (mapZone of mapZones(); track mapZone.id) {
+                <mat-card class="map-zone-card">
+                  <mat-card-header>
+                    <mat-card-title>{{ mapZone.name }}</mat-card-title>
+                    <button mat-icon-button color="warn" (click)="deleteMapZone(mapZone.id)">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </mat-card-header>
+                  <mat-card-content>
+                    <div class="map-zone-tables">
+                      <span><mat-icon>grid_view</mat-icon> Small: {{ mapZone.small_tables }}</span>
+                      <span><mat-icon>table_chart</mat-icon> Large: {{ mapZone.large_tables }}</span>
+                      <span><mat-icon>location_city</mat-icon> City: {{ mapZone.city_tables }}</span>
+                    </div>
+                    @if (mapZone.festivalGames && mapZone.festivalGames.length > 0) {
+                      <div class="map-zone-games">
+                        <p><strong><mat-icon>casino</mat-icon> Games ({{ mapZone.festivalGames.length }}):</strong></p>
+                        <ul>
+                          @for (fg of mapZone.festivalGames; track fg.id) {
+                            <li>{{ fg.game?.name || 'Unknown' }}</li>
+                          }
+                        </ul>
+                      </div>
+                    } @else {
+                      <p class="no-games">No games assigned yet</p>
+                    }
+                  </mat-card-content>
+                </mat-card>
+              }
+            </div>
+          } @else {
+            <div class="empty-state">
+              <mat-icon>map</mat-icon>
+              <p>No map zones created yet. Create one to organize your games!</p>
+            </div>
+          }
+        </div>
+      </mat-tab>
+
+    </mat-tab-group>
+
+  } @else {
+    <div class="loading">
+      <mat-icon>hourglass_empty</mat-icon>
+      <p>Loading price zone details...</p>
+    </div>
+  }
+</div>
