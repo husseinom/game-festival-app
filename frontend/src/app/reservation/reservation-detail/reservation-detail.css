@@ -467,6 +467,15 @@
 	font-size: 0.9rem;
 }
 
+:host .games-summary .warning {
+	color: #dc2626;
+	font-weight: bold;
+}
+
+:host .games-summary .ok {
+	color: #16a34a;
+}
+
 /* Status actions */
 :host .status-actions {
 	display: flex;
@@ -711,6 +720,11 @@
 	gap: 6px;
 	font-size: 0.9rem;
 	color: #475569;
+}
+
+:host .tables-info .min-info {
+	font-size: 0.75rem;
+	color: #94a3b8;
 }
 
 /* Cellule d'actions */

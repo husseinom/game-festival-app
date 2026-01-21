@@ -326,7 +326,17 @@ export class ReservationDetail {
 
   onAllocatedTablesChange(event: Event): void {
     const target = event.target as HTMLInputElement;
-    this.selectedAllocatedTables.set(Number(target.value) || 1);
+    const value = parseFloat(target.value);
+    // Le minimum est défini par la taille du jeu * nombre d'exemplaires
+    const minRequired = this.getMinRequiredTables();
+    this.selectedAllocatedTables.set(isNaN(value) || value < minRequired ? minRequired : value);
+  }
+
+  // Calculer le nombre minimum de tables requis pour le jeu sélectionné
+  getMinRequiredTables(): number {
+    const gameSize = this.selectedGameSize();
+    const copyCount = this.selectedCopyCount();
+    return getGameUnits(gameSize) * copyCount;
   }
 
   onMapZoneChange(event: Event): void {
@@ -350,6 +360,13 @@ export class ReservationDetail {
     console.log('[addSelectedGame] Sending data:', { gameId, copyCount, gameSize, allocatedTables });
     
     if (!r || !gameId) return;
+    
+    // Vérifier que le nombre de tables allouées ne dépasse pas les tables restantes
+    const remaining = this.getRemainingTables();
+    if (allocatedTables > remaining) {
+      alert(`Impossible d'allouer ${allocatedTables} table(s). Il ne reste que ${remaining} table(s) disponible(s) sur cette réservation.`);
+      return;
+    }
     
     this.isLoading.set(true);
     this.reservationService.addGames(r.reservation_id, [{ 
@@ -454,6 +471,11 @@ export class ReservationDetail {
     const r = this.reservation();
     if (!r?.games) return 0;
     return r.games.reduce((sum: number, g: FestivalGame) => sum + (g.allocated_tables || 0), 0);
+  }
+
+  // Tables restantes à allouer (réservées - allouées)
+  getRemainingTables(): number {
+    return this.getTotalTables() - this.getTotalAllocatedTables();
   }
 
   getReceivedGamesCount(): number {
