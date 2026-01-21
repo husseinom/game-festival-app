@@ -89,6 +89,7 @@ export const create = async (req: Request, res: Response) => {
       data: { 
         name, 
         price_zone_id,
+        festival_id: priceZone.festival_id,
         small_tables: requestedSmall,
         large_tables: requestedLarge,
         city_tables: requestedCity
