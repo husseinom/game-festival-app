@@ -158,11 +158,9 @@ export class ReservationEdit implements OnInit {
   }
 
   onSubmit(event: Event): void {
-    console.log('Submitting form...');
     event.preventDefault();
 
     if (this.form.invalid || !this.reservationId) {
-      console.warn('Formulaire invalide', this.form.errors);
       return;
     }
 

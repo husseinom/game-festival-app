@@ -1,8 +1,7 @@
 import { Component, inject, computed, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ReservationService } from '../services/reservation.service';
-import { Location, CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 import { 
   Reservation, 
   ReservationStatus, 
@@ -10,7 +9,6 @@ import {
   InvoiceStatus, 
   INVOICE_STATUS_LABELS,
   FestivalGame,
-  M2_PER_TABLE_UNIT,
   tablesToM2,
   GameSize,
   GAME_SIZE_LABELS,
@@ -20,7 +18,7 @@ import {
 } from '../../types/reservation';
 import { ReservantTypeLabelPipe } from '../../shared/pipes/reservant-type-label.pipe';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { map, switchMap, filter, BehaviorSubject, forkJoin, of } from 'rxjs';
+import { map, switchMap, filter, BehaviorSubject } from 'rxjs';
 import { GameDto } from '../../types/game-dto';
 import { GameService } from '../../Game/services/game-service';
 import { MapZoneService } from '../../MapZone/services/map-zone-services';
@@ -295,7 +293,6 @@ export class ReservationDetail {
     const copyCount = this.selectedCopyCount();
     const units = getGameUnits(gameSize);
     const result = units * copyCount;
-    console.log('[updateAllocatedTables] gameSize:', gameSize, 'units:', units, 'copyCount:', copyCount, 'result:', result);
     this.selectedAllocatedTables.set(result);
   }
 
@@ -318,10 +315,8 @@ export class ReservationDetail {
   onGameSizeChange(event: Event): void {
     const target = event.target as HTMLSelectElement;
     const newSize = target.value as GameSize;
-    console.log('[onGameSizeChange] New size selected:', newSize);
     this.selectedGameSize.set(newSize);
     this.updateAllocatedTables();
-    console.log('[onGameSizeChange] Allocated tables updated to:', this.selectedAllocatedTables());
   }
 
   onAllocatedTablesChange(event: Event): void {
@@ -356,8 +351,6 @@ export class ReservationDetail {
     const copyCount = this.selectedCopyCount();
     const gameSize = this.selectedGameSize();
     const allocatedTables = this.selectedAllocatedTables();
-    
-    console.log('[addSelectedGame] Sending data:', { gameId, copyCount, gameSize, allocatedTables });
     
     if (!r || !gameId) return;
     

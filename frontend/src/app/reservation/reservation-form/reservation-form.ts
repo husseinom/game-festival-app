@@ -1,5 +1,5 @@
-import { Component, output, inject, signal, computed, effect } from '@angular/core';
-import { CreateReservationDTO, Reservation, ReservationStatus, M2_PER_TABLE_UNIT, tablesToM2, m2ToTables } from '../../types/reservation';
+import { Component, output, inject, signal, computed } from '@angular/core';
+import { CreateReservationDTO, ReservationStatus, M2_PER_TABLE_UNIT, tablesToM2, m2ToTables } from '../../types/reservation';
 import { FormGroup, FormControl, ReactiveFormsModule, Validators, FormArray } from '@angular/forms';
 import { PriceZoneServices } from '../../PriceZone/services/price-zone-services';
 import { GamePubListService } from '../../GamePublisher/service/game-pub-list-service';
@@ -7,7 +7,6 @@ import { ReservantService } from '../../reservant/services/reservant-service';
 import { FestivalServices } from '../../festival/services/festival-services';
 import { CommonModule } from '@angular/common';
 import { ReservantTypeLabelPipe } from '../../shared/pipes/reservant-type-label.pipe';
-import { ReservantType } from '../../types/reservant';
 
 // Type d'unité de saisie
 type InputUnit = 'tables' | 'm2';
@@ -265,8 +264,6 @@ export class ReservationForm {
       nb_electrical_outlets: formValue.nb_electrical_outlets || 0,
       tables: (formValue.tables as any[]) || []
     };
-
-    console.log('Envoi de la réservation:', reservation);
 
     this.newReservation.emit(reservation);
     
