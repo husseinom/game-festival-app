@@ -15,6 +15,8 @@ import { ReservationList } from './reservation/reservation-list/reservation-list
 import { ReservationDetail } from './reservation/reservation-detail/reservation-detail';
 import { ReservationEdit } from './reservation/reservation-edit/reservation-edit';
 import { Admin } from './admin/admin/admin';
+import { ReservantList } from './reservant/reservant-list/reservant-list';
+import { UserList } from './admin/user-list/user-list';
 
 export const routes: Routes = [
     { path: 'login', component: Login },

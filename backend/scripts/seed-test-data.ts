@@ -314,7 +314,7 @@ async function main() {
         game_publisher_id: null,
         festival_id: festival.id,
         reservant_id: prestataireAnim.reservant_id,
-        status: 'Confirmé',
+        status: ReservationStatus.CONFIRMED,
         is_publisher_presenting: false,
         nb_electrical_outlets: 1,
         comments: 'Animation pour le compte de plusieurs éditeurs',

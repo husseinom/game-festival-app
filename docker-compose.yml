@@ -63,7 +63,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    command: sh -c "npm install --silent && npx prisma generate && npx ts-node ./scripts/import-csv.ts && npx ts-node ./scripts/seed-test-data.ts"
+    command: sh -c "npm install --silent && npx prisma generate && npx prisma db push --accept-data-loss && npx ts-node ./scripts/import-csv.ts && npx ts-node ./scripts/seed-test-data.ts"
     restart: "no"
 
   # --- Frontend (Angular) ---
