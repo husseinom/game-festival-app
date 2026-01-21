@@ -267,6 +267,14 @@
   display: block;
 }
 
+/* Warning Messages */
+.warning {
+  color: #ffc107;
+  font-size: 12px;
+  margin-top: 4px;
+  display: block;
+}
+
 /* Max Info */
 .max-info {
   font-size: 12px;

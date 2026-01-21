@@ -9,12 +9,15 @@
         formControlName="festival_id"
       >
         <option [value]="null" disabled>Sélectionner un festival</option>
-        @for (festival of festivals(); track festival.id) {
+        @for (festival of activeFestivals(); track festival.id) {
           <option [value]="festival.id">
             {{ festival.name }} - {{ festival.location }}
           </option>
         }
       </select>
+      @if (activeFestivals().length === 0) {
+        <span class="warning">Aucun festival actif disponible</span>
+      }
       @if (form.get('festival_id')?.hasError('required') && form.get('festival_id')?.touched) {
         <span class="error">
           Le festival est obligatoire

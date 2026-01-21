@@ -71,6 +71,20 @@ export const createReservation = async (data: any) => {
     tables
   } = data;
 
+  // Vérifier que le festival existe et n'est pas terminé
+  const festival = await prisma.festival.findUnique({
+    where: { id: Number(festival_id) }
+  });
+
+  if (!festival) {
+    throw new Error(`Le festival avec l'ID ${festival_id} n'existe pas.`);
+  }
+
+  const now = new Date();
+  if (festival.endDate < now) {
+    throw new Error(`Impossible de créer une réservation : le festival "${festival.name}" est terminé depuis le ${festival.endDate.toLocaleDateString('fr-FR')}.`);
+  }
+
   const parsedGamePublisherId = game_publisher_id ? Number(game_publisher_id) : null;
 
   return prisma.$transaction(async (tx) => {

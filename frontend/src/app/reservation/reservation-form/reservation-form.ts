@@ -31,6 +31,12 @@ export class ReservationForm {
   festivals = this.festivalService.festivals;
   reservants = this.reservantService.reservants;
 
+  // Festivals actifs (non terminés)
+  activeFestivals = computed(() => {
+    const now = new Date();
+    return this.festivals().filter(f => new Date(f.endDate) >= now);
+  });
+
   // Constante pour la conversion (accessible dans le template)
   readonly M2_PER_TABLE = M2_PER_TABLE_UNIT;
 
