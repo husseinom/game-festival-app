@@ -98,15 +98,15 @@ export const INVOICE_STATUS_LABELS: Record<InvoiceStatus, string> = {
 };
 
 export const TABLE_SIZE_LABELS: Record<TableSize, string> = {
-  'STANDARD': 'Standard (4 m²)',
-  'LARGE': 'Grande (8 m²)',
-  'CITY': 'Mairie'
+  'STANDARD': 'Petite table',
+  'LARGE': 'Grande table',
+  'CITY': 'Table de la mairie'
 };
 
 export const GAME_SIZE_LABELS: Record<GameSize, string> = {
-  'SMALL': 'Petit (2 m²)',
-  'STANDARD': 'Standard (4 m²)',
-  'LARGE': 'Grand (8 m²)'
+  'SMALL': 'Petit jeu (0.5 table)',
+  'STANDARD': 'Jeu standard (1 table)',
+  'LARGE': 'Grand jeu (2 tables)'
 };
 
 export interface CreateReservationDTO {

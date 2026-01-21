@@ -3,11 +3,11 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ReservationService } from '../services/reservation.service';
 import { Location, CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import {
-  Reservation,
-  ReservationStatus,
-  RESERVATION_STATUS_LABELS,
-  InvoiceStatus,
+import { 
+  Reservation, 
+  ReservationStatus, 
+  RESERVATION_STATUS_LABELS, 
+  InvoiceStatus, 
   INVOICE_STATUS_LABELS,
   FestivalGame,
   M2_PER_TABLE_UNIT,
@@ -60,13 +60,13 @@ export class ReservationDetail {
 
   readonly publisher = computed(() => this.reservation()?.publisher ?? null);
   readonly reservant = computed(() => this.reservation()?.reservant ?? null);
-
+  
   // Jeux disponibles de l'éditeur
   readonly publisherGames = signal<GameDto[]>([]);
-
+  
   // Zones de plan disponibles (pour le placement)
   readonly availableMapZones = signal<MapZone[]>([]);
-
+  
   // États UI
   readonly isAddingGames = signal(false);
   readonly selectedGameId = signal<number | null>(null);
@@ -74,8 +74,7 @@ export class ReservationDetail {
   readonly selectedGameSize = signal<GameSize>('STANDARD');
   readonly selectedAllocatedTables = signal(1);
   readonly isLoading = signal(false);
-  readonly selectedTargetMapZoneId = signal<number | null>(null);
-
+  
   // Pour le placement de jeu dans une zone
   readonly editingGameId = signal<number | null>(null);
   readonly selectedMapZoneId = signal<number | null>(null);
@@ -115,9 +114,12 @@ export class ReservationDetail {
     // Charger les map zones du festival
     this.mapZoneService.getByFestivalObs(r.festival_id).subscribe({
       next: (zones: MapZone[]) => {
-        // On ne filtre plus les zones pour permettre à l'utilisateur de placer des jeux
-        // sur n'importe quelle zone du festival, même celle non payée dans la réservation
-        this.availableMapZones.set(zones);
+        // Filtrer les MapZones pour ne garder que celles qui appartiennent 
+        // aux zones tarifaires de la réservation
+        const filteredZones = reservationPriceZoneIds.length > 0
+          ? zones.filter(z => reservationPriceZoneIds.includes(z.price_zone_id))
+          : zones;
+        this.availableMapZones.set(filteredZones);
       },
       error: (err: any) => console.error('Erreur chargement zones:', err)
     });
@@ -171,7 +173,7 @@ export class ReservationDetail {
   updateStatus(newStatus: ReservationStatus): void {
     const r = this.reservation();
     if (!r) return;
-
+    
     this.isLoading.set(true);
     this.reservationService.updateStatus(r.reservation_id, newStatus).subscribe({
       next: () => {
@@ -192,7 +194,7 @@ export class ReservationDetail {
   markAsInvoiced(): void {
     const r = this.reservation();
     if (!r) return;
-
+    
     this.isLoading.set(true);
     this.reservationService.markAsInvoiced(r.reservation_id).subscribe({
       next: () => {
@@ -209,7 +211,7 @@ export class ReservationDetail {
   markAsPaid(): void {
     const r = this.reservation();
     if (!r) return;
-
+    
     this.isLoading.set(true);
     this.reservationService.markAsPaid(r.reservation_id).subscribe({
       next: () => {
@@ -226,7 +228,7 @@ export class ReservationDetail {
   applyPartnerDiscount(): void {
     const r = this.reservation();
     if (!r) return;
-
+    
     this.isLoading.set(true);
     this.reservationService.applyPartnerDiscount(r.reservation_id).subscribe({
       next: () => {
@@ -247,7 +249,7 @@ export class ReservationDetail {
   requestGameList(): void {
     const r = this.reservation();
     if (!r) return;
-
+    
     this.isLoading.set(true);
     this.reservationService.requestGameList(r.reservation_id).subscribe({
       next: () => {
@@ -264,7 +266,7 @@ export class ReservationDetail {
   markGameListReceived(): void {
     const r = this.reservation();
     if (!r) return;
-
+    
     this.isLoading.set(true);
     this.reservationService.markGameListReceived(r.reservation_id).subscribe({
       next: () => {
@@ -292,7 +294,9 @@ export class ReservationDetail {
     const gameSize = this.selectedGameSize();
     const copyCount = this.selectedCopyCount();
     const units = getGameUnits(gameSize);
-    this.selectedAllocatedTables.set(units * copyCount);
+    const result = units * copyCount;
+    console.log('[updateAllocatedTables] gameSize:', gameSize, 'units:', units, 'copyCount:', copyCount, 'result:', result);
+    this.selectedAllocatedTables.set(result);
   }
 
   // ============================================
@@ -302,7 +306,7 @@ export class ReservationDetail {
   onGameIdChange(event: Event): void {
     const target = event.target as HTMLSelectElement;
     const value = target.value;
-    this.selectedGameId.set(value && value !== 'null' ? Number(value) : null);
+    this.selectedGameId.set(value ? Number(value) : null);
   }
 
   onCopyCountChange(event: Event): void {
@@ -313,8 +317,11 @@ export class ReservationDetail {
 
   onGameSizeChange(event: Event): void {
     const target = event.target as HTMLSelectElement;
-    this.selectedGameSize.set(target.value as GameSize);
+    const newSize = target.value as GameSize;
+    console.log('[onGameSizeChange] New size selected:', newSize);
+    this.selectedGameSize.set(newSize);
     this.updateAllocatedTables();
+    console.log('[onGameSizeChange] Allocated tables updated to:', this.selectedAllocatedTables());
   }
 
   onAllocatedTablesChange(event: Event): void {
@@ -333,48 +340,31 @@ export class ReservationDetail {
     this.selectedTableSize.set(target.value as TableSize);
   }
 
-  onTargetMapZoneChange(event: Event): void {
-    const target = event.target as HTMLSelectElement;
-    const val = target.value === 'null' ? null : Number(target.value);
-    this.selectedTargetMapZoneId.set(val);
-  }
-
   addSelectedGame(): void {
     const r = this.reservation();
     const gameId = this.selectedGameId();
     const copyCount = this.selectedCopyCount();
     const gameSize = this.selectedGameSize();
     const allocatedTables = this.selectedAllocatedTables();
-    const targetZoneId = this.selectedTargetMapZoneId();
-
+    
+    console.log('[addSelectedGame] Sending data:', { gameId, copyCount, gameSize, allocatedTables });
+    
     if (!r || !gameId) return;
-
+    
     this.isLoading.set(true);
-    this.reservationService.addGames(r.reservation_id, [{
-      game_id: gameId,
+    this.reservationService.addGames(r.reservation_id, [{ 
+      game_id: gameId, 
       copy_count: copyCount,
       game_size: gameSize,
       allocated_tables: allocatedTables
     }]).subscribe({
-      next: (updatedReservation: Reservation) => {
-        this.reservation.set(updatedReservation);
-
-        if (targetZoneId) {
-          // Filtrer les jeux nouvellement ajoutés qui ne sont pas placés
-          const unplacedGames = updatedReservation.games?.filter((g: FestivalGame) =>
-            g.game_id === gameId && g.map_zone_id === null
-          ) || [];
-
-          if (unplacedGames.length > 0) {
-            this.placeGamesSequentially(unplacedGames, targetZoneId);
-          } else {
-            this.resetAddGameForm();
-            this.isLoading.set(false);
-          }
-        } else {
-          this.resetAddGameForm();
-          this.isLoading.set(false);
-        }
+      next: () => {
+        this.refreshReservation();
+        this.selectedGameId.set(null);
+        this.selectedCopyCount.set(1);
+        this.selectedGameSize.set('STANDARD');
+        this.selectedAllocatedTables.set(1);
+        this.isLoading.set(false);
       },
       error: (err: any) => {
         console.error('Erreur ajout jeu:', err);
@@ -383,48 +373,10 @@ export class ReservationDetail {
     });
   }
 
-  private resetAddGameForm(): void {
-    this.refreshReservation();
-    this.selectedGameId.set(null);
-    this.selectedCopyCount.set(1);
-    this.selectedGameSize.set('STANDARD');
-    this.selectedAllocatedTables.set(1);
-    this.selectedTargetMapZoneId.set(null);
-  }
-
-  private placeGamesSequentially(games: FestivalGame[], zoneId: number, index = 0): void {
-    if (index >= games.length) {
-      this.resetAddGameForm();
-      this.isLoading.set(false);
-      return;
-    }
-
-    const game = games[index];
-    const zone = this.availableMapZones().find((z: MapZone) => z.id === zoneId);
-    let tableSize: TableSize = 'STANDARD';
-
-    // Heuristique simple pour le choix de table
-    if (game.game_size === 'LARGE' && zone?.large_tables && zone.large_tables > 0) {
-      tableSize = 'LARGE';
-    } else if (zone?.small_tables === 0 && zone?.large_tables && zone.large_tables > 0) {
-      tableSize = 'LARGE';
-    } else if (zone?.small_tables === 0 && zone?.city_tables && zone.city_tables > 0) {
-      tableSize = 'CITY';
-    }
-
-    this.reservationService.placeGame(game.id, zoneId, tableSize, game.allocated_tables).subscribe({
-      next: () => this.placeGamesSequentially(games, zoneId, index + 1),
-      error: (err: any) => {
-        console.error(`Erreur placement jeu ${game.id}:`, err);
-        this.placeGamesSequentially(games, zoneId, index + 1);
-      }
-    });
-  }
-
   markGamesReceived(): void {
     const r = this.reservation();
     if (!r) return;
-
+    
     this.isLoading.set(true);
     this.reservationService.markGamesReceived(r.reservation_id).subscribe({
       next: () => {
@@ -533,7 +485,7 @@ export class ReservationDetail {
   isZoneValidForGame(mapZone: MapZone): boolean {
     const r = this.reservation();
     if (!r?.festival_id) return false;
-
+    
     // Vérifier que la zone de plan appartient au même festival que la réservation
     return mapZone.festival_id === r.festival_id;
   }
@@ -551,8 +503,8 @@ export class ReservationDetail {
 
     this.isLoading.set(true);
     this.reservationService.placeGame(
-      festivalGame.id,
-      mapZoneId,
+      festivalGame.id, 
+      mapZoneId, 
       this.selectedTableSize(),
       festivalGame.allocated_tables || 1
     ).subscribe({
@@ -572,7 +524,7 @@ export class ReservationDetail {
   // Retirer un jeu d'une zone
   unplaceGame(festivalGameId: number): void {
     if (!confirm('Retirer ce jeu de sa zone ?')) return;
-
+    
     this.isLoading.set(true);
     this.reservationService.unplaceGame(festivalGameId).subscribe({
       next: () => {
@@ -590,12 +542,12 @@ export class ReservationDetail {
   private checkTableLimits(festivalGame: FestivalGame, mapZoneId: number): boolean {
     const r = this.reservation();
     const mapZone = this.availableMapZones().find(z => z.id === mapZoneId);
-
+    
     if (!r || !mapZone) return false;
 
     // Obtenir le type de table sélectionné
     const tableSize = this.selectedTableSize();
-
+    
     // Compter les tables déjà placées dans cette zone (du même type)
     const tablesAlreadyInZone = (r.games || [])
       .filter((g: FestivalGame) => g.map_zone_id === mapZoneId && g.id !== festivalGame.id && g.table_size === tableSize)
@@ -616,7 +568,7 @@ export class ReservationDetail {
     }
 
     const newTotal = tablesAlreadyInZone + (festivalGame.allocated_tables || 1);
-
+    
     return newTotal <= maxTables;
   }
 
@@ -630,7 +582,7 @@ export class ReservationDetail {
       // Calculer le max et used à partir des TableTypes
       let max = 0;
       let usedByOthers = 0;
-
+      
       if (mapZone.tableTypes && mapZone.tableTypes.length > 0) {
         for (const tt of mapZone.tableTypes) {
           max += tt.nb_total;
@@ -675,87 +627,5 @@ export class ReservationDetail {
     const r = this.reservation();
     if (!r?.games) return 0;
     return r.games.filter((g: FestivalGame) => g.map_zone_id !== null && g.map_zone_id !== undefined).length;
-  }
-
-  // Obtenir la disponibilité des tables pour une zone
-  getZoneTableAvailability(zone: MapZone): { total: number; totalAvailable: number } {
-    let total = 0;
-    let totalAvailable = 0;
-
-    if (zone.tableTypes && zone.tableTypes.length > 0) {
-      for (const tt of zone.tableTypes) {
-        total += tt.nb_total;
-        totalAvailable += tt.nb_available;
-      }
-    } else {
-      total = (zone.small_tables || 0) + (zone.large_tables || 0) + (zone.city_tables || 0);
-      totalAvailable = total;
-    }
-
-    return { total, totalAvailable };
-  }
-
-  // Obtenir la disponibilité d'un type de table pour la zone sélectionnée
-  getTableTypeAvailability(tableType: string): { total: number; available: number } {
-    const zoneId = this.selectedMapZoneId();
-    if (!zoneId) return { total: 0, available: 0 };
-
-    const zone = this.availableMapZones().find(z => z.id === zoneId);
-    if (!zone?.tableTypes) return { total: 0, available: 0 };
-
-    const tt = zone.tableTypes.find(t => t.name === tableType);
-    if (!tt) return { total: 0, available: 0 };
-
-    return { total: tt.nb_total, available: tt.nb_available };
-  }
-
-  // Obtenir la disponibilité détaillée de la zone sélectionnée
-  getSelectedZoneAvailability(): {
-    standard: { total: number; available: number };
-    large: { total: number; available: number };
-    city: { total: number; available: number }
-  } {
-    const zoneId = this.selectedMapZoneId();
-    const defaultResult = {
-      standard: { total: 0, available: 0 },
-      large: { total: 0, available: 0 },
-      city: { total: 0, available: 0 }
-    };
-
-    if (!zoneId) return defaultResult;
-
-    const zone = this.availableMapZones().find(z => z.id === zoneId);
-    if (!zone?.tableTypes) return defaultResult;
-
-    const result = { ...defaultResult };
-    for (const tt of zone.tableTypes) {
-      if (tt.name === 'STANDARD') {
-        result.standard = { total: tt.nb_total, available: tt.nb_available };
-      } else if (tt.name === 'LARGE') {
-        result.large = { total: tt.nb_total, available: tt.nb_available };
-      } else if (tt.name === 'CITY') {
-        result.city = { total: tt.nb_total, available: tt.nb_available };
-      }
-    }
-    return result;
-  }
-
-  // Calculer la consommation de tables selon la taille du jeu et le type de table
-  getTableConsumption(gameSize: GameSize | undefined, tableSize: TableSize): number {
-    const gameSizeUnits: Record<string, number> = {
-      'SMALL': 0.5,
-      'STANDARD': 1,
-      'LARGE': 2
-    };
-
-    const gameUnits = gameSizeUnits[gameSize || 'STANDARD'] ?? 1;
-
-    if (tableSize === 'LARGE') {
-      // Sur une grande table: 1 table LARGE = 2 unités de capacité
-      return gameUnits / 2;
-    } else {
-      // Sur une table STANDARD ou CITY: consommation = unités du jeu
-      return gameUnits;
-    }
   }
 }

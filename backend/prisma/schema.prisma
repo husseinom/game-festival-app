@@ -274,8 +274,8 @@ model FestivalGame {
 model TableType {
   id              Int       @id @default(autoincrement())
   name            TableSize // "STANDARD", "LARGE", "CITY"
-  nb_total        Int       // Stock total disponible
-  nb_available    Int       // Stock restant (décrémenté à l'affectation)
+  nb_total        Float     // Stock total disponible (peut être décimal pour les demi-tables)
+  nb_available    Float     // Stock restant (décrémenté à l'affectation, peut être 0.5, 1.5, etc.)
   nb_total_player Int       // Capacité joueurs (ex: 4)
   
   map_zone_id     Int
