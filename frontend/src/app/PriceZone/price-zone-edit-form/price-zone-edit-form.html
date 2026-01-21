@@ -1,0 +1,102 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit($event)" class="price-zone-edit-form">
+  <h2>Modifier la Zone de Prix: {{ priceZone().name }}</h2>
+  
+  <!-- Table Price -->
+  <div class="form-group">
+    <label for="table_price">Prix de la Table (€)</label>
+    <input 
+      type="number" 
+      formControlName="table_price" 
+      placeholder="Prix de la table"
+      [class.error]="form.controls.table_price.invalid && form.controls.table_price.touched"
+      min="0"
+      step="0.01"
+      required
+    />
+    @if(form.controls.table_price.invalid && form.controls.table_price.touched) {
+      <div class="error-message">
+        Le prix de la table est requis et doit être positif
+      </div>
+    }
+  </div>
+
+  <!-- Table counts - only if there are 2 price zones -->
+  @if(canEditTables()) {
+    <div class="tables-section">
+      <h3>Nombre de Tables</h3>
+      <p class="info-text">⚠️ Modifier le nombre de tables affectera l'autre zone de prix</p>
+      
+      <div class="form-group">
+        <label for="small_tables">Petites Tables (Max: {{ maxTables().small }})</label>
+        <input 
+          type="number" 
+          formControlName="small_tables" 
+          [max]="maxTables().small"
+          min="0"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="large_tables">Grandes Tables (Max: {{ maxTables().large }})</label>
+        <input 
+          type="number" 
+          formControlName="large_tables" 
+          [max]="maxTables().large"
+          min="0"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="city_tables">Tables Mairie (Max: {{ maxTables().city }})</label>
+        <input 
+          type="number" 
+          formControlName="city_tables" 
+          [max]="maxTables().city"
+          min="0"
+          required
+        />
+      </div>
+    </div>
+  }
+
+  <!-- Map Zones Selection -->
+  @if(availableMapZones().length > 0) {
+    <div class="map-zones-section">
+      <h3>Zones Plan</h3>
+      <p class="info-text">⚠️ Assigner une zone plan la retirera de l'autre zone de prix</p>
+      
+      <div class="map-zones-list">
+        @for (mapZone of availableMapZones(); track mapZone.id) {
+          <label class="map-zone-checkbox">
+            <input 
+              type="checkbox"
+              [checked]="isMapZoneSelected(mapZone.id)"
+              (change)="toggleMapZone(mapZone.id)"
+            />
+            <span>{{ mapZone.name }}</span>
+            <small>(P: {{ mapZone.small_tables }}, G: {{ mapZone.large_tables }}, M: {{ mapZone.city_tables }})</small>
+          </label>
+        }
+      </div>
+    </div>
+  }
+
+  <div class="form-actions">
+    <button 
+      type="submit" 
+      class="btn-submit"
+      [disabled]="form.invalid"
+    >
+      ✅ Mettre à Jour
+    </button>
+    <button 
+      type="button" 
+      class="btn-cancel"
+      (click)="onCancel()"
+    >
+      ❌ Annuler
+    </button>
+  </div>
+</form>

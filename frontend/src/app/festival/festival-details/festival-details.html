@@ -11,21 +11,38 @@
             <div class="festival-info">{{fest.location}}</div>
         </div>
 
+        <!-- Edit Form Section -->
+        @if(showEditForm() && editingPriceZone()) {
+            <div class="form-section">
+                <app-price-zone-edit-form 
+                    [priceZone]="editingPriceZone()!"
+                    [otherPriceZone]="otherPriceZone()"
+                    [festivalMapZones]="festivalMapZones()"
+                    [canEditTables]="canEditPriceZones()"
+                    (updated)="onUpdatePriceZone($event)"
+                    (cancelled)="toggleEditForm()"
+                >
+                </app-price-zone-edit-form>
+            </div>
+        }
+
         <h3 class="priceZone-section-title">Zones de Prix du Festival</h3>
         
         <div class="priceZone-grid">
-            @for (pz of priceZones(); track pz.id) {
+            @for (pz of festivalPZ(); track pz.id) {
                 <app-price-zone-card
-                [pz]="pz"
-                (card)="goToPriceZone($event)"
+                    [pz]="pz"
+                    [canEdit]="canEditPriceZones()"
+                    [isEditing]="selectedPriceZoneId() === pz.id"
+                    (card)="goToPriceZone($event)"
+                    (edit)="onEditPriceZone($event)"
+                    (remove)="onDeletePriceZone($event)"
                 >
-                    
                 </app-price-zone-card>
             }
         </div>
 
-    } 
-    @else {
+    } @else {
         <div class="state-message">
             <p>Festival inconnu.</p>
         </div>

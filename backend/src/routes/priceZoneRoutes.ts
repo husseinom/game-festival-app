@@ -16,6 +16,11 @@ router.get('/:priceZoneId/reservations', verifyToken, priceZoneControlleer.getRe
 
 router.get('/:priceZoneId/games', verifyToken, priceZoneControlleer.getGamesByPriceZone)
 
+router.put('/:id', verifyToken, priceZoneControlleer.updatePriceZone);
+
+
+router.delete('/:id', verifyToken, priceZoneControlleer.deletePriceZone);
+
 router.post(
     '/add',
     verifyToken,

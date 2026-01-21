@@ -1,25 +1,25 @@
 @let zone = pz();
 @if(zone){
-<mat-card class="pz-card" [class.selected]="isSelected()" (click)="onCardClick($event)">
-  <mat-card-header class="card-header">
-    <mat-card-title class="pz-name">{{ zone?.name }}</mat-card-title>
+<mat-card class="pz-card" [class.selected]="isSelected()" [class.editing]="isEditing()">
+  <mat-card-header class="card-header" (click)="onCardClick($event)">
+    <mat-card-title class="pz-name">{{ zone.name.name }}</mat-card-title>
   </mat-card-header>
 
-  <mat-card-content class="pz-info">
+  <mat-card-content class="pz-info" (click)="onCardClick($event)">
     <div class="pz-row">
       <strong>Prix de la table: </strong>
-      <span>{{ zone?.table_price }} €</span>
+      <span>{{ zone.table_price }} €</span>
     </div>
 
     <div class="pz-row">
       <strong>Total tables: </strong>
-      <span>{{ zone?.total_tables }}</span>
+      <span>{{ zone.total_tables || (zone.small_tables + zone.large_tables + zone.city_tables) }}</span>
     </div>
 
     <div class="pz-row">
       <strong>Zones Plan: </strong>
       <span>
-        @if(zone?.mapZones?.length) {
+        @if(zone.mapZones && zone.mapZones.length > 0) {
           @for(mapZone of zone.mapZones; track mapZone.id) {
             <div>{{ mapZone.name }}</div>
           }
@@ -29,5 +29,18 @@
       </span>
     </div>
   </mat-card-content>
+
+  <mat-card-actions class="card-actions">
+    @if(canEdit()) {
+      <button mat-raised-button color="primary" class="edit-btn" (click)="onEditClick($event)">
+        <mat-icon>edit</mat-icon>
+        Modifier
+      </button>
+    }
+    <button mat-raised-button color="warn" class="delete-btn" (click)="onDeleteClick($event)">
+      <mat-icon>delete</mat-icon>
+      Supprimer
+    </button>
+  </mat-card-actions>
 </mat-card>
 }

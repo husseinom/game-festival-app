@@ -9,7 +9,7 @@ export const authGuard: CanActivateFn = (route, state) => {
 
   // If user is logged in, allow access
   if (authService.isLoggedIn()) {
-    console.log('✅ User already logged in');
+    // console.log('✅ User already logged in');
     return true;
   }
 
