@@ -100,6 +100,7 @@ export class ReservationDetail {
   }
 
   // Charge les zones de plan disponibles pour le festival de la réservation
+  // Filtrées par les zones tarifaires de la réservation
   private loadAvailableMapZones(): void {
     const r = this.reservation();
     if (!r?.festival_id) {
@@ -107,10 +108,18 @@ export class ReservationDetail {
       return;
     }
 
+    // Récupérer les IDs des zones tarifaires de la réservation
+    const reservationPriceZoneIds = (r.zones || []).map((z: any) => z.price_zone_id);
+
     // Charger les map zones du festival
     this.mapZoneService.getByFestivalObs(r.festival_id).subscribe({
       next: (zones: MapZone[]) => {
-        this.availableMapZones.set(zones);
+        // Filtrer les MapZones pour ne garder que celles qui appartiennent 
+        // aux zones tarifaires de la réservation
+        const filteredZones = reservationPriceZoneIds.length > 0
+          ? zones.filter(z => reservationPriceZoneIds.includes(z.price_zone_id))
+          : zones;
+        this.availableMapZones.set(filteredZones);
       },
       error: (err: any) => console.error('Erreur chargement zones:', err)
     });

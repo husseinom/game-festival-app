@@ -259,6 +259,34 @@ export const updateReservation = async (id: number, data: any) => {
 
 export const deleteReservation = async (id: number) => {
   return prisma.$transaction(async (tx) => {
+    // Récupérer tous les jeux placés de cette réservation
+    const placedGames = await tx.festivalGame.findMany({
+      where: { 
+        reservation_id: id,
+        map_zone_id: { not: null }
+      }
+    });
+
+    // Restaurer le stock de tables pour chaque jeu placé
+    for (const game of placedGames) {
+      if (game.map_zone_id && game.allocated_tables) {
+        const tableType = await tx.tableType.findFirst({
+          where: {
+            map_zone_id: game.map_zone_id,
+            name: game.table_size
+          }
+        });
+
+        if (tableType) {
+          await tx.tableType.update({
+            where: { id: tableType.id },
+            data: { nb_available: tableType.nb_available + game.allocated_tables }
+          });
+        }
+      }
+    }
+
+    // Supprimer les données liées
     await tx.festivalGame.deleteMany({ where: { reservation_id: id } });
     await tx.contactLog.deleteMany({ where: { reservation_id: id } });
     await tx.zoneReservation.deleteMany({ where: { reservation_id: id } });
