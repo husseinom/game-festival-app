@@ -3,11 +3,11 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ReservationService } from '../services/reservation.service';
 import { Location, CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { 
-  Reservation, 
-  ReservationStatus, 
-  RESERVATION_STATUS_LABELS, 
-  InvoiceStatus, 
+import {
+  Reservation,
+  ReservationStatus,
+  RESERVATION_STATUS_LABELS,
+  InvoiceStatus,
   INVOICE_STATUS_LABELS,
   FestivalGame,
   M2_PER_TABLE_UNIT,
@@ -60,13 +60,13 @@ export class ReservationDetail {
 
   readonly publisher = computed(() => this.reservation()?.publisher ?? null);
   readonly reservant = computed(() => this.reservation()?.reservant ?? null);
-  
+
   // Jeux disponibles de l'éditeur
   readonly publisherGames = signal<GameDto[]>([]);
-  
+
   // Zones de plan disponibles (pour le placement)
   readonly availableMapZones = signal<MapZone[]>([]);
-  
+
   // États UI
   readonly isAddingGames = signal(false);
   readonly selectedGameId = signal<number | null>(null);
@@ -74,7 +74,7 @@ export class ReservationDetail {
   readonly selectedGameSize = signal<GameSize>('STANDARD');
   readonly selectedAllocatedTables = signal(1);
   readonly isLoading = signal(false);
-  
+
   // Pour le placement de jeu dans une zone
   readonly editingGameId = signal<number | null>(null);
   readonly selectedMapZoneId = signal<number | null>(null);
@@ -173,7 +173,7 @@ export class ReservationDetail {
   updateStatus(newStatus: ReservationStatus): void {
     const r = this.reservation();
     if (!r) return;
-    
+
     this.isLoading.set(true);
     this.reservationService.updateStatus(r.reservation_id, newStatus).subscribe({
       next: () => {
@@ -194,7 +194,7 @@ export class ReservationDetail {
   markAsInvoiced(): void {
     const r = this.reservation();
     if (!r) return;
-    
+
     this.isLoading.set(true);
     this.reservationService.markAsInvoiced(r.reservation_id).subscribe({
       next: () => {
@@ -211,7 +211,7 @@ export class ReservationDetail {
   markAsPaid(): void {
     const r = this.reservation();
     if (!r) return;
-    
+
     this.isLoading.set(true);
     this.reservationService.markAsPaid(r.reservation_id).subscribe({
       next: () => {
@@ -228,7 +228,7 @@ export class ReservationDetail {
   applyPartnerDiscount(): void {
     const r = this.reservation();
     if (!r) return;
-    
+
     this.isLoading.set(true);
     this.reservationService.applyPartnerDiscount(r.reservation_id).subscribe({
       next: () => {
@@ -249,7 +249,7 @@ export class ReservationDetail {
   requestGameList(): void {
     const r = this.reservation();
     if (!r) return;
-    
+
     this.isLoading.set(true);
     this.reservationService.requestGameList(r.reservation_id).subscribe({
       next: () => {
@@ -266,7 +266,7 @@ export class ReservationDetail {
   markGameListReceived(): void {
     const r = this.reservation();
     if (!r) return;
-    
+
     this.isLoading.set(true);
     this.reservationService.markGameListReceived(r.reservation_id).subscribe({
       next: () => {
@@ -341,12 +341,12 @@ export class ReservationDetail {
     const copyCount = this.selectedCopyCount();
     const gameSize = this.selectedGameSize();
     const allocatedTables = this.selectedAllocatedTables();
-    
+
     if (!r || !gameId) return;
-    
+
     this.isLoading.set(true);
-    this.reservationService.addGames(r.reservation_id, [{ 
-      game_id: gameId, 
+    this.reservationService.addGames(r.reservation_id, [{
+      game_id: gameId,
       copy_count: copyCount,
       game_size: gameSize,
       allocated_tables: allocatedTables
@@ -369,7 +369,7 @@ export class ReservationDetail {
   markGamesReceived(): void {
     const r = this.reservation();
     if (!r) return;
-    
+
     this.isLoading.set(true);
     this.reservationService.markGamesReceived(r.reservation_id).subscribe({
       next: () => {
@@ -478,7 +478,7 @@ export class ReservationDetail {
   isZoneValidForGame(mapZone: MapZone): boolean {
     const r = this.reservation();
     if (!r?.festival_id) return false;
-    
+
     // Vérifier que la zone de plan appartient au même festival que la réservation
     return mapZone.festival_id === r.festival_id;
   }
@@ -496,8 +496,8 @@ export class ReservationDetail {
 
     this.isLoading.set(true);
     this.reservationService.placeGame(
-      festivalGame.id, 
-      mapZoneId, 
+      festivalGame.id,
+      mapZoneId,
       this.selectedTableSize(),
       festivalGame.allocated_tables || 1
     ).subscribe({
@@ -517,7 +517,7 @@ export class ReservationDetail {
   // Retirer un jeu d'une zone
   unplaceGame(festivalGameId: number): void {
     if (!confirm('Retirer ce jeu de sa zone ?')) return;
-    
+
     this.isLoading.set(true);
     this.reservationService.unplaceGame(festivalGameId).subscribe({
       next: () => {
@@ -535,12 +535,12 @@ export class ReservationDetail {
   private checkTableLimits(festivalGame: FestivalGame, mapZoneId: number): boolean {
     const r = this.reservation();
     const mapZone = this.availableMapZones().find(z => z.id === mapZoneId);
-    
+
     if (!r || !mapZone) return false;
 
     // Obtenir le type de table sélectionné
     const tableSize = this.selectedTableSize();
-    
+
     // Compter les tables déjà placées dans cette zone (du même type)
     const tablesAlreadyInZone = (r.games || [])
       .filter((g: FestivalGame) => g.map_zone_id === mapZoneId && g.id !== festivalGame.id && g.table_size === tableSize)
@@ -561,7 +561,7 @@ export class ReservationDetail {
     }
 
     const newTotal = tablesAlreadyInZone + (festivalGame.allocated_tables || 1);
-    
+
     return newTotal <= maxTables;
   }
 
@@ -575,7 +575,7 @@ export class ReservationDetail {
       // Calculer le max et used à partir des TableTypes
       let max = 0;
       let usedByOthers = 0;
-      
+
       if (mapZone.tableTypes && mapZone.tableTypes.length > 0) {
         for (const tt of mapZone.tableTypes) {
           max += tt.nb_total;
@@ -620,5 +620,68 @@ export class ReservationDetail {
     const r = this.reservation();
     if (!r?.games) return 0;
     return r.games.filter((g: FestivalGame) => g.map_zone_id !== null && g.map_zone_id !== undefined).length;
+  }
+
+  // Obtenir la disponibilité des tables pour une zone
+  getZoneTableAvailability(zone: MapZone): { total: number; totalAvailable: number } {
+    let total = 0;
+    let totalAvailable = 0;
+
+    if (zone.tableTypes && zone.tableTypes.length > 0) {
+      for (const tt of zone.tableTypes) {
+        total += tt.nb_total;
+        totalAvailable += tt.nb_available;
+      }
+    } else {
+      total = (zone.small_tables || 0) + (zone.large_tables || 0) + (zone.city_tables || 0);
+      totalAvailable = total;
+    }
+
+    return { total, totalAvailable };
+  }
+
+  // Obtenir la disponibilité d'un type de table pour la zone sélectionnée
+  getTableTypeAvailability(tableType: string): { total: number; available: number } {
+    const zoneId = this.selectedMapZoneId();
+    if (!zoneId) return { total: 0, available: 0 };
+
+    const zone = this.availableMapZones().find(z => z.id === zoneId);
+    if (!zone?.tableTypes) return { total: 0, available: 0 };
+
+    const tt = zone.tableTypes.find(t => t.name === tableType);
+    if (!tt) return { total: 0, available: 0 };
+
+    return { total: tt.nb_total, available: tt.nb_available };
+  }
+
+  // Obtenir la disponibilité détaillée de la zone sélectionnée
+  getSelectedZoneAvailability(): {
+    standard: { total: number; available: number };
+    large: { total: number; available: number };
+    city: { total: number; available: number }
+  } {
+    const zoneId = this.selectedMapZoneId();
+    const defaultResult = {
+      standard: { total: 0, available: 0 },
+      large: { total: 0, available: 0 },
+      city: { total: 0, available: 0 }
+    };
+
+    if (!zoneId) return defaultResult;
+
+    const zone = this.availableMapZones().find(z => z.id === zoneId);
+    if (!zone?.tableTypes) return defaultResult;
+
+    const result = { ...defaultResult };
+    for (const tt of zone.tableTypes) {
+      if (tt.name === 'STANDARD') {
+        result.standard = { total: tt.nb_total, available: tt.nb_available };
+      } else if (tt.name === 'LARGE') {
+        result.large = { total: tt.nb_total, available: tt.nb_available };
+      } else if (tt.name === 'CITY') {
+        result.city = { total: tt.nb_total, available: tt.nb_available };
+      }
+    }
+    return result;
   }
 }

@@ -1,307 +1,340 @@
 @if (reservation()) {
-  @let r = reservation()!;
-  <div class="details-grid">
-    <div class="meta">
-      <h2>Détails de la réservation</h2>
-      <p><strong>Id:</strong> {{ r.reservation_id }}</p>
-      <p><strong>Statut:</strong> <span class="status-badge" [class]="'status-' + (r.status || 'unknown')">{{ getStatusLabel(r.status) }}</span></p>
-      
-      <!-- Réservant -->
-      <h3>Réservant</h3>
-      <p><strong>Nom:</strong> {{ r.reservant?.name || 'Non défini' }}</p>
-      <p><strong>Type:</strong> {{ (r.reservant?.type || 'PUBLISHER') | reservantTypeLabel }}</p>
-      @if (isPartner) {
-        <p class="partner-badge">🤝 Partenaire</p>
+@let r = reservation()!;
+<div class="details-grid">
+  <div class="meta">
+    <h2>Détails de la réservation</h2>
+    <p><strong>Id:</strong> {{ r.reservation_id }}</p>
+    <p><strong>Statut:</strong> <span class="status-badge" [class]="'status-' + (r.status || 'unknown')">{{
+        getStatusLabel(r.status) }}</span></p>
+
+    <!-- Réservant -->
+    <h3>Réservant</h3>
+    <p><strong>Nom:</strong> {{ r.reservant?.name || 'Non défini' }}</p>
+    <p><strong>Type:</strong> {{ (r.reservant?.type || 'PUBLISHER') | reservantTypeLabel }}</p>
+    @if (isPartner) {
+    <p class="partner-badge">🤝 Partenaire</p>
+    }
+
+    <!-- Éditeur -->
+    <p class="publisher-row">
+      <strong>Éditeur:</strong>
+      <span class="publisher-info">
+        @if (r.publisher && r.publisher.logoUrl) {
+        <img [src]="r.publisher.logoUrl" alt="Logo éditeur" class="publisher-logo">
+        }
+        {{ r.publisher?.name || 'Inconnu' }}
+      </span>
+    </p>
+    <p><strong>Festival:</strong> {{ r.festival?.name || 'Non défini' }}</p>
+
+    <h3>Informations de réservation</h3>
+    <p><strong>Éditeur présent:</strong> {{ r.is_publisher_presenting ? 'Oui' : 'Non' }}</p>
+    <p><strong>Liste de jeux demandée:</strong> {{ r.game_list_requested ? 'Oui' : 'Non' }}</p>
+    <p><strong>Liste de jeux reçue:</strong> {{ r.game_list_received ? 'Oui' : 'Non' }}</p>
+    <p><strong>Jeux reçus:</strong> {{ r.games_received ? 'Oui' : 'Non' }}</p>
+
+    <h3>Détails financiers</h3>
+    <p><strong>Statut facture:</strong> <span class="invoice-badge"
+        [class]="'invoice-' + (r.invoice_status || 'PENDING')">{{ getInvoiceStatusLabel(r.invoice_status) }}</span></p>
+    <p><strong>Remise (€):</strong> {{ r.discount_amount || 0 }}</p>
+    <p><strong>Tables en remise:</strong> {{ r.discount_tables || 0 }}</p>
+    <p><strong>Prises électriques:</strong> {{ r.nb_electrical_outlets }} ({{ r.nb_electrical_outlets * 250 }}€)</p>
+
+    @if (r.zones && r.zones.length > 0) {
+    <h3>Zones et espace réservé</h3>
+    <div class="zones-list">
+      @for (zone of r.zones; track zone.id) {
+      <div class="zone-item">
+        <p><strong>Zone:</strong> {{ zone.priceZone.name }}</p>
+        <p><strong>Tables:</strong> {{ zone.table_count }} <span class="m2-equiv">({{ zone.space_m2 || zone.table_count
+            * 4 }} m²)</span></p>
+        <p><strong>Prix/table:</strong> {{ zone.priceZone.table_price }}€</p>
+      </div>
       }
-      
-      <!-- Éditeur -->
-      <p class="publisher-row">
-        <strong>Éditeur:</strong>
-        <span class="publisher-info">
-          @if (r.publisher && r.publisher.logoUrl) {
-            <img [src]="r.publisher.logoUrl" alt="Logo éditeur" class="publisher-logo">
-          }
-          {{ r.publisher?.name || 'Inconnu' }}
-        </span>
-      </p>
-      <p><strong>Festival:</strong> {{ r.festival?.name || 'Non défini' }}</p>
-      
-      <h3>Informations de réservation</h3>
-      <p><strong>Éditeur présent:</strong> {{ r.is_publisher_presenting ? 'Oui' : 'Non' }}</p>
-      <p><strong>Liste de jeux demandée:</strong> {{ r.game_list_requested ? 'Oui' : 'Non' }}</p>
-      <p><strong>Liste de jeux reçue:</strong> {{ r.game_list_received ? 'Oui' : 'Non' }}</p>
-      <p><strong>Jeux reçus:</strong> {{ r.games_received ? 'Oui' : 'Non' }}</p>
+      <div class="zone-total">
+        <p><strong>Total espace:</strong> {{ getTotalTables() }} tables = {{ getTotalM2() }} m²</p>
+        <p><strong>Montant final de la facture:</strong> {{ r.final_invoice_amount || 'N/A' }}€</p>
+      </div>
+    </div>
+    }
 
-      <h3>Détails financiers</h3>
-      <p><strong>Statut facture:</strong> <span class="invoice-badge" [class]="'invoice-' + (r.invoice_status || 'PENDING')">{{ getInvoiceStatusLabel(r.invoice_status) }}</span></p>
-      <p><strong>Remise (€):</strong> {{ r.discount_amount || 0 }}</p>
-      <p><strong>Tables en remise:</strong> {{ r.discount_tables || 0 }}</p>
-      <p><strong>Prises électriques:</strong> {{ r.nb_electrical_outlets }} ({{ r.nb_electrical_outlets * 250 }}€)</p>
+    @if (r.comments) {
+    <h3>Commentaires</h3>
+    <p class="comments">{{ r.comments }}</p>
+    }
 
-      @if (r.zones && r.zones.length > 0) {
-        <h3>Zones et espace réservé</h3>
-        <div class="zones-list">
-          @for (zone of r.zones; track zone.id) {
-            <div class="zone-item">
-              <p><strong>Zone:</strong> {{ zone.priceZone.name }}</p>
-              <p><strong>Tables:</strong> {{ zone.table_count }} <span class="m2-equiv">({{ zone.space_m2 || zone.table_count * 4 }} m²)</span></p>
-              <p><strong>Prix/table:</strong> {{ zone.priceZone.table_price }}€</p>
-            </div>
+    <!-- Section Jeux -->
+    <h3>Jeux ({{ r.games?.length || 0 }})</h3>
+
+    <!-- Workflow jeux -->
+    <div class="games-workflow">
+      @if (canRequestGameList) {
+      <button class="btn btn-primary" (click)="requestGameList()" [disabled]="isLoading()">
+        📋 Demander la liste des jeux
+      </button>
+      }
+      @if (canMarkGameListReceived) {
+      <p class="workflow-status">⏳ En attente de la liste des jeux...</p>
+      <button class="btn btn-success" (click)="markGameListReceived()" [disabled]="isLoading()">
+        ✅ Liste des jeux reçue
+      </button>
+      }
+      @if (canAddGames) {
+      <button class="btn btn-secondary" (click)="toggleAddGames()">
+        {{ isAddingGames() ? '❌ Annuler' : '➕ Ajouter un jeu' }}
+      </button>
+      }
+    </div>
+
+    <!-- Formulaire ajout jeu -->
+    @if (isAddingGames() && canAddGames) {
+    <div class="add-game-form">
+      <h4>Ajouter un jeu du catalogue</h4>
+      <div class="form-row">
+        <select [value]="selectedGameId()" (change)="onGameIdChange($event)" class="form-control">
+          <option [value]="null">-- Sélectionner un jeu --</option>
+          @for (game of publisherGames(); track game.id) {
+          <option [value]="game.id">{{ game.name }}</option>
           }
-          <div class="zone-total">
-            <p><strong>Total espace:</strong> {{ getTotalTables() }} tables = {{ getTotalM2() }} m²</p>
-            <p><strong>Montant final de la facture:</strong> {{ r.final_invoice_amount || 'N/A' }}€</p>
+        </select>
+        <input type="number" [value]="selectedCopyCount()" (input)="onCopyCountChange($event)" min="1" max="20"
+          class="form-control copy-count" placeholder="Nb ex.">
+      </div>
+      <div class="form-row">
+        <select [value]="selectedGameSize()" (change)="onGameSizeChange($event)" class="form-control">
+          @for (opt of gameSizeOptions; track opt.value) {
+          <option [value]="opt.value">{{ opt.label }}</option>
+          }
+        </select>
+        <label class="tables-info">
+          Tables: <input type="number" [value]="selectedAllocatedTables()" (input)="onAllocatedTablesChange($event)"
+            min="0.5" max="10" step="0.5" class="form-control allocated-tables">
+        </label>
+        <button class="btn btn-primary" (click)="addSelectedGame()" [disabled]="!selectedGameId() || isLoading()">
+          Ajouter
+        </button>
+      </div>
+      @if (publisherGames().length === 0) {
+      <p class="no-games-warning">⚠️ Aucun jeu dans le catalogue de cet éditeur</p>
+      }
+    </div>
+    }
+
+    <!-- Liste des jeux ajoutés -->
+    @if (r.games && r.games.length > 0) {
+    <div class="games-list">
+      <!-- Résumé d'utilisation des zones -->
+      @if (getZoneUsageSummary().length > 0) {
+      <div class="zone-usage-summary">
+        <h4>Occupation des zones</h4>
+        @for (zone of getZoneUsageSummary(); track zone.priceZoneId) {
+        <div class="zone-usage-bar">
+          <span class="zone-name">{{ zone.zoneName }}</span>
+          <div class="usage-bar">
+            <div class="usage-fill" [style.width.%]="(zone.used / zone.max) * 100"
+              [class.overbooked]="zone.used > zone.max"></div>
           </div>
+          <span class="usage-text" [class.overbooked]="zone.used > zone.max">{{ zone.used }}/{{ zone.max }}</span>
         </div>
-      }
-
-      @if (r.comments) {
-        <h3>Commentaires</h3>
-        <p class="comments">{{ r.comments }}</p>
-      }
-
-      <!-- Section Jeux -->
-      <h3>Jeux ({{ r.games?.length || 0 }})</h3>
-      
-      <!-- Workflow jeux -->
-      <div class="games-workflow">
-        @if (canRequestGameList) {
-          <button class="btn btn-primary" (click)="requestGameList()" [disabled]="isLoading()">
-            📋 Demander la liste des jeux
-          </button>
-        }
-        @if (canMarkGameListReceived) {
-          <p class="workflow-status">⏳ En attente de la liste des jeux...</p>
-          <button class="btn btn-success" (click)="markGameListReceived()" [disabled]="isLoading()">
-            ✅ Liste des jeux reçue
-          </button>
-        }
-        @if (canAddGames) {
-          <button class="btn btn-secondary" (click)="toggleAddGames()">
-            {{ isAddingGames() ? '❌ Annuler' : '➕ Ajouter un jeu' }}
-          </button>
         }
       </div>
-
-      <!-- Formulaire ajout jeu -->
-      @if (isAddingGames() && canAddGames) {
-        <div class="add-game-form">
-          <h4>Ajouter un jeu du catalogue</h4>
-          <div class="form-row">
-            <select [value]="selectedGameId()" (change)="onGameIdChange($event)" class="form-control">
-              <option [value]="null">-- Sélectionner un jeu --</option>
-              @for (game of publisherGames(); track game.id) {
-                <option [value]="game.id">{{ game.name }}</option>
-              }
-            </select>
-            <input type="number" [value]="selectedCopyCount()" (input)="onCopyCountChange($event)" min="1" max="20" class="form-control copy-count" placeholder="Nb ex.">
-          </div>
-          <div class="form-row">
-            <select [value]="selectedGameSize()" (change)="onGameSizeChange($event)" class="form-control">
-              @for (opt of gameSizeOptions; track opt.value) {
-                <option [value]="opt.value">{{ opt.label }}</option>
-              }
-            </select>
-            <label class="tables-info">
-              Tables: <input type="number" [value]="selectedAllocatedTables()" (input)="onAllocatedTablesChange($event)" min="0.5" max="10" step="0.5" class="form-control allocated-tables">
-            </label>
-            <button class="btn btn-primary" (click)="addSelectedGame()" [disabled]="!selectedGameId() || isLoading()">
-              Ajouter
-            </button>
-          </div>
-          @if (publisherGames().length === 0) {
-            <p class="no-games-warning">⚠️ Aucun jeu dans le catalogue de cet éditeur</p>
-          }
-        </div>
       }
 
-      <!-- Liste des jeux ajoutés -->
-      @if (r.games && r.games.length > 0) {
-        <div class="games-list">
-          <!-- Résumé d'utilisation des zones -->
-          @if (getZoneUsageSummary().length > 0) {
-            <div class="zone-usage-summary">
-              <h4>Occupation des zones</h4>
-              @for (zone of getZoneUsageSummary(); track zone.priceZoneId) {
-                <div class="zone-usage-bar">
-                  <span class="zone-name">{{ zone.zoneName }}</span>
-                  <div class="usage-bar">
-                    <div class="usage-fill" [style.width.%]="(zone.used / zone.max) * 100" [class.overbooked]="zone.used > zone.max"></div>
-                  </div>
-                  <span class="usage-text" [class.overbooked]="zone.used > zone.max">{{ zone.used }}/{{ zone.max }}</span>
-                </div>
+      <table class="games-table">
+        <thead>
+          <tr>
+            <th>Jeu</th>
+            <th>Ex.</th>
+            <th>Taille</th>
+            <th>Tables</th>
+            <th>Zone</th>
+            <th>Reçu</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (fg of r.games; track fg.id) {
+          <tr [class.received]="fg.is_received" [class.placed]="fg.map_zone_id">
+            <td>{{ fg.game?.name || 'Jeu #' + fg.game_id }}</td>
+            <td>{{ fg.copy_count }}</td>
+            <td>{{ getGameSizeLabel(fg.game_size) }}</td>
+            <td>{{ fg.allocated_tables || 1 }}</td>
+            <td>
+              @if (editingGameId() === fg.id) {
+              <!-- Mode édition: sélection de zone et type de table -->
+              <div class="zone-select-inline">
+                <select [value]="selectedMapZoneId()" (change)="onMapZoneChange($event)"
+                  class="form-control form-control-sm">
+                  <option [value]="null">-- Zone --</option>
+                  @for (zone of availableMapZones(); track zone.id) {
+                  @let availability = getZoneTableAvailability(zone);
+                  <option [value]="zone.id" [disabled]="!isZoneValidForGame(zone) || availability.totalAvailable === 0">
+                    {{ zone.name }} ({{ availability.totalAvailable }}/{{ availability.total }} dispo)
+                  </option>
+                  }
+                </select>
+                <select [value]="selectedTableSize()" (change)="onTableSizeChange($event)"
+                  class="form-control form-control-sm table-size-select">
+                  @for (opt of tableSizeOptions; track opt.value) {
+                  @let avail = getTableTypeAvailability(opt.value);
+                  <option [value]="opt.value" [disabled]="avail.available === 0">
+                    {{ opt.label }} ({{ avail.available }}/{{ avail.total }})
+                  </option>
+                  }
+                </select>
+                <button class="btn btn-xs btn-success" (click)="placeGameInZone(fg)"
+                  [disabled]="!selectedMapZoneId() || isLoading()">✓</button>
+                <button class="btn btn-xs btn-secondary" (click)="cancelPlacing()">✗</button>
+              </div>
+              <!-- Indicateur de disponibilité détaillé -->
+              @if (selectedMapZoneId()) {
+              @let zoneAvail = getSelectedZoneAvailability();
+              <div class="zone-availability-hint">
+                <small>
+                  🪑 Standard: {{ zoneAvail.standard.available }}/{{ zoneAvail.standard.total }} |
+                  📐 Large: {{ zoneAvail.large.available }}/{{ zoneAvail.large.total }} |
+                  🏛️ City: {{ zoneAvail.city.available }}/{{ zoneAvail.city.total }}
+                </small>
+              </div>
               }
-            </div>
-          }
-
-          <table class="games-table">
-            <thead>
-              <tr>
-                <th>Jeu</th>
-                <th>Ex.</th>
-                <th>Taille</th>
-                <th>Tables</th>
-                <th>Zone</th>
-                <th>Reçu</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (fg of r.games; track fg.id) {
-                <tr [class.received]="fg.is_received" [class.placed]="fg.map_zone_id">
-                  <td>{{ fg.game?.name || 'Jeu #' + fg.game_id }}</td>
-                  <td>{{ fg.copy_count }}</td>
-                  <td>{{ getGameSizeLabel(fg.game_size) }}</td>
-                  <td>{{ fg.allocated_tables || 1 }}</td>
-                  <td>
-                    @if (editingGameId() === fg.id) {
-                      <!-- Mode édition: sélection de zone et type de table -->
-                      <div class="zone-select-inline">
-                        <select [value]="selectedMapZoneId()" (change)="onMapZoneChange($event)" class="form-control form-control-sm">
-                          <option [value]="null">-- Zone --</option>
-                          @for (zone of availableMapZones(); track zone.id) {
-                            <option [value]="zone.id" [disabled]="!isZoneValidForGame(zone)">
-                              {{ zone.name }} @if (!isZoneValidForGame(zone)) { (non dispo) }
-                            </option>
-                          }
-                        </select>
-                        <select [value]="selectedTableSize()" (change)="onTableSizeChange($event)" class="form-control form-control-sm table-size-select">
-                          @for (opt of tableSizeOptions; track opt.value) {
-                            <option [value]="opt.value">{{ opt.label }}</option>
-                          }
-                        </select>
-                        <button class="btn btn-xs btn-success" (click)="placeGameInZone(fg)" [disabled]="!selectedMapZoneId() || isLoading()">✓</button>
-                        <button class="btn btn-xs btn-secondary" (click)="cancelPlacing()">✗</button>
-                      </div>
-                    } @else {
-                      <!-- Affichage normal -->
-                      @if (fg.mapZone) {
-                        <span class="zone-badge">📍 {{ fg.mapZone.name }}</span>
-                      } @else {
-                        <span class="no-zone">Non placé</span>
-                      }
-                    }
-                  </td>
-                  <td>
-                    @if (fg.is_received) {
-                      <span class="received-badge">✅</span>
-                    } @else {
-                      <span class="pending-badge">⏳</span>
-                    }
-                  </td>
-                  <td class="actions-cell">
-                    @if (editingGameId() !== fg.id) {
-                      <button class="btn btn-xs btn-outline" (click)="startPlacingGame(fg)" [disabled]="isLoading()" title="Placer dans une zone">
-                        📍
-                      </button>
-                      @if (fg.map_zone_id) {
-                        <button class="btn btn-xs btn-outline-danger" (click)="unplaceGame(fg.id)" [disabled]="isLoading()" title="Retirer de la zone">
-                          ✗
-                        </button>
-                      }
-                      @if (!fg.is_received) {
-                        <button class="btn btn-xs btn-success" (click)="markGameAsReceived(fg.id)" [disabled]="isLoading()" title="Marquer comme reçu">
-                          ✓
-                        </button>
-                      }
-                      <button class="btn btn-xs btn-danger" (click)="removeGameFromReservation(fg.id)" [disabled]="isLoading()" title="Supprimer de la réservation">
-                        🗑️
-                      </button>
-                    }
-                  </td>
-                </tr>
+              } @else {
+              <!-- Affichage normal -->
+              @if (fg.mapZone) {
+              <span class="zone-badge">📍 {{ fg.mapZone.name }}</span>
+              } @else {
+              <span class="no-zone">Non placé</span>
               }
-            </tbody>
-          </table>
-          <div class="games-summary">
-            <p><strong>Total jeux:</strong> {{ r.games.length }}</p>
-            <p><strong>Jeux placés:</strong> {{ getPlacedGamesCount() }} / {{ r.games.length }}</p>
-            <p><strong>Jeux reçus:</strong> {{ getReceivedGamesCount() }} / {{ r.games.length }}</p>
-            <p><strong>Tables allouées:</strong> {{ getTotalAllocatedTables() }}</p>
-          </div>
-          @if (canMarkGamesReceived) {
-            <button class="btn btn-success" (click)="markGamesReceived()" [disabled]="isLoading()">
-              ✅ Tous les jeux reçus
-            </button>
+              }
+            </td>
+            <td>
+              @if (fg.is_received) {
+              <span class="received-badge">✅</span>
+              } @else {
+              <span class="pending-badge">⏳</span>
+              }
+            </td>
+            <td class="actions-cell">
+              @if (editingGameId() !== fg.id) {
+              <button class="btn btn-xs btn-outline" (click)="startPlacingGame(fg)" [disabled]="isLoading()"
+                title="Placer dans une zone">
+                📍
+              </button>
+              @if (fg.map_zone_id) {
+              <button class="btn btn-xs btn-outline-danger" (click)="unplaceGame(fg.id)" [disabled]="isLoading()"
+                title="Retirer de la zone">
+                ✗
+              </button>
+              }
+              @if (!fg.is_received) {
+              <button class="btn btn-xs btn-success" (click)="markGameAsReceived(fg.id)" [disabled]="isLoading()"
+                title="Marquer comme reçu">
+                ✓
+              </button>
+              }
+              <button class="btn btn-xs btn-danger" (click)="removeGameFromReservation(fg.id)" [disabled]="isLoading()"
+                title="Supprimer de la réservation">
+                🗑️
+              </button>
+              }
+            </td>
+          </tr>
           }
-        </div>
+        </tbody>
+      </table>
+      <div class="games-summary">
+        <p><strong>Total jeux:</strong> {{ r.games.length }}</p>
+        <p><strong>Jeux placés:</strong> {{ getPlacedGamesCount() }} / {{ r.games.length }}</p>
+        <p><strong>Jeux reçus:</strong> {{ getReceivedGamesCount() }} / {{ r.games.length }}</p>
+        <p><strong>Tables allouées:</strong> {{ getTotalAllocatedTables() }}</p>
+      </div>
+      @if (canMarkGamesReceived) {
+      <button class="btn btn-success" (click)="markGamesReceived()" [disabled]="isLoading()">
+        ✅ Tous les jeux reçus
+      </button>
       }
+    </div>
+    }
 
-      <div class="actions">
-        <button class="btn btn-secondary" (click)="goBack()">Retour</button>
-        <button class="btn btn-primary" (click)="goToEdit()">Modifier</button>
+    <div class="actions">
+      <button class="btn btn-secondary" (click)="goBack()">Retour</button>
+      <button class="btn btn-primary" (click)="goToEdit()">Modifier</button>
+    </div>
+  </div>
+
+  <aside class="aside">
+    <!-- Statuts -->
+    <div class="info-card">
+      <h3>Statut commercial</h3>
+      <div class="status-actions">
+        <button class="btn btn-sm" [class.active]="r.status === 'NOT_CONTACTED'" (click)="updateStatus('NOT_CONTACTED')"
+          [disabled]="isLoading()">Non contacté</button>
+        <button class="btn btn-sm" [class.active]="r.status === 'CONTACTED'" (click)="updateStatus('CONTACTED')"
+          [disabled]="isLoading()">Contacté</button>
+        <button class="btn btn-sm" [class.active]="r.status === 'IN_DISCUSSION'" (click)="updateStatus('IN_DISCUSSION')"
+          [disabled]="isLoading()">En discussion</button>
+        <button class="btn btn-sm" [class.active]="r.status === 'CONFIRMED'" (click)="updateStatus('CONFIRMED')"
+          [disabled]="isLoading()">Confirmé</button>
+        <button class="btn btn-sm" [class.active]="r.status === 'ABSENT'" (click)="updateStatus('ABSENT')"
+          [disabled]="isLoading()">Absent</button>
       </div>
     </div>
 
-    <aside class="aside">
-      <!-- Statuts -->
-      <div class="info-card">
-        <h3>Statut commercial</h3>
-        <div class="status-actions">
-          <button class="btn btn-sm" [class.active]="r.status === 'NOT_CONTACTED'" (click)="updateStatus('NOT_CONTACTED')" [disabled]="isLoading()">Non contacté</button>
-          <button class="btn btn-sm" [class.active]="r.status === 'CONTACTED'" (click)="updateStatus('CONTACTED')" [disabled]="isLoading()">Contacté</button>
-          <button class="btn btn-sm" [class.active]="r.status === 'IN_DISCUSSION'" (click)="updateStatus('IN_DISCUSSION')" [disabled]="isLoading()">En discussion</button>
-          <button class="btn btn-sm" [class.active]="r.status === 'CONFIRMED'" (click)="updateStatus('CONFIRMED')" [disabled]="isLoading()">Confirmé</button>
-          <button class="btn btn-sm" [class.active]="r.status === 'ABSENT'" (click)="updateStatus('ABSENT')" [disabled]="isLoading()">Absent</button>
-        </div>
-      </div>
-      
-      <div class="divider"></div>
+    <div class="divider"></div>
 
-      <!-- Facturation -->
-      <div class="info-card">
-        <h3>Facturation</h3>
-        <div class="invoice-actions">
-          @if (r.invoice_status === 'PENDING') {
-            <button class="btn btn-primary" (click)="markAsInvoiced()" [disabled]="isLoading()">
-              📄 Marquer comme facturé
-            </button>
-          }
-          @if (r.invoice_status === 'INVOICED') {
-            <button class="btn btn-success" (click)="markAsPaid()" [disabled]="isLoading()">
-              💰 Marquer comme payé
-            </button>
-          }
-          @if (r.invoice_status === 'PAID') {
-            <p class="paid-badge">✅ Payé</p>
-          }
-          @if (isPartner && !r.discount_amount) {
-            <button class="btn btn-secondary" (click)="applyPartnerDiscount()" [disabled]="isLoading()">
-              🤝 Appliquer remise partenaire
-            </button>
-          }
-        </div>
+    <!-- Facturation -->
+    <div class="info-card">
+      <h3>Facturation</h3>
+      <div class="invoice-actions">
+        @if (r.invoice_status === 'PENDING') {
+        <button class="btn btn-primary" (click)="markAsInvoiced()" [disabled]="isLoading()">
+          📄 Marquer comme facturé
+        </button>
+        }
+        @if (r.invoice_status === 'INVOICED') {
+        <button class="btn btn-success" (click)="markAsPaid()" [disabled]="isLoading()">
+          💰 Marquer comme payé
+        </button>
+        }
+        @if (r.invoice_status === 'PAID') {
+        <p class="paid-badge">✅ Payé</p>
+        }
+        @if (isPartner && !r.discount_amount) {
+        <button class="btn btn-secondary" (click)="applyPartnerDiscount()" [disabled]="isLoading()">
+          🤝 Appliquer remise partenaire
+        </button>
+        }
       </div>
+    </div>
 
-      <div class="divider"></div>
-      
-      <div class="info-card">
-        <h3>Résumé</h3>
-        <div class="summary">
-          @if (r.reservation_id) {
-            <div class="summary-item">
-              <span class="label">Réservation #</span>
-              <span class="value">{{ r.reservation_id }}</span>
-            </div>
-          }
-          @if (r.status) {
-            <div class="summary-item">
-              <span class="label">Statut</span>
-              <span class="value status-badge" [class]="'status-' + r.status">{{ getStatusLabel(r.status) }}</span>
-            </div>
-          }
-          @if (r.final_invoice_amount) {
-            <div class="summary-item">
-              <span class="label">Montant</span>
-              <span class="value">{{ r.final_invoice_amount }}$</span>
-            </div>
-          }
+    <div class="divider"></div>
+
+    <div class="info-card">
+      <h3>Résumé</h3>
+      <div class="summary">
+        @if (r.reservation_id) {
+        <div class="summary-item">
+          <span class="label">Réservation #</span>
+          <span class="value">{{ r.reservation_id }}</span>
         </div>
+        }
+        @if (r.status) {
+        <div class="summary-item">
+          <span class="label">Statut</span>
+          <span class="value status-badge" [class]="'status-' + r.status">{{ getStatusLabel(r.status) }}</span>
+        </div>
+        }
+        @if (r.final_invoice_amount) {
+        <div class="summary-item">
+          <span class="label">Montant</span>
+          <span class="value">{{ r.final_invoice_amount }}$</span>
+        </div>
+        }
       </div>
-    </aside>
-  </div>
+    </div>
+  </aside>
+</div>
 } @else {
-  <div class="loading">
-    <p>Chargement de la réservation...</p>
-  </div>
+<div class="loading">
+  <p>Chargement de la réservation...</p>
+</div>
 }

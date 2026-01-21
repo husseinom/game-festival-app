@@ -549,6 +549,7 @@
 	text-align: center;
 	color: #6b7280;
 }
+
 /* ============================================
    Placement des jeux dans les zones
    ============================================ */
@@ -716,4 +717,21 @@
 :host .form-control-sm {
 	padding: 4px 8px;
 	font-size: 0.85rem;
+}
+
+/* Zone availability hint */
+:host .zone-availability-hint {
+	margin-top: 6px;
+	padding: 6px 10px;
+	background: linear-gradient(135deg, #e0f2fe 0%, #f0fdf4 100%);
+	border-radius: 6px;
+	border-left: 3px solid #3b82f6;
+}
+
+:host .zone-availability-hint small {
+	font-size: 0.75rem;
+	color: #475569;
+	display: flex;
+	gap: 8px;
+	flex-wrap: wrap;
 }
