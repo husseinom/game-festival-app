@@ -143,3 +143,15 @@ export const deleteGame = async (req: Request, res: Response) => {
     }
   }
 };
+
+export const getGamesByPublisher = async (req: Request, res: Response) => {
+  const { publisherId } = req.params;
+
+  try {
+    const games = await gameService.getGamesByPublisher(Number(publisherId));
+    res.status(200).json(games);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};

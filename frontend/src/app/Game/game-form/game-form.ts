@@ -78,10 +78,10 @@ export class GameForm implements OnInit {
     const game: Omit<GameDto, 'id'> = {
       name: value.name as string,
       type: value.type as string,
-      minAge: value.ageMin as number,
+      minAge: Number(value.ageMin),
       imageUrl: undefined,
-      publisherId: value.pubId as number,
-      maxPlayers: value.MaxPlayers as number,
+      publisherId: Number(value.pubId),
+      maxPlayers: Number(value.MaxPlayers),
     }
 
     const editing = this.editingGame()

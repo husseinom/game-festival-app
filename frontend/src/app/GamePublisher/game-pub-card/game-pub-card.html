@@ -15,8 +15,10 @@
         </mat-card-content>
 
         <mat-card-actions class="card-actions">
-            <button mat-raised-button class="delete-btn" (click)="onRemove($event)">Supprimer</button>
-            <button mat-raised-button class="edit-btn" (click)="onEditClick($event)">Modifier</button>
+			@if (canEdit()) {
+	            <button mat-raised-button class="delete-btn" (click)="onRemove($event)">Supprimer</button>
+	            <button mat-raised-button class="edit-btn" (click)="onEditClick($event)">Modifier</button>
+			}
         </mat-card-actions>
     </mat-card>
 }

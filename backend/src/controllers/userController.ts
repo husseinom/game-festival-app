@@ -16,7 +16,7 @@ export const register = async (req: Request, res: Response) => {
       httpOnly: true, secure: true, sameSite: 'strict', maxAge: 15 * 60 * 1000,
     });
     res.cookie('refresh_token', refreshToken, {
-      httpOnly: true, secure: true, sameSite: 'strict', maxAge: 7 * 24 * 60 * 60 * 1000,
+      httpOnly: true, secure: true, sameSite: 'strict', maxAge: 60 * 60 * 1000, // une heure
     });
     // Réponse succès 201 (Created)
     res.status(201).json({

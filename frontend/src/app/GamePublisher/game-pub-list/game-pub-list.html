@@ -4,6 +4,37 @@
         <!-- Title is handled by CSS ::before -->
     </div>
 
+    <!-- Filtres et recherche -->
+    <div class="filters-section">
+        <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input 
+                type="text" 
+                placeholder="Rechercher un éditeur..."
+                [value]="searchQuery()"
+                (input)="onSearchChange($event)"
+                class="search-input"
+            />
+        </div>
+        <div class="filter-box">
+            <select 
+                [value]="selectedFilter()"
+                (change)="onFilterChange($event)"
+                class="filter-select"
+            >
+                <option value="">Tous les éditeurs</option>
+                <option value="exposant">Exposants</option>
+                <option value="distributeur">Distributeurs</option>
+            </select>
+        </div>
+        @if (searchQuery() || selectedFilter()) {
+            <button class="clear-btn" (click)="clearFilters()">✕ Effacer</button>
+        }
+        <div class="results-count">
+            {{ gamePubCount() }} @if (gamePubCount() !== totalCount()) { / {{ totalCount() }} } éditeur(s)
+        </div>
+    </div>
+
     @if (gls.isLoading()) {
         <p style="color: white; text-align: center;">Chargement des éditeurs...</p>
     }
@@ -12,14 +43,16 @@
         <p style="color: red; text-align: center;">Erreur : {{ gls.error() }}</p>
     }
 
-    <div class="button-container">
-        <button (click)="toggleForm()" class="action-btn" [class.add-btn]="!showForm()" [class.cancel-btn]="showForm()">
-            @if (showForm()) { Annuler } @else { Ajouter un Éditeur }
-        </button>
-    </div>
+    @if (canEdit()) {
+        <div class="button-container">
+            <button (click)="toggleForm()" class="action-btn" [class.add-btn]="!showForm()" [class.cancel-btn]="showForm()">
+                @if (showForm()) { Annuler } @else { Ajouter un Éditeur }
+            </button>
+        </div>
+    }
 
     <!-- Form Section -->
-    @if (showForm()){
+    @if (showForm() && canEdit()){
         <div class="form-section">
             <app-publisher-form 
                 [editingPublisher]="selectedGamePub()"
@@ -40,6 +73,13 @@
                 (remove)="onDelete($event)"
                 [games]="games()">
             </app-game-pub-card>
+        } @empty {
+            <div class="no-results">
+                <p>🏢 Aucun éditeur trouvé</p>
+                @if (searchQuery() || selectedFilter()) {
+                    <p class="hint">Essayez de modifier vos filtres</p>
+                }
+            </div>
         }
     </div>
 </div>

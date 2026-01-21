@@ -16,7 +16,6 @@ export class UserForm {
   userCreated = output<void>();
 
   readonly roles: { value: Role; label: string }[] = [
-    { value: 'VISITOR', label: 'Visitor' },
     { value: 'VOLUNTEER', label: 'Volunteer' },
     { value: 'ORGANISATOR', label: 'Organisator' },
     { value: 'SUPER_ORGANISATOR', label: 'Super Organisator' },
@@ -27,7 +26,7 @@ export class UserForm {
     name: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(2)] }),
     email: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.email] }),
     password: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(4)] }),
-    role: new FormControl<Role>('VISITOR', { nonNullable: true, validators: [Validators.required] })
+    role: new FormControl<Role>('VOLUNTEER', { nonNullable: true, validators: [Validators.required] })
   });
 
   readonly isLoading = this.adminService.isLoading;
@@ -44,7 +43,7 @@ export class UserForm {
     this.adminService.createUser({ name, email, password, role });
     
    
-    this.form.reset({ role: 'VISITOR' });
+    this.form.reset({ role: 'VOLUNTEER' });
     this.userCreated.emit();
   }
 

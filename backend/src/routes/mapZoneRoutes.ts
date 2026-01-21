@@ -5,6 +5,7 @@ import * as mapZoneController from '../controllers/mapZoneController.js';
 
 const router = Router();
 
+router.get('/festival/:festivalId', verifyToken, mapZoneController.getByFestival);
 router.get('/price-zone/:priceZoneId', verifyToken, mapZoneController.getByPriceZone);
 router.post('/', verifyToken, mapZoneController.create);
 router.post('/:id/festival-games', verifyToken, mapZoneController.addFestivalGame);

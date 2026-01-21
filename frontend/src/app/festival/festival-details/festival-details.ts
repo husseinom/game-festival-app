@@ -8,6 +8,7 @@ import { Festival } from '../../types/festival';
 import { PriceZone } from '../../types/price-zone';
 import { MatButtonModule } from '@angular/material/button';
 import { CommonModule } from '@angular/common';
+import { RoleService } from '../../shared/services/role.service';
 
 @Component({
   selector: 'app-festival-details',
@@ -17,10 +18,11 @@ import { CommonModule } from '@angular/common';
   styleUrl: './festival-details.css',
 })
 export class FestivalDetails {
-  private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
-  private readonly _festivalServices = inject(FestivalServices);
-  private readonly _priceZoneService = inject(PriceZoneServices);
+  private readonly route = inject(ActivatedRoute)
+  private readonly router = inject(Router)
+  private readonly _festivalServices = inject(FestivalServices)
+  private readonly _priceZoneService = inject(PriceZoneServices)
+  private readonly roleService = inject(RoleService)
 
   festivalId = signal<number | null>(null);
   showEditForm = signal(false);
@@ -103,7 +105,16 @@ export class FestivalDetails {
   }
 
   goToPriceZone(id: number): void {
-    this.router.navigate(['/price-zone', id]);
+    const festId = this.festivalId();
+    // SUPER_ORGANISATOR et ADMIN voient la vue de gestion
+    if (this.roleService.isSuperOrganisator()) {
+      this.router.navigate(['/price-zone', id]);
+    } else {
+      // VISITOR, VOLUNTEER, ORGANISATOR voient la vue publique
+      if (festId) {
+        this.router.navigate(['/festival', festId, 'zone', id]);
+      }
+    }
   }
 
   back(): void {

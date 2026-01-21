@@ -8,6 +8,9 @@ const router = Router();
 // GET /api/games/types - Liste des types de jeux
 router.get('/types', gameController.getAllGameTypes);
 
+// GET /api/games/publisher/:publisherId - Jeux d'un éditeur
+router.get('/publisher/:publisherId', gameController.getGamesByPublisher);
+
 // POST /api/games/add
 router.post(
     '/add',

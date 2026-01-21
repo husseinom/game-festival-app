@@ -22,7 +22,7 @@
     <select formControlName="type" [class.error]="form.controls.type.invalid && form.controls.type.touched" required>
       <option value="" disabled selected>Sélectionnez un type de jeu</option>
       @for (gameType of gameTypes(); track gameType.id) {
-        <option [value]="gameType.id">{{ gameType.label}}</option>
+        <option [value]="gameType.label">{{ gameType.label}}</option>
       }
     </select>
     @if(form.controls.type.invalid && form.controls.type.touched) {

@@ -18,6 +18,11 @@ export class AuthService {
   readonly currentUser = this._currentUser.asReadonly()
   readonly isLoggedIn = computed(() => this._currentUser() != null)
   readonly isAdmin = computed(() => this.currentUser()?.role?.toUpperCase() === 'ADMIN')
+  readonly isSuperOrganisator = computed(() => this.currentUser()?.role?.toUpperCase() === 'SUPER_ORGANISATOR')
+  readonly canManageFestivals = computed(() => {
+    const role = this.currentUser()?.role?.toUpperCase();
+    return role === 'ADMIN' || role === 'SUPER_ORGANISATOR';
+  })
   readonly isLoading = this._isLoading.asReadonly()
   readonly error = this._error.asReadonly()
   readonly hasCheckedAuth = this._hasCheckedAuth.asReadonly()

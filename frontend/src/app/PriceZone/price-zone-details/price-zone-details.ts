@@ -16,10 +16,10 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/confirm-
   selector: 'app-price-zone-details',
   standalone: true,
   imports: [
-    CommonModule, 
-    FormsModule, 
-    MatTabsModule, 
-    MatButtonModule, 
+    CommonModule,
+    FormsModule,
+    MatTabsModule,
+    MatButtonModule,
     MatIconModule,
     MatCardModule
   ],
@@ -36,7 +36,7 @@ export class PriceZoneDetailsComponent {
   priceZoneId = signal<number | null>(null);
   festivalId = signal<number | null>(null);
   showMapZoneForm = signal(false);
-  
+
   newMapZone = signal({
     name: '',
     small_tables: 0,
@@ -60,6 +60,24 @@ export class PriceZoneDetailsComponent {
     return this.games().filter(g => !g.map_zone_id);
   });
 
+  // Calculate used tables from TableTypes in map zones
+  usedTables = computed(() => {
+    const zones = this.mapZones();
+    const result = { small: 0, large: 0, city: 0 };
+
+    for (const zone of zones) {
+      if (zone.tableTypes) {
+        for (const tt of zone.tableTypes) {
+          const used = tt.nb_total - tt.nb_available;
+          if (tt.name === 'STANDARD') result.small += used;
+          else if (tt.name === 'LARGE') result.large += used;
+          else if (tt.name === 'CITY') result.city += used;
+        }
+      }
+    }
+    return result;
+  });
+
   // Calculate allocated tables from existing map zones
   allocatedTables = computed(() => {
     const zones = this.mapZones();
@@ -74,9 +92,9 @@ export class PriceZoneDetailsComponent {
   availableTables = computed(() => {
     const zone = this.priceZone();
     const allocated = this.allocatedTables();
-    
+
     if (!zone) return { small: 0, large: 0, city: 0 };
-    
+
     return {
       small: zone.small_tables - allocated.small,
       large: zone.large_tables - allocated.large,
@@ -88,7 +106,7 @@ export class PriceZoneDetailsComponent {
   remainingTables = computed(() => {
     const available = this.availableTables();
     const current = this.newMapZone();
-    
+
     return {
       small: available.small - current.small_tables,
       large: available.large - current.large_tables,
@@ -110,7 +128,7 @@ export class PriceZoneDetailsComponent {
       const idParam = pm.get('id');
       const id = idParam ? Number(idParam) : null;
       this.priceZoneId.set(id);
-      
+
       if (id !== null) {
         this._priceZoneService.getReservationsByPriceZone(id);
         this._priceZoneService.getGamesByPriceZone(id);
@@ -124,6 +142,15 @@ export class PriceZoneDetailsComponent {
       const festId = festIdParam ? Number(festIdParam) : null;
       this.festivalId.set(festId);
     });
+  }
+
+  refreshData(): void {
+    const id = this.priceZoneId();
+    if (id !== null) {
+      this._priceZoneService.getReservationsByPriceZone(id);
+      this._priceZoneService.getGamesByPriceZone(id);
+      this._mapZoneService.getByPriceZone(id);
+    }
   }
 
   toggleMapZoneForm(): void {
@@ -184,7 +211,7 @@ export class PriceZoneDetailsComponent {
   createMapZone(): void {
     const zone = this.newMapZone();
     const pzId = this.priceZoneId();
-    
+
     if (!zone.name.trim() || this.totalTables() === 0 || pzId === null) {
       this.validationError.set('Please provide a name and at least one table');
       return;
@@ -194,7 +221,7 @@ export class PriceZoneDetailsComponent {
     if (!this.validateTables()) {
       return;
     }
-    
+
     this._mapZoneService.create({
       name: zone.name,
       small_tables: zone.small_tables || 0,

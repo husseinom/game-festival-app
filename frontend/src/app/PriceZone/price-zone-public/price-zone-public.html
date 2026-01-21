@@ -1,0 +1,111 @@
+<div class="price-zone-public-container">
+  @if (priceZone(); as zone) {
+    <!-- Header -->
+    <div class="header">
+      <button mat-icon-button class="back-btn" (click)="back()">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div class="header-info">
+        <h1>{{ zone.name }}</h1>
+        <p class="subtitle">{{ totalGames() }} jeux exposés</p>
+      </div>
+    </div>
+
+    <!-- Zone Info -->
+    <div class="zone-summary">
+      <mat-chip-set>
+        <mat-chip>
+          <mat-icon matChipAvatar>table_chart</mat-icon>
+          {{ zone.total_tables }} tables
+        </mat-chip>
+      </mat-chip-set>
+    </div>
+
+    <!-- Games grouped by Map Zone -->
+    @if (gamesByMapZone().length > 0) {
+      <div class="map-zones-list">
+        @for (group of gamesByMapZone(); track group.mapZone.id) {
+          <section class="map-zone-section">
+            <div class="map-zone-header">
+              <mat-icon>place</mat-icon>
+              <h2>{{ group.mapZone.name }}</h2>
+              <span class="games-count">{{ group.games.length }} jeu(x)</span>
+            </div>
+            
+            <div class="games-grid">
+              @for (festivalGame of group.games; track festivalGame.id) {
+                <mat-card class="game-card">
+                  @if (festivalGame.game?.imageUrl) {
+                    <img mat-card-image [src]="festivalGame.game.imageUrl" [alt]="festivalGame.game.name" class="game-image">
+                  }
+                  <mat-card-header>
+                    <mat-card-title>{{ festivalGame.game?.name || 'Jeu inconnu' }}</mat-card-title>
+                    @if (festivalGame.game?.type?.name) {
+                      <mat-chip class="game-type">{{ festivalGame.game.type.name }}</mat-chip>
+                    }
+                  </mat-card-header>
+                  <mat-card-content>
+                    @if (festivalGame.game?.author) {
+                      <p class="author">
+                        <mat-icon>person</mat-icon>
+                        {{ festivalGame.game.author }}
+                      </p>
+                    }
+                    @if (festivalGame.reservation?.publisher?.name) {
+                      <p class="publisher">
+                        <mat-icon>business</mat-icon>
+                        {{ festivalGame.reservation.publisher.name }}
+                      </p>
+                    }
+                    @if (festivalGame.game?.minPlayers || festivalGame.game?.maxPlayers) {
+                      <p class="players">
+                        <mat-icon>group</mat-icon>
+                        {{ festivalGame.game?.minPlayers || '?' }} - {{ festivalGame.game?.maxPlayers || '?' }} joueurs
+                      </p>
+                    }
+                    @if (festivalGame.game?.minAge) {
+                      <p class="age">
+                        <mat-icon>child_care</mat-icon>
+                        À partir de {{ festivalGame.game.minAge }} ans
+                      </p>
+                    }
+                    @if (festivalGame.game?.duration) {
+                      <p class="duration">
+                        <mat-icon>schedule</mat-icon>
+                        {{ festivalGame.game.duration }} min
+                      </p>
+                    }
+                    @if (festivalGame.game?.prototype) {
+                      <p class="prototype">
+                        <mat-icon>science</mat-icon>
+                        Prototype
+                      </p>
+                    }
+                    @if (festivalGame.copy_count && festivalGame.copy_count > 1) {
+                      <p class="copies">
+                        <mat-icon>content_copy</mat-icon>
+                        {{ festivalGame.copy_count }} exemplaires
+                      </p>
+                    }
+                    @if (festivalGame.game?.description) {
+                      <p class="description">{{ festivalGame.game.description }}</p>
+                    }
+                  </mat-card-content>
+                </mat-card>
+              }
+            </div>
+          </section>
+        }
+      </div>
+    } @else {
+      <div class="empty-state">
+        <mat-icon>casino</mat-icon>
+        <p>Aucun jeu n'est encore exposé dans cette zone.</p>
+      </div>
+    }
+  } @else {
+    <div class="loading">
+      <p>Chargement de la zone tarifaire...</p>
+    </div>
+  }
+</div>
