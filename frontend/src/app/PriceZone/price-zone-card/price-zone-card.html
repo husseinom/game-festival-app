@@ -2,7 +2,7 @@
 @if(zone){
 <mat-card class="pz-card" [class.selected]="isSelected()" [class.editing]="isEditing()">
   <mat-card-header class="card-header" (click)="onCardClick($event)">
-    <mat-card-title class="pz-name">{{ zone.name.name }}</mat-card-title>
+    <mat-card-title class="pz-name">{{ zone.name }}</mat-card-title>
   </mat-card-header>
 
   <mat-card-content class="pz-info" (click)="onCardClick($event)">

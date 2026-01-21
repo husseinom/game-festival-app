@@ -140,6 +140,10 @@ model Reservant {
 
     name            String
     type            String
+    email           String?
+    mobile          String?
+    role            String?
+    
     reservations    Reservation[]
 }
 

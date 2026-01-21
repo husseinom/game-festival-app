@@ -42,23 +42,53 @@ async function main() {
   console.log('📝 Création des réservants par typologie...');
 
   const editeurAsmodee = await prisma.reservant.create({
-    data: { name: 'Asmodee', type: 'Éditeur' }
+    data: { 
+      name: 'Asmodee', 
+      type: 'Éditeur',
+      email: 'contact@asmodee.com',
+      mobile: '+33 6 12 34 56 78',
+      role: 'Responsable Commercial'
+    }
   });
 
   const prestataireAnim = await prisma.reservant.create({
-    data: { name: 'Ludis Animation', type: 'Prestataire' }
+    data: { 
+      name: 'Ludis Animation', 
+      type: 'Prestataire',
+      email: 'info@ludis-animation.fr',
+      mobile: '+33 6 23 45 67 89',
+      role: 'Coordinateur Événementiel'
+    }
   });
 
   const boutiquePhilibert = await prisma.reservant.create({
-    data: { name: 'Philibert', type: 'Boutique' }
+    data: { 
+      name: 'Philibert', 
+      type: 'Boutique',
+      email: 'pro@philibert.net',
+      mobile: '+33 6 34 56 78 90',
+      role: 'Responsable Partenariats'
+    }
   });
 
   const assoEchecs = await prisma.reservant.create({
-    data: { name: 'Club d\'Échecs Local', type: 'Association' }
+    data: { 
+      name: 'Club d\'Échecs Local', 
+      type: 'Association',
+      email: 'contact@echecs-local.org',
+      mobile: '+33 6 45 67 89 01',
+      role: 'Président'
+    }
   });
 
   const zoneProto = await prisma.reservant.create({
-    data: { name: 'Zone Prototypes / Festival', type: 'Animation / Zone Proto' }
+    data: { 
+      name: 'Zone Prototypes / Festival', 
+      type: 'Animation / Zone Proto',
+      email: 'proto@gamefest.com',
+      mobile: '+33 6 56 78 90 12',
+      role: 'Coordinateur Zone Proto'
+    }
   });
 
   console.log('✅ Réservants créés avec succès.');
