@@ -167,7 +167,7 @@
                         </select>
                         <select [value]="selectedTableSize()" (change)="onTableSizeChange($event)" class="form-control form-control-sm table-size-select">
                           @for (opt of tableSizeOptions; track opt.value) {
-                            <option [value]="opt.value">{{ opt.label }}</option>
+                            <option [value]="opt.value">{{ opt.label }} ({{ getAvailableTablesForType(opt.value) }} dispo)</option>
                           }
                         </select>
                         <button class="btn btn-xs btn-success" (click)="placeGameInZone(fg)" [disabled]="!selectedMapZoneId() || isLoading()">✓</button>
@@ -192,7 +192,7 @@
                   <td class="actions-cell">
                     @if (editingGameId() !== fg.id) {
                       <button class="btn btn-xs btn-outline" (click)="startPlacingGame(fg)" [disabled]="isLoading()" title="Placer dans une zone">
-                        📍
+                        Placer
                       </button>
                       @if (fg.map_zone_id) {
                         <button class="btn btn-xs btn-outline-danger" (click)="unplaceGame(fg.id)" [disabled]="isLoading()" title="Retirer de la zone">

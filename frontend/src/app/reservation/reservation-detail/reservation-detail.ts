@@ -622,6 +622,28 @@ export class ReservationDetail {
     return tableSize ? TABLE_SIZE_LABELS[tableSize] || tableSize : 'Standard';
   }
 
+  // Obtenir le nombre de tables disponibles par type pour la zone sélectionnée
+  getAvailableTablesForType(tableType: string): number {
+    const zoneId = this.selectedMapZoneId();
+    if (!zoneId) return 0;
+    
+    const zone = this.availableMapZones().find(z => z.id === zoneId);
+    if (!zone) return 0;
+    
+    if (zone.tableTypes && zone.tableTypes.length > 0) {
+      const tt = zone.tableTypes.find(t => t.name === tableType);
+      return tt ? tt.nb_available : 0;
+    }
+    
+    // Fallback sur les anciens champs
+    switch (tableType) {
+      case 'STANDARD': return zone.small_tables || 0;
+      case 'LARGE': return zone.large_tables || 0;
+      case 'CITY': return zone.city_tables || 0;
+      default: return 0;
+    }
+  }
+
   // Compte de jeux placés
   getPlacedGamesCount(): number {
     const r = this.reservation();
