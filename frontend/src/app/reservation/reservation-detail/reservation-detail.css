@@ -676,6 +676,12 @@
 	background: #f1f5f9;
 }
 
+:host .btn-outline:disabled {
+	opacity: 0.4;
+	cursor: not-allowed;
+	background: #e5e7eb;
+}
+
 :host .btn-outline-danger {
 	background: transparent;
 	border: 1px solid #fca5a5;

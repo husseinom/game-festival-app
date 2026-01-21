@@ -19,4 +19,9 @@ export interface MapZone {
   city_tables: number;
   festivalGames?: FestivalGame[];
   tableTypes?: TableType[];
+  price_zone?: {
+    id: number;
+    name: string;
+    description?: string;
+  };
 }

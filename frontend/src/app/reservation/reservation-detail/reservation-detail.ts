@@ -74,6 +74,7 @@ export class ReservationDetail {
   readonly selectedGameSize = signal<GameSize>('STANDARD');
   readonly selectedAllocatedTables = signal(1);
   readonly isLoading = signal(false);
+  readonly selectedTargetMapZoneId = signal<number | null>(null);
 
   // Pour le placement de jeu dans une zone
   readonly editingGameId = signal<number | null>(null);
@@ -114,12 +115,9 @@ export class ReservationDetail {
     // Charger les map zones du festival
     this.mapZoneService.getByFestivalObs(r.festival_id).subscribe({
       next: (zones: MapZone[]) => {
-        // Filtrer les MapZones pour ne garder que celles qui appartiennent 
-        // aux zones tarifaires de la réservation
-        const filteredZones = reservationPriceZoneIds.length > 0
-          ? zones.filter(z => reservationPriceZoneIds.includes(z.price_zone_id))
-          : zones;
-        this.availableMapZones.set(filteredZones);
+        // On ne filtre plus les zones pour permettre à l'utilisateur de placer des jeux
+        // sur n'importe quelle zone du festival, même celle non payée dans la réservation
+        this.availableMapZones.set(zones);
       },
       error: (err: any) => console.error('Erreur chargement zones:', err)
     });
@@ -335,12 +333,19 @@ export class ReservationDetail {
     this.selectedTableSize.set(target.value as TableSize);
   }
 
+  onTargetMapZoneChange(event: Event): void {
+    const target = event.target as HTMLSelectElement;
+    const val = target.value === 'null' ? null : Number(target.value);
+    this.selectedTargetMapZoneId.set(val);
+  }
+
   addSelectedGame(): void {
     const r = this.reservation();
     const gameId = this.selectedGameId();
     const copyCount = this.selectedCopyCount();
     const gameSize = this.selectedGameSize();
     const allocatedTables = this.selectedAllocatedTables();
+    const targetZoneId = this.selectedTargetMapZoneId();
 
     if (!r || !gameId) return;
 
@@ -351,17 +356,67 @@ export class ReservationDetail {
       game_size: gameSize,
       allocated_tables: allocatedTables
     }]).subscribe({
-      next: () => {
-        this.refreshReservation();
-        this.selectedGameId.set(null);
-        this.selectedCopyCount.set(1);
-        this.selectedGameSize.set('STANDARD');
-        this.selectedAllocatedTables.set(1);
-        this.isLoading.set(false);
+      next: (updatedReservation: Reservation) => {
+        this.reservation.set(updatedReservation);
+
+        if (targetZoneId) {
+          // Filtrer les jeux nouvellement ajoutés qui ne sont pas placés
+          const unplacedGames = updatedReservation.games?.filter((g: FestivalGame) =>
+            g.game_id === gameId && g.map_zone_id === null
+          ) || [];
+
+          if (unplacedGames.length > 0) {
+            this.placeGamesSequentially(unplacedGames, targetZoneId);
+          } else {
+            this.resetAddGameForm();
+            this.isLoading.set(false);
+          }
+        } else {
+          this.resetAddGameForm();
+          this.isLoading.set(false);
+        }
       },
       error: (err: any) => {
         console.error('Erreur ajout jeu:', err);
         this.isLoading.set(false);
+      }
+    });
+  }
+
+  private resetAddGameForm(): void {
+    this.refreshReservation();
+    this.selectedGameId.set(null);
+    this.selectedCopyCount.set(1);
+    this.selectedGameSize.set('STANDARD');
+    this.selectedAllocatedTables.set(1);
+    this.selectedTargetMapZoneId.set(null);
+  }
+
+  private placeGamesSequentially(games: FestivalGame[], zoneId: number, index = 0): void {
+    if (index >= games.length) {
+      this.resetAddGameForm();
+      this.isLoading.set(false);
+      return;
+    }
+
+    const game = games[index];
+    const zone = this.availableMapZones().find((z: MapZone) => z.id === zoneId);
+    let tableSize: TableSize = 'STANDARD';
+
+    // Heuristique simple pour le choix de table
+    if (game.game_size === 'LARGE' && zone?.large_tables && zone.large_tables > 0) {
+      tableSize = 'LARGE';
+    } else if (zone?.small_tables === 0 && zone?.large_tables && zone.large_tables > 0) {
+      tableSize = 'LARGE';
+    } else if (zone?.small_tables === 0 && zone?.city_tables && zone.city_tables > 0) {
+      tableSize = 'CITY';
+    }
+
+    this.reservationService.placeGame(game.id, zoneId, tableSize, game.allocated_tables).subscribe({
+      next: () => this.placeGamesSequentially(games, zoneId, index + 1),
+      error: (err: any) => {
+        console.error(`Erreur placement jeu ${game.id}:`, err);
+        this.placeGamesSequentially(games, zoneId, index + 1);
       }
     });
   }
@@ -683,5 +738,24 @@ export class ReservationDetail {
       }
     }
     return result;
+  }
+
+  // Calculer la consommation de tables selon la taille du jeu et le type de table
+  getTableConsumption(gameSize: GameSize | undefined, tableSize: TableSize): number {
+    const gameSizeUnits: Record<string, number> = {
+      'SMALL': 0.5,
+      'STANDARD': 1,
+      'LARGE': 2
+    };
+
+    const gameUnits = gameSizeUnits[gameSize || 'STANDARD'] ?? 1;
+
+    if (tableSize === 'LARGE') {
+      // Sur une grande table: 1 table LARGE = 2 unités de capacité
+      return gameUnits / 2;
+    } else {
+      // Sur une table STANDARD ou CITY: consommation = unités du jeu
+      return gameUnits;
+    }
   }
 }

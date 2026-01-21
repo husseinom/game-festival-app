@@ -76,17 +76,17 @@ export const createReservation = async (data: any) => {
   return prisma.$transaction(async (tx) => {
     // Si publisher_is_reservant est true, créer ou récupérer un réservant basé sur l'éditeur
     let finalReservantId = reservant_id ? Number(reservant_id) : null;
-    
+
     if (publisher_is_reservant && parsedGamePublisherId) {
       // Récupérer l'éditeur
       const publisher = await tx.gamePublisher.findUnique({
         where: { id: parsedGamePublisherId }
       });
-      
+
       if (!publisher) {
         throw new Error(`L'éditeur avec l'ID ${parsedGamePublisherId} n'existe pas.`);
       }
-      
+
       // Chercher un réservant existant avec le même nom et type PUBLISHER
       let existingReservant = await tx.reservant.findFirst({
         where: {
@@ -94,7 +94,7 @@ export const createReservation = async (data: any) => {
           type: 'PUBLISHER'
         }
       });
-      
+
       if (existingReservant) {
         finalReservantId = existingReservant.reservant_id;
       } else {
@@ -109,7 +109,7 @@ export const createReservation = async (data: any) => {
         finalReservantId = newReservant.reservant_id;
       }
     }
-    
+
     if (!finalReservantId) {
       throw new Error('Un réservant est requis pour créer une réservation.');
     }
@@ -164,13 +164,13 @@ export const createReservation = async (data: any) => {
         zones: {
           create: tables && Array.isArray(tables)
             ? tables.map((t: any) => {
-                const tableCount = Number(t.table_count || t.quantity);
-                return {
-                  price_zone_id: Number(t.price_zone_id),
-                  table_count: tableCount,
-                  space_m2: tablesToM2(tableCount)
-                };
-              })
+              const tableCount = Number(t.table_count || t.quantity);
+              return {
+                price_zone_id: Number(t.price_zone_id),
+                table_count: tableCount,
+                space_m2: tablesToM2(tableCount)
+              };
+            })
             : []
         }
       },
@@ -248,7 +248,7 @@ export const updateReservation = async (id: number, data: any) => {
     });
 
     const finalAmount = await calculatePrice(reservationWithZones!);
-    
+
     return tx.reservation.update({
       where: { reservation_id: id },
       data: { final_invoice_amount: finalAmount },
@@ -261,7 +261,7 @@ export const deleteReservation = async (id: number) => {
   return prisma.$transaction(async (tx) => {
     // Récupérer tous les jeux placés de cette réservation
     const placedGames = await tx.festivalGame.findMany({
-      where: { 
+      where: {
         reservation_id: id,
         map_zone_id: { not: null }
       }
@@ -346,7 +346,7 @@ export const markAsPaid = async (id: number) => {
 
 export const updateInvoiceStatusBatch = async (ids: number[], invoiceStatus: InvoiceStatus) => {
   const updateData: any = { invoice_status: invoiceStatus };
-  
+
   if (invoiceStatus === 'INVOICED') {
     updateData.invoiced_at = new Date();
   } else if (invoiceStatus === 'PAID') {
@@ -503,7 +503,6 @@ export const markGameAsReceived = async (festivalGameId: number) => {
 
 // Phase technique - Placement
 
-
 export const placeGame = async (
   festivalGameId: number,
   mapZoneId: number,
@@ -511,6 +510,36 @@ export const placeGame = async (
   allocatedTables: number
 ) => {
   return prisma.$transaction(async (tx) => {
+    // Récupérer le jeu pour connaître sa taille
+    const festivalGame = await tx.festivalGame.findUnique({
+      where: { id: festivalGameId }
+    });
+
+    if (!festivalGame) {
+      throw new Error('Jeu non trouvé');
+    }
+
+    // Calculer les unités requises par le jeu
+    const gameSize = festivalGame.game_size || 'STANDARD';
+    const gameUnits = GAME_SIZE_UNITS[gameSize] ?? 1;
+
+    // Calculer la consommation de stock selon la combinaison jeu/table
+    let stockToConsume: number;
+
+    if (tableSize === 'LARGE') {
+      // Sur une grande table: 1 table LARGE = 2 unités de capacité
+      // Un jeu LARGE (2 unités) occupe 1 grande table
+      // Un jeu STANDARD (1 unité) occupe 0.5 grande table
+      // Un jeu SMALL (0.5 unité) occupe 0.25 grande table
+      stockToConsume = gameUnits / 2;
+    } else {
+      // Sur une table STANDARD ou CITY: consommation = unités du jeu
+      // SMALL (0.5) -> consomme 0.5 table
+      // STANDARD (1) -> consomme 1 table
+      // LARGE (2) -> consomme 2 tables
+      stockToConsume = gameUnits;
+    }
+
     // Vérifier le stock disponible
     const tableType = await tx.tableType.findFirst({
       where: {
@@ -523,26 +552,26 @@ export const placeGame = async (
       throw new Error(`Aucune table de type ${tableSize} dans cette zone`);
     }
 
-    if (tableType.nb_available < allocatedTables) {
+    if (tableType.nb_available < stockToConsume) {
       throw new Error(
-        `Stock insuffisant. Disponible: ${tableType.nb_available}, Demandé: ${allocatedTables}`
+        `Stock insuffisant. Disponible: ${tableType.nb_available}, Requis: ${stockToConsume} pour un jeu ${gameSize}`
       );
     }
 
     // Décrémenter le stock
     await tx.tableType.update({
       where: { id: tableType.id },
-      data: { nb_available: tableType.nb_available - allocatedTables }
+      data: { nb_available: tableType.nb_available - stockToConsume }
     });
 
-    // Mettre à jour le jeu
+    // Mettre à jour le jeu avec les informations de placement
     return tx.festivalGame.update({
       where: { id: festivalGameId },
       data: {
         map_zone_id: mapZoneId,
         table_size: tableSize,
-        allocated_tables: allocatedTables,
-        space_m2: tablesToM2(allocatedTables)
+        allocated_tables: stockToConsume,
+        space_m2: tablesToM2(gameUnits)
       },
       include: {
         game: true,
@@ -551,6 +580,7 @@ export const placeGame = async (
     });
   });
 };
+
 
 export const unplaceGame = async (festivalGameId: number) => {
   return prisma.$transaction(async (tx) => {
@@ -626,7 +656,7 @@ const calculatePrice = async (reservation: any, applyDiscount = true): Promise<n
       const priceZone = zone.priceZone || await prisma.priceZone.findUnique({
         where: { id: zone.price_zone_id }
       });
-      
+
       if (priceZone) {
         total += priceZone.table_price * zone.table_count;
       }
@@ -645,11 +675,11 @@ const calculatePrice = async (reservation: any, applyDiscount = true): Promise<n
     if (remainingDiscount > 0 && reservation.zones) {
       for (const zone of reservation.zones) {
         if (remainingDiscount <= 0) break;
-        
+
         const priceZone = zone.priceZone || await prisma.priceZone.findUnique({
           where: { id: zone.price_zone_id }
         });
-        
+
         if (priceZone) {
           const tablesToDiscount = Math.min(zone.table_count, remainingDiscount);
           total -= priceZone.table_price * tablesToDiscount;
@@ -671,7 +701,7 @@ export const recalculatePrice = async (id: number) => {
   if (!reservation) throw new Error('Réservation introuvable');
 
   const finalAmount = await calculatePrice(reservation);
-  
+
   return prisma.reservation.update({
     where: { reservation_id: id },
     data: { final_invoice_amount: finalAmount },

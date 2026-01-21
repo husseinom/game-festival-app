@@ -55,6 +55,8 @@ export class MapZoneService {
         },
         error: (error) => {
           console.error('Error deleting map zone:', error);
+          const message = error.error?.error || error.error?.message || 'Erreur lors de la suppression de la zone';
+          alert(message);
         }
       });
   }

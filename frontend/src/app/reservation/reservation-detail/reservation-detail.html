@@ -106,6 +106,17 @@
           <option [value]="opt.value">{{ opt.label }}</option>
           }
         </select>
+        <select [value]="selectedTargetMapZoneId()" (change)="onTargetMapZoneChange($event)" class="form-control"
+          style="width: 200px;">
+          <option [value]="null">-- Zone (Optionnel) --</option>
+          @for (zone of availableMapZones(); track zone.id) {
+          @let availability = getZoneTableAvailability(zone);
+          <option [value]="zone.id" [disabled]="!isZoneValidForGame(zone) || availability.totalAvailable === 0">
+            {{ zone.name }}{{ zone.price_zone ? ' (' + zone.price_zone.name + ')' : '' }} ({{
+            availability.totalAvailable }} dispo)
+          </option>
+          }
+        </select>
         <label class="tables-info">
           Tables: <input type="number" [value]="selectedAllocatedTables()" (input)="onAllocatedTablesChange($event)"
             min="0.5" max="10" step="0.5" class="form-control allocated-tables">
@@ -169,7 +180,8 @@
                   @for (zone of availableMapZones(); track zone.id) {
                   @let availability = getZoneTableAvailability(zone);
                   <option [value]="zone.id" [disabled]="!isZoneValidForGame(zone) || availability.totalAvailable === 0">
-                    {{ zone.name }} ({{ availability.totalAvailable }}/{{ availability.total }} dispo)
+                    {{ zone.name }}{{ zone.price_zone ? ' (' + zone.price_zone.name + ')' : '' }} ({{
+                    availability.totalAvailable }}/{{ availability.total }} dispo)
                   </option>
                   }
                 </select>
@@ -186,14 +198,20 @@
                   [disabled]="!selectedMapZoneId() || isLoading()">✓</button>
                 <button class="btn btn-xs btn-secondary" (click)="cancelPlacing()">✗</button>
               </div>
-              <!-- Indicateur de disponibilité détaillé -->
+              <!-- Indicateur de disponibilité détaillé + calcul consommation -->
               @if (selectedMapZoneId()) {
               @let zoneAvail = getSelectedZoneAvailability();
+              @let consumption = getTableConsumption(fg.game_size, selectedTableSize());
               <div class="zone-availability-hint">
                 <small>
-                  🪑 Standard: {{ zoneAvail.standard.available }}/{{ zoneAvail.standard.total }} |
-                  📐 Large: {{ zoneAvail.large.available }}/{{ zoneAvail.large.total }} |
-                  🏛️ City: {{ zoneAvail.city.available }}/{{ zoneAvail.city.total }}
+                  <strong>Ce jeu ({{ getGameSizeLabel(fg.game_size) }}) va consommer {{ consumption }} table(s) {{
+                    selectedTableSize() }}</strong>
+                </small>
+                <br>
+                <small>
+                  Standard: {{ zoneAvail.standard.available }}/{{ zoneAvail.standard.total }} |
+                  Large: {{ zoneAvail.large.available }}/{{ zoneAvail.large.total }} |
+                  City: {{ zoneAvail.city.available }}/{{ zoneAvail.city.total }}
                 </small>
               </div>
               }
@@ -215,8 +233,9 @@
             </td>
             <td class="actions-cell">
               @if (editingGameId() !== fg.id) {
-              <button class="btn btn-xs btn-outline" (click)="startPlacingGame(fg)" [disabled]="isLoading()"
-                title="Placer dans une zone">
+              <button class="btn btn-xs btn-outline" (click)="startPlacingGame(fg)"
+                [disabled]="isLoading() || fg.map_zone_id"
+                title="{{ fg.map_zone_id ? 'Déjà placé' : 'Placer dans une zone' }}">
                 📍
               </button>
               @if (fg.map_zone_id) {

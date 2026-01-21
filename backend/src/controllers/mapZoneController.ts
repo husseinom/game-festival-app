@@ -252,11 +252,16 @@ export const deleteMapZone = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Invalid map zone id' });
     }
 
-    // Retirer les jeux de cette zone
-    await prisma.festivalGame.updateMany({
-      where: { map_zone_id: id },
-      data: { map_zone_id: null }
+    // Vérifier s'il y a des jeux associés à cette zone
+    const gamesInZone = await prisma.festivalGame.count({
+      where: { map_zone_id: id }
     });
+
+    if (gamesInZone > 0) {
+      return res.status(400).json({
+        error: `Impossible de supprimer cette zone : ${gamesInZone} jeu(x) sont encore placés dans cette zone. Retirez-les d'abord.`
+      });
+    }
 
     // Supprimer les TableType associés à cette zone
     await prisma.tableType.deleteMany({
