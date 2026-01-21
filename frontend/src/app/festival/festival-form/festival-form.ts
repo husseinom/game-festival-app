@@ -117,7 +117,7 @@ export class FestivalForm {
       city_tables: this.form.value.city_tables!,
       startDate: new Date(this.form.value.startDate!),
       endDate: new Date(this.form.value.endDate!),
-      priceZoneTypeId: Number(this.form.value.priceZoneTypeId!)
+      priceZoneTypeId: this.form.value.priceZoneTypeId ? Number(this.form.value.priceZoneTypeId) : undefined
     };
 
     this.newFestival.emit(festival as Festival);
@@ -140,7 +140,7 @@ export class FestivalForm {
       city_tables: this.form.value.city_tables!,
       startDate: new Date(this.form.value.startDate!),
       endDate: new Date(this.form.value.endDate!),
-      priceZoneTypeId: Number(this.form.value.priceZoneTypeId!)
+      priceZoneTypeId: this.form.value.priceZoneTypeId ? Number(this.form.value.priceZoneTypeId) : undefined
     };
 
     this.updatedFestival.emit(updatedFestival);

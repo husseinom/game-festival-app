@@ -1,6 +1,8 @@
 import prisma from "../config/prisma.js";
 
 export const createGame = async (gameData: any) => {
+  console.log('createGame received:', JSON.stringify(gameData));
+  
   const { 
     publisherId: inputPublisherId,
     name, 
