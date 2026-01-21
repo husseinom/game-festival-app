@@ -204,6 +204,9 @@
                           ✓
                         </button>
                       }
+                      <button class="btn btn-xs btn-danger" (click)="removeGameFromReservation(fg.id)" [disabled]="isLoading()" title="Supprimer de la réservation">
+                        🗑️
+                      </button>
                     }
                   </td>
                 </tr>

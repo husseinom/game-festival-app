@@ -407,6 +407,25 @@ export const addGamesToReservation = async (
   return getReservationById(reservationId);
 };
 
+export const removeGameFromReservation = async (festivalGameId: number) => {
+  // Récupérer le jeu pour avoir la reservation_id
+  const festivalGame = await prisma.festivalGame.findUnique({
+    where: { id: festivalGameId }
+  });
+
+  if (!festivalGame) {
+    throw new Error('Jeu non trouvé dans la réservation');
+  }
+
+  // Supprimer le jeu de la réservation
+  await prisma.festivalGame.delete({
+    where: { id: festivalGameId }
+  });
+
+  // Retourner la réservation mise à jour
+  return getReservationById(festivalGame.reservation_id);
+};
+
 export const markGamesReceived = async (id: number) => {
   return prisma.reservation.update({
     where: { reservation_id: id },

@@ -1,6 +1,36 @@
 import type { Request, Response } from 'express';
 import prisma from '../config/prisma.js';
 
+export const getByFestival = async (req: Request, res: Response) => {
+  try {
+    const festivalId = Number(req.params.festivalId);
+    if (Number.isNaN(festivalId)) {
+      return res.status(400).json({ error: 'Invalid festivalId' });
+    }
+    const mapZones = await prisma.mapZone.findMany({
+      where: { festival_id: festivalId },
+      include: { 
+        price_zone: true,
+        tableTypes: true,
+        festivalGames: {
+          include: {
+            game: true,
+            reservation: {
+              include: {
+                publisher: true
+              }
+            }
+          }
+        }
+      }
+    });
+    res.json(mapZones);
+  } catch (error) {
+    console.error('Error fetching map zones by festival:', error);
+    res.status(500).json({ message: 'Error fetching map zones' });
+  }
+};
+
 export const getByPriceZone = async (req: Request, res: Response) => {
   try {
     const priceZoneId = Number(req.params.priceZoneId);
@@ -10,6 +40,7 @@ export const getByPriceZone = async (req: Request, res: Response) => {
     const mapZones = await prisma.mapZone.findMany({
       where: { price_zone_id: priceZoneId },
       include: { 
+        tableTypes: true,
         festivalGames: {
           include: {
             game: true,
@@ -95,6 +126,42 @@ export const create = async (req: Request, res: Response) => {
         city_tables: requestedCity
       }
     });
+
+    // Create TableTypes for this map zone
+    const tableTypesToCreate = [];
+    if (requestedSmall > 0) {
+      tableTypesToCreate.push({
+        map_zone_id: mapZone.id,
+        name: 'STANDARD' as const,
+        nb_total: requestedSmall,
+        nb_available: requestedSmall,
+        nb_total_player: 4
+      });
+    }
+    if (requestedLarge > 0) {
+      tableTypesToCreate.push({
+        map_zone_id: mapZone.id,
+        name: 'LARGE' as const,
+        nb_total: requestedLarge,
+        nb_available: requestedLarge,
+        nb_total_player: 6
+      });
+    }
+    if (requestedCity > 0) {
+      tableTypesToCreate.push({
+        map_zone_id: mapZone.id,
+        name: 'CITY' as const,
+        nb_total: requestedCity,
+        nb_available: requestedCity,
+        nb_total_player: 8
+      });
+    }
+    
+    if (tableTypesToCreate.length > 0) {
+      await prisma.tableType.createMany({
+        data: tableTypesToCreate
+      });
+    }
 
     // Assign games to this map zone
     if (gameIds && gameIds.length > 0) {

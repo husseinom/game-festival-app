@@ -13,6 +13,11 @@ export class MapZoneService {
 
   mapZones = this._mapZones.asReadonly();
 
+  // Retourne un Observable pour les map zones d'un festival
+  getByFestivalObs(festivalId: number): Observable<MapZone[]> {
+    return this.http.get<MapZone[]>(`${environment.apiUrl}/map_zones/festival/${festivalId}`, { withCredentials: true });
+  }
+
   // Retourne un Observable (utile pour forkJoin)
   getByPriceZoneObs(priceZoneId: number): Observable<MapZone[]> {
     return this.http.get<MapZone[]>(`${environment.apiUrl}/map_zones/price-zone/${priceZoneId}`, { withCredentials: true });

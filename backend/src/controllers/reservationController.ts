@@ -251,6 +251,21 @@ export const markGamesReceived = async (req: Request, res: Response) => {
   }
 };
 
+export const removeGame = async (req: Request, res: Response) => {
+  const festivalGameId = Number(req.params.gameId);
+  try {
+    const updated = await reservationService.removeGameFromReservation(festivalGameId);
+    res.status(200).json({ message: 'Jeu supprimé de la réservation', data: updated });
+  } catch (error: any) {
+    console.error(error);
+    if (error.message === 'Jeu non trouvé dans la réservation') {
+      res.status(404).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: 'Erreur serveur' });
+    }
+  }
+};
+
 export const markGameAsReceived = async (req: Request, res: Response) => {
   const festivalGameId = Number(req.params.gameId);
   try {

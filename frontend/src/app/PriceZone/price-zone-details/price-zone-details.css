@@ -288,6 +288,11 @@
   color: #555;
 }
 
+.map-zone-tables span.low-availability {
+  color: #dc3545;
+  font-weight: 600;
+}
+
 .map-zone-tables mat-icon {
   font-size: 20px;
   width: 20px;

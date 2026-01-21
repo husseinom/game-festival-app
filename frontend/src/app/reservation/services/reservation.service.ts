@@ -145,6 +145,13 @@ export class ReservationService {
     );
   }
 
+  removeGame(festivalGameId: number): Observable<ReservationResponse> {
+    return this.http.delete<ReservationResponse>(
+      `${this.baseUrl}/game/${festivalGameId}`, 
+      { withCredentials: true }
+    );
+  }
+
   markGamesReceived(id: number): Observable<ReservationResponse> {
     return this.http.post<ReservationResponse>(
       `${this.baseUrl}/${id}/games-received`, 

@@ -57,6 +57,24 @@ export class PriceZoneDetailsComponent {
     return this.games().filter(g => !g.map_zone_id);
   });
 
+  // Calculate used tables from TableTypes in map zones
+  usedTables = computed(() => {
+    const zones = this.mapZones();
+    const result = { small: 0, large: 0, city: 0 };
+    
+    for (const zone of zones) {
+      if (zone.tableTypes) {
+        for (const tt of zone.tableTypes) {
+          const used = tt.nb_total - tt.nb_available;
+          if (tt.name === 'STANDARD') result.small += used;
+          else if (tt.name === 'LARGE') result.large += used;
+          else if (tt.name === 'CITY') result.city += used;
+        }
+      }
+    }
+    return result;
+  });
+
   // Calculate allocated tables from existing map zones
   allocatedTables = computed(() => {
     const zones = this.mapZones();

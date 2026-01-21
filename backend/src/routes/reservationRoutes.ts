@@ -73,6 +73,9 @@ router.post('/:id/game-list-received', verifyToken, requireRole(orgRoles), reser
 // POST /api/reservations/:id/games - Ajouter des jeux à la réservation
 router.post('/:id/games', verifyToken, requireRole(orgRoles), reservationController.addGames);
 
+// DELETE /api/reservations/game/:gameId - Supprimer un jeu de la réservation
+router.delete('/game/:gameId', verifyToken, requireRole(orgRoles), reservationController.removeGame);
+
 // POST /api/reservations/:id/games-received - Marquer tous les jeux comme reçus
 router.post('/:id/games-received', verifyToken, requireRole(orgRoles), reservationController.markGamesReceived);
 

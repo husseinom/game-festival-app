@@ -18,19 +18,19 @@
           </div>
           <div class="info-item">
             <span class="label">Small Tables:</span>
-            <span class="value">{{ zone.small_tables }}</span>
+            <span class="value">{{ zone.small_tables - usedTables().small }}/{{ zone.small_tables }}</span>
           </div>
           <div class="info-item">
             <span class="label">Large Tables:</span>
-            <span class="value">{{ zone.large_tables }}</span>
+            <span class="value">{{ zone.large_tables - usedTables().large }}/{{ zone.large_tables }}</span>
           </div>
           <div class="info-item">
             <span class="label">City Tables:</span>
-            <span class="value">{{ zone.city_tables }}</span>
+            <span class="value">{{ zone.city_tables - usedTables().city }}/{{ zone.city_tables }}</span>
           </div>
           <div class="info-item total">
-            <span class="label">Total Tables:</span>
-            <span class="value">{{ zone.total_tables || (zone.small_tables + zone.large_tables + zone.city_tables) }}</span>
+            <span class="label">Total Used:</span>
+            <span class="value">{{ usedTables().small + usedTables().large + usedTables().city }} / {{ zone.small_tables + zone.large_tables + zone.city_tables }}</span>
           </div>
         </div>
       </mat-card-content>
@@ -284,16 +284,30 @@
                   </mat-card-header>
                   <mat-card-content>
                     <div class="map-zone-tables">
-                      <span><mat-icon>grid_view</mat-icon> Small: {{ mapZone.small_tables }}</span>
-                      <span><mat-icon>table_chart</mat-icon> Large: {{ mapZone.large_tables }}</span>
-                      <span><mat-icon>location_city</mat-icon> City: {{ mapZone.city_tables }}</span>
+                      @for (tt of mapZone.tableTypes || []; track tt.id) {
+                        <span [class.low-availability]="tt.nb_available === 0">
+                          @if (tt.name === 'STANDARD') {
+                            <mat-icon>grid_view</mat-icon>
+                          } @else if (tt.name === 'LARGE') {
+                            <mat-icon>table_chart</mat-icon>
+                          } @else {
+                            <mat-icon>location_city</mat-icon>
+                          }
+                          {{ tt.name }}: {{ tt.nb_available }}/{{ tt.nb_total }}
+                        </span>
+                      }
+                      @if (!mapZone.tableTypes || mapZone.tableTypes.length === 0) {
+                        <span><mat-icon>grid_view</mat-icon> Small: {{ mapZone.small_tables }}</span>
+                        <span><mat-icon>table_chart</mat-icon> Large: {{ mapZone.large_tables }}</span>
+                        <span><mat-icon>location_city</mat-icon> City: {{ mapZone.city_tables }}</span>
+                      }
                     </div>
                     @if (mapZone.festivalGames && mapZone.festivalGames.length > 0) {
                       <div class="map-zone-games">
                         <p><strong><mat-icon>casino</mat-icon> Games ({{ mapZone.festivalGames.length }}):</strong></p>
                         <ul>
                           @for (fg of mapZone.festivalGames; track fg.id) {
-                            <li>{{ fg.game?.name || 'Unknown' }}</li>
+                            <li>{{ fg.game?.name || 'Unknown' }} ({{ fg.allocated_tables }} table{{ fg.allocated_tables > 1 ? 's' : '' }})</li>
                           }
                         </ul>
                       </div>

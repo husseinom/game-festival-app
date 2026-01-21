@@ -99,33 +99,18 @@ export class ReservationDetail {
     }
   }
 
-  // Charge les zones de plan disponibles pour toutes les zones tarifaires de la réservation
+  // Charge les zones de plan disponibles pour le festival de la réservation
   private loadAvailableMapZones(): void {
     const r = this.reservation();
-    if (!r?.zones || r.zones.length === 0) {
+    if (!r?.festival_id) {
       this.availableMapZones.set([]);
       return;
     }
 
-    // Pour chaque zone tarifaire de la réservation, charger les zones de plan associées
-    const priceZoneIds = r.zones.map(z => z.priceZone.id);
-    const requests = priceZoneIds.map(pzId => 
-      this.mapZoneService.getByPriceZoneObs(pzId)
-    );
-
-    if (requests.length === 0) {
-      this.availableMapZones.set([]);
-      return;
-    }
-
-    forkJoin(requests).subscribe({
-      next: (results: MapZone[][]) => {
-        // Fusionner et dédupliquer les zones
-        const allZones = results.flat();
-        const uniqueZones = allZones.filter((zone, index, self) => 
-          index === self.findIndex(z => z.id === zone.id)
-        );
-        this.availableMapZones.set(uniqueZones);
+    // Charger les map zones du festival
+    this.mapZoneService.getByFestivalObs(r.festival_id).subscribe({
+      next: (zones: MapZone[]) => {
+        this.availableMapZones.set(zones);
       },
       error: (err: any) => console.error('Erreur chargement zones:', err)
     });
@@ -401,6 +386,23 @@ export class ReservationDetail {
     });
   }
 
+  removeGameFromReservation(festivalGameId: number): void {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer ce jeu de la réservation ?')) {
+      return;
+    }
+    this.isLoading.set(true);
+    this.reservationService.removeGame(festivalGameId).subscribe({
+      next: () => {
+        this.refreshReservation();
+        this.isLoading.set(false);
+      },
+      error: (err: any) => {
+        console.error('Erreur suppression jeu:', err);
+        this.isLoading.set(false);
+      }
+    });
+  }
+
   // ============================================
   // Helpers
   // ============================================
@@ -461,13 +463,13 @@ export class ReservationDetail {
     this.selectedTableSize.set('STANDARD');
   }
 
-  // Vérifier si une zone est valide pour un jeu (doit être dans une zone tarifaire de la réservation)
+  // Vérifier si une zone est valide pour un jeu (doit appartenir au même festival)
   isZoneValidForGame(mapZone: MapZone): boolean {
     const r = this.reservation();
-    if (!r?.zones) return false;
+    if (!r?.festival_id) return false;
     
-    // Vérifier que la zone de plan appartient à une zone tarifaire de cette réservation
-    return r.zones.some(z => z.priceZone.id === mapZone.price_zone_id);
+    // Vérifier que la zone de plan appartient au même festival que la réservation
+    return mapZone.festival_id === r.festival_id;
   }
 
   // Placer le jeu dans la zone sélectionnée
@@ -518,50 +520,65 @@ export class ReservationDetail {
     });
   }
 
-  // Vérifier que le nombre de tables demandées ne dépasse pas les limites
+  // Vérifier que le nombre de tables demandées ne dépasse pas les limites de la zone
   private checkTableLimits(festivalGame: FestivalGame, mapZoneId: number): boolean {
     const r = this.reservation();
     const mapZone = this.availableMapZones().find(z => z.id === mapZoneId);
     
     if (!r || !mapZone) return false;
 
-    // Compter les tables déjà placées dans cette zone pour cette réservation
+    // Obtenir le type de table sélectionné
+    const tableSize = this.selectedTableSize();
+    
+    // Compter les tables déjà placées dans cette zone (du même type)
     const tablesAlreadyInZone = (r.games || [])
-      .filter((g: FestivalGame) => g.map_zone_id === mapZoneId && g.id !== festivalGame.id)
+      .filter((g: FestivalGame) => g.map_zone_id === mapZoneId && g.id !== festivalGame.id && g.table_size === tableSize)
       .reduce((sum: number, g: FestivalGame) => sum + (g.allocated_tables || 0), 0);
 
-    // Récupérer le nombre de tables réservées pour cette zone tarifaire
-    const zoneReservation = r.zones?.find(z => z.priceZone.id === mapZone.price_zone_id);
-    const maxTables = zoneReservation?.table_count || 0;
+    // Récupérer le nombre de tables disponibles dans la MapZone selon le type
+    let maxTables = 0;
+    switch (tableSize) {
+      case 'STANDARD':
+        maxTables = mapZone.small_tables || 0;
+        break;
+      case 'LARGE':
+        maxTables = mapZone.large_tables || 0;
+        break;
+      case 'CITY':
+        maxTables = mapZone.city_tables || 0;
+        break;
+    }
 
     const newTotal = tablesAlreadyInZone + (festivalGame.allocated_tables || 1);
     
     return newTotal <= maxTables;
   }
 
-  // Obtenir un résumé des tables utilisées par zone
+  // Obtenir un résumé des tables utilisées par MapZone
   getZoneUsageSummary(): { zoneName: string; used: number; max: number; priceZoneId: number }[] {
     const r = this.reservation();
-    if (!r?.zones || !r?.games) return [];
+    const mapZones = this.availableMapZones();
+    if (!r?.games || mapZones.length === 0) return [];
 
-    return r.zones.map(zone => {
+    return mapZones.map(mapZone => {
+      // Compter les tables utilisées dans cette MapZone
       const used = (r.games || [])
-        .filter((g: FestivalGame) => {
-          const gameZone = this.availableMapZones().find(z => z.id === g.map_zone_id);
-          return gameZone?.price_zone_id === zone.priceZone.id;
-        })
+        .filter((g: FestivalGame) => g.map_zone_id === mapZone.id)
         .reduce((sum: number, g: FestivalGame) => sum + (g.allocated_tables || 0), 0);
 
-      // Gérer le cas où name est un objet PriceZoneType ou une string
-      const zoneName = typeof zone.priceZone.name === 'object' 
-        ? (zone.priceZone.name as any).name 
-        : String(zone.priceZone.name);
+      // Calculer le max à partir des TableTypes ou des tables de la zone
+      let max = 0;
+      if (mapZone.tableTypes && mapZone.tableTypes.length > 0) {
+        max = mapZone.tableTypes.reduce((sum, tt) => sum + tt.nb_total, 0);
+      } else {
+        max = (mapZone.small_tables || 0) + (mapZone.large_tables || 0) + (mapZone.city_tables || 0);
+      }
 
       return {
-        zoneName,
+        zoneName: mapZone.name,
         used,
-        max: zone.table_count,
-        priceZoneId: zone.priceZone.id
+        max,
+        priceZoneId: mapZone.price_zone_id
       };
     });
   }
