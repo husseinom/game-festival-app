@@ -24,6 +24,15 @@
   margin: 0;
   font-size: 28px;
   color: #faf8f8;
+  flex: 1;
+}
+
+.refresh-btn {
+  color: white !important;
+}
+
+.refresh-btn .mat-icon {
+  color: white !important;
 }
 
 /* Zone Info Card */

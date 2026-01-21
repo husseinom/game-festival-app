@@ -269,7 +269,7 @@ export const deleteReservation = async (id: number) => {
 
     // Restaurer le stock de tables pour chaque jeu placé
     for (const game of placedGames) {
-      if (game.map_zone_id && game.allocated_tables) {
+      if (game.map_zone_id !== null && game.allocated_tables > 0) {
         const tableType = await tx.tableType.findFirst({
           where: {
             map_zone_id: game.map_zone_id,
@@ -278,9 +278,10 @@ export const deleteReservation = async (id: number) => {
         });
 
         if (tableType) {
+          const tablesToRestore = Math.round(game.allocated_tables);
           await tx.tableType.update({
             where: { id: tableType.id },
-            data: { nb_available: tableType.nb_available + game.allocated_tables }
+            data: { nb_available: tableType.nb_available + tablesToRestore }
           });
         }
       }
@@ -436,22 +437,42 @@ export const addGamesToReservation = async (
 };
 
 export const removeGameFromReservation = async (festivalGameId: number) => {
-  // Récupérer le jeu pour avoir la reservation_id
-  const festivalGame = await prisma.festivalGame.findUnique({
-    where: { id: festivalGameId }
+  return prisma.$transaction(async (tx) => {
+    // Récupérer le jeu pour avoir la reservation_id et les infos de placement
+    const festivalGame = await tx.festivalGame.findUnique({
+      where: { id: festivalGameId }
+    });
+
+    if (!festivalGame) {
+      throw new Error('Jeu non trouvé dans la réservation');
+    }
+
+    // Si le jeu était placé, restaurer le stock de tables
+    if (festivalGame.map_zone_id !== null && festivalGame.allocated_tables > 0) {
+      const tableType = await tx.tableType.findFirst({
+        where: {
+          map_zone_id: festivalGame.map_zone_id,
+          name: festivalGame.table_size
+        }
+      });
+
+      if (tableType) {
+        const tablesToRestore = Math.round(festivalGame.allocated_tables);
+        await tx.tableType.update({
+          where: { id: tableType.id },
+          data: { nb_available: tableType.nb_available + tablesToRestore }
+        });
+      }
+    }
+
+    // Supprimer le jeu de la réservation
+    await tx.festivalGame.delete({
+      where: { id: festivalGameId }
+    });
+
+    // Retourner la réservation mise à jour
+    return getReservationById(festivalGame.reservation_id);
   });
-
-  if (!festivalGame) {
-    throw new Error('Jeu non trouvé dans la réservation');
-  }
-
-  // Supprimer le jeu de la réservation
-  await prisma.festivalGame.delete({
-    where: { id: festivalGameId }
-  });
-
-  // Retourner la réservation mise à jour
-  return getReservationById(festivalGame.reservation_id);
 };
 
 export const markGamesReceived = async (id: number) => {
