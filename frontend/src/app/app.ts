@@ -24,7 +24,13 @@ export class App {
   readonly isOrganisator = this.roleService.isOrganisator;
   readonly currentUser = this.authService.currentUser;
   readonly isLoading = this.authService.isLoading;
-  
+
+  constructor() {
+    // Vérifier la session au démarrage de l'application (après refresh)
+    if (!this.authService.hasCheckedAuth()) {
+      this.authService.whoami().subscribe();
+    }
+  }
 
   LoggedOut(): void{
     setTimeout(() => {
