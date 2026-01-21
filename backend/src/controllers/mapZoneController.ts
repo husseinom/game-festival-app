@@ -9,7 +9,7 @@ export const getByFestival = async (req: Request, res: Response) => {
     }
     const mapZones = await prisma.mapZone.findMany({
       where: { festival_id: festivalId },
-      include: { 
+      include: {
         price_zone: true,
         tableTypes: true,
         festivalGames: {
@@ -39,7 +39,7 @@ export const getByPriceZone = async (req: Request, res: Response) => {
     }
     const mapZones = await prisma.mapZone.findMany({
       where: { price_zone_id: priceZoneId },
-      include: { 
+      include: {
         tableTypes: true,
         festivalGames: {
           include: {
@@ -63,7 +63,7 @@ export const getByPriceZone = async (req: Request, res: Response) => {
 export const create = async (req: Request, res: Response) => {
   try {
     const { name, price_zone_id, small_tables, large_tables, city_tables, gameIds } = req.body;
-    
+
     if (!name || !price_zone_id) {
       return res.status(400).json({ error: 'Name and price_zone_id are required' });
     }
@@ -100,25 +100,25 @@ export const create = async (req: Request, res: Response) => {
     const requestedCity = city_tables || 0;
 
     if (requestedSmall > availableTables.small) {
-      return res.status(400).json({ 
-        error: `Not enough small tables available. Requested: ${requestedSmall}, Available: ${availableTables.small}` 
+      return res.status(400).json({
+        error: `Not enough small tables available. Requested: ${requestedSmall}, Available: ${availableTables.small}`
       });
     }
     if (requestedLarge > availableTables.large) {
-      return res.status(400).json({ 
-        error: `Not enough large tables available. Requested: ${requestedLarge}, Available: ${availableTables.large}` 
+      return res.status(400).json({
+        error: `Not enough large tables available. Requested: ${requestedLarge}, Available: ${availableTables.large}`
       });
     }
     if (requestedCity > availableTables.city) {
-      return res.status(400).json({ 
-        error: `Not enough city tables available. Requested: ${requestedCity}, Available: ${availableTables.city}` 
+      return res.status(400).json({
+        error: `Not enough city tables available. Requested: ${requestedCity}, Available: ${availableTables.city}`
       });
     }
 
     // Create map zone
     const mapZone = await prisma.mapZone.create({
-      data: { 
-        name, 
+      data: {
+        name,
         price_zone_id,
         festival_id: priceZone.festival_id,
         small_tables: requestedSmall,
@@ -156,7 +156,7 @@ export const create = async (req: Request, res: Response) => {
         nb_total_player: 8
       });
     }
-    
+
     if (tableTypesToCreate.length > 0) {
       await prisma.tableType.createMany({
         data: tableTypesToCreate
@@ -166,7 +166,7 @@ export const create = async (req: Request, res: Response) => {
     // Assign games to this map zone
     if (gameIds && gameIds.length > 0) {
       await prisma.festivalGame.updateMany({
-        where: { 
+        where: {
           id: { in: gameIds },
           map_zone_id: null
         },
@@ -201,11 +201,11 @@ export const addFestivalGame = async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.id);
     const { festivalGameId } = req.body;
-    
+
     if (Number.isNaN(id)) {
       return res.status(400).json({ error: 'Invalid map zone id' });
     }
-    
+
     const festivalGame = await prisma.festivalGame.update({
       where: { id: festivalGameId },
       data: { map_zone_id: id },
@@ -228,11 +228,11 @@ export const addFestivalGame = async (req: Request, res: Response) => {
 export const removeFestivalGame = async (req: Request, res: Response) => {
   try {
     const festivalGameId = Number(req.params.festivalGameId);
-    
+
     if (Number.isNaN(festivalGameId)) {
       return res.status(400).json({ error: 'Invalid festival game id' });
     }
-    
+
     const festivalGame = await prisma.festivalGame.update({
       where: { id: festivalGameId },
       data: { map_zone_id: null }
@@ -247,15 +247,23 @@ export const removeFestivalGame = async (req: Request, res: Response) => {
 export const deleteMapZone = async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.id);
-    
+
     if (Number.isNaN(id)) {
       return res.status(400).json({ error: 'Invalid map zone id' });
     }
-    
+
+    // Retirer les jeux de cette zone
     await prisma.festivalGame.updateMany({
       where: { map_zone_id: id },
       data: { map_zone_id: null }
     });
+
+    // Supprimer les TableType associés à cette zone
+    await prisma.tableType.deleteMany({
+      where: { map_zone_id: id }
+    });
+
+    // Supprimer la zone
     await prisma.mapZone.delete({ where: { id: id } });
     res.status(204).send();
   } catch (error) {
