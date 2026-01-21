@@ -204,3 +204,10 @@
   background: #c5cae9;
   cursor: not-allowed;
 }
+
+.m2-info {
+  display: block;
+  color: #3f51b5;
+  font-size: 0.85rem;
+  margin-top: 4px;
+}

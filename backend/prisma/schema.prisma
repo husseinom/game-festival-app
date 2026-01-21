@@ -104,6 +104,7 @@ model MapZone{
     city_tables   Int       @default(0)
 
     festivalGames FestivalGame[]
+    tableTypes    TableType[]
 }
 
 model PriceZoneType{
@@ -224,7 +225,8 @@ model ZoneReservation {
   id             Int         @id @default(autoincrement())
   reservation_id Int
   price_zone_id  Int
-  table_count    Int         @default(0)
+  table_count    Int         @default(0)    // Nombre d'unités de table (1 unité = 4 m²)
+  space_m2       Float       @default(0)    // Espace en m² (table_count * 4)
 
   reservation    Reservation @relation(fields: [reservation_id], references: [reservation_id])
   priceZone      PriceZone   @relation(fields: [price_zone_id], references: [id])
@@ -234,9 +236,16 @@ model ZoneReservation {
 
 // Type de table physique
 enum TableSize {
-    STANDARD  // Table standard
-    LARGE     // Grande table
-    CITY      // Table mairie
+    STANDARD  // Table standard (1 unité = 4 m²)
+    LARGE     // Grande table (2 unités = 8 m²)
+    CITY      // Table mairie (variable)
+}
+
+// Taille d'un jeu (détermine l'espace occupé)
+enum GameSize {
+    SMALL     // Petit jeu: 0.5 unité = 2 m²
+    STANDARD  // Jeu standard: 1 unité = 4 m²
+    LARGE     // Gros jeu: 2 unités = 8 m²
 }
 
 model FestivalGame {
@@ -246,8 +255,10 @@ model FestivalGame {
   map_zone_id     Int?        // Peut être null tant que l'orga ne l'a pas placé
   
   copy_count      Int         @default(1) // Nombre d'exemplaires du jeu
-  table_size      TableSize   @default(STANDARD) // Type de table utilisée
-  allocated_tables Float      @default(1) // Combien de tables ça prend (0.5 à 2)
+  game_size       GameSize    @default(STANDARD) // Taille du jeu: SMALL(0.5), STANDARD(1), LARGE(2)
+  table_size      TableSize   @default(STANDARD) // Type de table physique utilisée
+  allocated_tables Float      @default(1) // Combien d'unités de table ça prend (0.5 à 2)
+  space_m2        Float       @default(4) // Espace occupé en m² (allocated_tables * 4)
   is_received     Boolean     @default(false) // Pointage à réception
   received_at     DateTime?   // Date de réception
 

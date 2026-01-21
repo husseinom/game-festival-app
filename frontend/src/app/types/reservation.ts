@@ -3,6 +3,48 @@ import { Festival } from "./festival";
 import { PriceZone } from "./price-zone";
 import { Reservant } from "./reservant";
 
+// ============================================
+// CONSTANTES DE CONVERSION ESPACE / TABLES
+// ============================================
+
+// 1 unité de table = 4 m² (standard de référence)
+export const M2_PER_TABLE_UNIT = 4;
+
+// Équivalent en unités de table par type de table physique
+export const TABLE_SIZE_UNITS: Record<string, number> = {
+  'STANDARD': 1,   // Table standard = 1 unité = 4 m²
+  'LARGE': 2,      // Grande table = 2 unités = 8 m²
+  'CITY': 1        // Table mairie = variable (par défaut 1)
+};
+
+// Équivalent en unités de table par taille de jeu
+export const GAME_SIZE_UNITS: Record<string, number> = {
+  'SMALL': 0.5,    // Petit jeu = 0.5 unité = 2 m²
+  'STANDARD': 1,   // Jeu standard = 1 unité = 4 m²
+  'LARGE': 2       // Gros jeu = 2 unités = 8 m²
+};
+
+// Fonctions utilitaires de conversion
+export function tablesToM2(tableUnits: number): number {
+  return tableUnits * M2_PER_TABLE_UNIT;
+}
+
+export function m2ToTables(m2: number): number {
+  return m2 / M2_PER_TABLE_UNIT;
+}
+
+export function getTableUnitsBySize(tableSize: TableSize): number {
+  return TABLE_SIZE_UNITS[tableSize] ?? 1;
+}
+
+export function getGameUnits(gameSize: GameSize): number {
+  return GAME_SIZE_UNITS[gameSize] ?? 1;
+}
+
+// ============================================
+// ENUMS
+// ============================================
+
 // Enums correspondant au backend (utiliser les valeurs comme constantes)
 export const ReservationStatus = {
   NOT_CONTACTED: 'NOT_CONTACTED',
@@ -31,6 +73,14 @@ export const TableSize = {
 
 export type TableSize = typeof TableSize[keyof typeof TableSize];
 
+export const GameSize = {
+  SMALL: 'SMALL',
+  STANDARD: 'STANDARD',
+  LARGE: 'LARGE'
+} as const;
+
+export type GameSize = typeof GameSize[keyof typeof GameSize];
+
 // Labels pour l'affichage
 export const RESERVATION_STATUS_LABELS: Record<ReservationStatus, string> = {
   'NOT_CONTACTED': 'Pas contacté',
@@ -48,9 +98,15 @@ export const INVOICE_STATUS_LABELS: Record<InvoiceStatus, string> = {
 };
 
 export const TABLE_SIZE_LABELS: Record<TableSize, string> = {
-  'STANDARD': 'Standard',
-  'LARGE': 'Grande',
+  'STANDARD': 'Standard (4 m²)',
+  'LARGE': 'Grande (8 m²)',
   'CITY': 'Mairie'
+};
+
+export const GAME_SIZE_LABELS: Record<GameSize, string> = {
+  'SMALL': 'Petit (2 m²)',
+  'STANDARD': 'Standard (4 m²)',
+  'LARGE': 'Grand (8 m²)'
 };
 
 export interface CreateReservationDTO {
@@ -69,7 +125,8 @@ export interface CreateReservationDTO {
   
   tables: {
     price_zone_id: number;
-    table_count: number;
+    table_count: number;   // Unités de table (1 unité = 4 m²)
+    space_m2?: number;     // Espace en m² (calculé automatiquement)
   }[];
 }
 
@@ -78,8 +135,10 @@ export interface FestivalGame {
   game_id: number;
   map_zone_id?: number;
   copy_count: number;
-  table_size: TableSize;
-  allocated_tables: number;
+  game_size: GameSize;           // Taille du jeu: SMALL, STANDARD, LARGE
+  table_size: TableSize;         // Type de table physique
+  allocated_tables: number;      // Unités de table occupées
+  space_m2: number;              // Espace en m²
   is_received: boolean;
   received_at?: string;
   game?: {
@@ -140,7 +199,8 @@ export interface Reservation {
   
   zones?: {
     id: number;
-    table_count: number;
+    table_count: number;   // Unités de table
+    space_m2: number;      // Espace en m²
     priceZone: PriceZone;
   }[];
   

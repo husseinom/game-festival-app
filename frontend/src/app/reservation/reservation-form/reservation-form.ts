@@ -1,5 +1,5 @@
 import { Component, output, inject, signal, computed, effect } from '@angular/core';
-import { CreateReservationDTO, Reservation, ReservationStatus } from '../../types/reservation';
+import { CreateReservationDTO, Reservation, ReservationStatus, M2_PER_TABLE_UNIT, tablesToM2, m2ToTables } from '../../types/reservation';
 import { FormGroup, FormControl, ReactiveFormsModule, Validators, FormArray } from '@angular/forms';
 import { PriceZoneServices } from '../../PriceZone/services/price-zone-services';
 import { GamePubListService } from '../../GamePublisher/service/game-pub-list-service';
@@ -8,6 +8,9 @@ import { FestivalServices } from '../../festival/services/festival-services';
 import { CommonModule } from '@angular/common';
 import { ReservantTypeLabelPipe } from '../../shared/pipes/reservant-type-label.pipe';
 import { ReservantType } from '../../types/reservant';
+
+// Type d'unité de saisie
+type InputUnit = 'tables' | 'm2';
 
 @Component({
   selector: 'app-reservation-form',
@@ -27,6 +30,12 @@ export class ReservationForm {
   gamePublishers = this.gamePubService.gamePubs;
   festivals = this.festivalService.festivals;
   reservants = this.reservantService.reservants;
+
+  // Constante pour la conversion (accessible dans le template)
+  readonly M2_PER_TABLE = M2_PER_TABLE_UNIT;
+
+  // Unité de saisie par défaut (tables ou m²)
+  inputUnit = signal<InputUnit>('tables');
 
   // Computed signal to filter price zones by selected festival
   filteredPriceZones = computed(() => {
@@ -63,9 +72,6 @@ export class ReservationForm {
       nonNullable: true
     }),
     needs_festival_animators: new FormControl(false, {
-      nonNullable: true
-    }),
-    large_table_request: new FormControl('', {
       nonNullable: true
     }),
     discount_amount: new FormControl<number | null>(null),
@@ -127,10 +133,57 @@ export class ReservationForm {
     return this.form.get('festival_id')?.value!;
   }
 
+  // Toggle entre saisie en tables et saisie en m²
+  toggleInputUnit(): void {
+    this.inputUnit.update(u => u === 'tables' ? 'm2' : 'tables');
+  }
+
+  // Conversion tables -> m²
+  tablesToM2(tables: number): number {
+    return tablesToM2(tables);
+  }
+
+  // Conversion m² -> tables
+  m2ToTables(m2: number): number {
+    return m2ToTables(m2);
+  }
+
+  // Obtenir la valeur convertie pour l'affichage
+  getConvertedValue(index: number): string {
+    const tableEntry = this.tablesArray.at(index);
+    const tableCount = tableEntry.get('table_count')?.value || 0;
+    const spaceM2 = tableEntry.get('space_m2')?.value || 0;
+
+    if (this.inputUnit() === 'tables') {
+      return `= ${this.tablesToM2(tableCount)} m²`;
+    } else {
+      return `= ${this.m2ToTables(spaceM2)} tables`;
+    }
+  }
+
+  // Mise à jour automatique lors de la saisie
+  onTableCountChange(index: number, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const tableCount = parseFloat(input.value) || 0;
+    const tableEntry = this.tablesArray.at(index);
+    tableEntry.get('space_m2')?.setValue(this.tablesToM2(tableCount), { emitEvent: false });
+  }
+
+  onSpaceM2Change(index: number, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const spaceM2 = parseFloat(input.value) || 0;
+    const tableEntry = this.tablesArray.at(index);
+    tableEntry.get('table_count')?.setValue(this.m2ToTables(spaceM2), { emitEvent: false });
+  }
+
   getMaxTablesForZone(priceZoneId: number | null): number {
     if (!priceZoneId) return 0;
     const zone = this.allPriceZones().find(z => z.id === priceZoneId);
     return zone?.total_tables!;
+  }
+
+  getMaxM2ForZone(priceZoneId: number | null): number {
+    return this.tablesToM2(this.getMaxTablesForZone(priceZoneId));
   }
 
   getPriceZoneName(priceZoneId: number | null): string {
@@ -159,7 +212,11 @@ export class ReservationForm {
         }),
         table_count: new FormControl<number | null>(null, {
           nonNullable: false,
-          validators: [Validators.required, Validators.min(1)]
+          validators: [Validators.required, Validators.min(0.5)]
+        }),
+        space_m2: new FormControl<number | null>(null, {
+          nonNullable: false,
+          validators: [Validators.required, Validators.min(2)]
         })
       })
     );
@@ -197,7 +254,6 @@ export class ReservationForm {
       comments: formValue.comments || '',
       is_publisher_presenting: formValue.is_publisher_presenting || false,
       needs_festival_animators: formValue.needs_festival_animators || false,
-      large_table_request: formValue.large_table_request || undefined,
       discount_amount: formValue.discount_amount || undefined,
       discount_tables: formValue.discount_tables || undefined,
       nb_electrical_outlets: formValue.nb_electrical_outlets || 0,
@@ -212,7 +268,6 @@ export class ReservationForm {
       status: ReservationStatus.NOT_CONTACTED,
       is_publisher_presenting: false,
       needs_festival_animators: false,
-      large_table_request: '',
       nb_electrical_outlets: 0
     });
     this.publisherIsReservant.set(false);

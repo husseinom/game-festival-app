@@ -1,7 +1,6 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { FormsModule } from '@angular/forms';
 import { ReservationService } from '../services/reservation.service';
 import { 
   Reservation, 
@@ -17,7 +16,7 @@ import { ReservationForm } from '../reservation-form/reservation-form';
 @Component({
   selector: 'app-reservation-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReservationCard, ReservationForm], 
+  imports: [CommonModule, ReservationCard, ReservationForm], 
   templateUrl: './reservation-list.html',
   styleUrls: ['./reservation-list.css']
 })
@@ -96,6 +95,17 @@ export class ReservationList implements OnInit {
 
   onReservationClick(id: number): void {
     this.router.navigate(['/reservation', id]);
+  }
+
+  // Handlers pour les filtres sans ngModel
+  onStatusFilterChange(event: Event): void {
+    const target = event.target as HTMLSelectElement;
+    this.statusFilter.set(target.value as ReservationStatus | 'ALL');
+  }
+
+  onInvoiceFilterChange(event: Event): void {
+    const target = event.target as HTMLSelectElement;
+    this.invoiceFilter.set(target.value as InvoiceStatus | 'ALL');
   }
 
   toggleForm(): void {

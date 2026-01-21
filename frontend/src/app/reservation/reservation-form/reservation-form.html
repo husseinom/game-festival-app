@@ -106,16 +106,6 @@
       ></textarea>
     </div>
 
-    <div class="form-group">
-      <label for="large_table_request">Demande de grandes tables</label>
-      <textarea
-        id="large_table_request"
-        formControlName="large_table_request"
-        placeholder="Détails de la demande de grandes tables (ex: 2 tables 180cm pour démo)"
-        rows="2"
-      ></textarea>
-    </div>
-
     <div class="checkbox-group">
       <label>
         <input type="checkbox" formControlName="is_publisher_presenting" />
@@ -177,12 +167,34 @@
 
   <div class="form-section">
     <div class="section-header">
-      <h3>Zones de prix et tables</h3>
+      <h3>Zones de prix et espace</h3>
       @if (!selectedFestivalId) {
         <p class="warning-message">
           ⚠️ Veuillez d'abord sélectionner un festival pour ajouter des zones
         </p>
       }
+    </div>
+
+    <!-- Toggle unité de saisie -->
+    <div class="unit-toggle">
+      <span class="unit-label">Saisir en :</span>
+      <button 
+        type="button" 
+        class="unit-btn"
+        [class.active]="inputUnit() === 'tables'"
+        (click)="inputUnit() !== 'tables' && toggleInputUnit()"
+      >
+        📊 Tables
+      </button>
+      <button 
+        type="button" 
+        class="unit-btn"
+        [class.active]="inputUnit() === 'm2'"
+        (click)="inputUnit() !== 'm2' && toggleInputUnit()"
+      >
+        📐 m²
+      </button>
+      <span class="unit-info">1 table = {{ M2_PER_TABLE }} m²</span>
     </div>
 
     <div formArrayName="tables">
@@ -200,7 +212,7 @@
               <option [value]="null" disabled>Sélectionner une zone</option>
               @for (zone of filteredPriceZones(); track zone.id) {
                 <option [value]="zone.id">
-                  {{ zone.name }} - {{ zone.table_price }}€/table ({{ zone.total_tables }} tables disponibles)
+                  {{ zone.name }} - {{ zone.table_price }}€/table ({{ zone.total_tables }} tables = {{ tablesToM2(zone.total_tables || 0) }} m²)
                 </option>
               }
             </select>
@@ -211,37 +223,87 @@
             }
           </div>
 
-          <div class="form-group">
-            <label [for]="'table_count_' + i">
-              Nombre de tables * 
-              @if (tablesArray.at(i).get('price_zone_id')?.value) {
-                <span class="max-info">(Max: {{ getMaxTablesForZone(tablesArray.at(i).get('price_zone_id')?.value) }})</span>
+          @if (inputUnit() === 'tables') {
+            <!-- Saisie en nombre de tables -->
+            <div class="form-group">
+              <label [for]="'table_count_' + i">
+                Nombre de tables * 
+                @if (tablesArray.at(i).get('price_zone_id')?.value) {
+                  <span class="max-info">(Max: {{ getMaxTablesForZone(tablesArray.at(i).get('price_zone_id')?.value) }})</span>
+                }
+              </label>
+              <div class="input-with-conversion">
+                <input
+                  type="number"
+                  [id]="'table_count_' + i"
+                  formControlName="table_count"
+                  placeholder="1"
+                  min="0.5"
+                  step="0.5"
+                  [max]="getMaxTablesForZone(tablesArray.at(i).get('price_zone_id')?.value)"
+                  (input)="onTableCountChange(i, $event)"
+                />
+                <span class="conversion-display">
+                  = {{ tablesToM2(tablesArray.at(i).get('table_count')?.value || 0) }} m²
+                </span>
+              </div>
+              @if (form.get('tables')?.get([i, 'table_count'])?.hasError('required') && form.get('tables')?.get([i, 'table_count'])?.touched) {
+                <span class="error">
+                  Le nombre de tables est obligatoire
+                </span>
               }
-            </label>
-            <input
-              type="number"
-              [id]="'table_count_' + i"
-              formControlName="table_count"
-              placeholder="1"
-              min="1"
-              [max]="getMaxTablesForZone(tablesArray.at(i).get('price_zone_id')?.value)"
-            />
-            @if (form.get('tables')?.get([i, 'table_count'])?.hasError('required') && form.get('tables')?.get([i, 'table_count'])?.touched) {
-              <span class="error">
-                Le nombre de tables est obligatoire
-              </span>
-            }
-            @if (form.get('tables')?.get([i, 'table_count'])?.hasError('min')) {
-              <span class="error">
-                Le nombre doit être au moins 1
-              </span>
-            }
-            @if (tablesArray.at(i).get('table_count')?.value > getMaxTablesForZone(tablesArray.at(i).get('price_zone_id')?.value)) {
-              <span class="error">
-                Maximum {{ getMaxTablesForZone(tablesArray.at(i).get('price_zone_id')?.value) }} tables disponibles dans {{ getPriceZoneName(tablesArray.at(i).get('price_zone_id')?.value) }}
-              </span>
-            }
-          </div>
+              @if (form.get('tables')?.get([i, 'table_count'])?.hasError('min')) {
+                <span class="error">
+                  Minimum 0.5 table (2 m²)
+                </span>
+              }
+              @if (tablesArray.at(i).get('table_count')?.value > getMaxTablesForZone(tablesArray.at(i).get('price_zone_id')?.value)) {
+                <span class="error">
+                  Maximum {{ getMaxTablesForZone(tablesArray.at(i).get('price_zone_id')?.value) }} tables disponibles
+                </span>
+              }
+            </div>
+          } @else {
+            <!-- Saisie en m² -->
+            <div class="form-group">
+              <label [for]="'space_m2_' + i">
+                Espace en m² * 
+                @if (tablesArray.at(i).get('price_zone_id')?.value) {
+                  <span class="max-info">(Max: {{ getMaxM2ForZone(tablesArray.at(i).get('price_zone_id')?.value) }} m²)</span>
+                }
+              </label>
+              <div class="input-with-conversion">
+                <input
+                  type="number"
+                  [id]="'space_m2_' + i"
+                  formControlName="space_m2"
+                  placeholder="4"
+                  min="2"
+                  step="2"
+                  [max]="getMaxM2ForZone(tablesArray.at(i).get('price_zone_id')?.value)"
+                  (input)="onSpaceM2Change(i, $event)"
+                />
+                <span class="conversion-display">
+                  = {{ m2ToTables(tablesArray.at(i).get('space_m2')?.value || 0) }} tables
+                </span>
+              </div>
+              @if (form.get('tables')?.get([i, 'space_m2'])?.hasError('required') && form.get('tables')?.get([i, 'space_m2'])?.touched) {
+                <span class="error">
+                  L'espace en m² est obligatoire
+                </span>
+              }
+              @if (form.get('tables')?.get([i, 'space_m2'])?.hasError('min')) {
+                <span class="error">
+                  Minimum 2 m² (0.5 table)
+                </span>
+              }
+              @if (tablesArray.at(i).get('space_m2')?.value > getMaxM2ForZone(tablesArray.at(i).get('price_zone_id')?.value)) {
+                <span class="error">
+                  Maximum {{ getMaxM2ForZone(tablesArray.at(i).get('price_zone_id')?.value) }} m² disponibles
+                </span>
+              }
+            </div>
+          }
 
           <button type="button" (click)="removeTable(i)" class="btn-remove" title="Supprimer cette zone">
             🗑️ Supprimer

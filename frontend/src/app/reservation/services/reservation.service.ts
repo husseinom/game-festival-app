@@ -137,7 +137,7 @@ export class ReservationService {
     );
   }
 
-  addGames(id: number, games: { game_id: number; copy_count: number }[]): Observable<ReservationResponse> {
+  addGames(id: number, games: { game_id: number; copy_count: number; game_size?: string; allocated_tables?: number }[]): Observable<ReservationResponse> {
     return this.http.post<ReservationResponse>(
       `${this.baseUrl}/${id}/games`, 
       { games }, 

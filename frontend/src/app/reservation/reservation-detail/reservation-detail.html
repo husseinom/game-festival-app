@@ -34,20 +34,24 @@
 
       <h3>Détails financiers</h3>
       <p><strong>Statut facture:</strong> <span class="invoice-badge" [class]="'invoice-' + (r.invoice_status || 'PENDING')">{{ getInvoiceStatusLabel(r.invoice_status) }}</span></p>
-      <p><strong>Remise ($):</strong> {{ r.discount_amount || 0 }}</p>
+      <p><strong>Remise (€):</strong> {{ r.discount_amount || 0 }}</p>
       <p><strong>Tables en remise:</strong> {{ r.discount_tables || 0 }}</p>
-      <p><strong>Prises électriques:</strong> {{ r.nb_electrical_outlets }} ({{ r.nb_electrical_outlets * 250 }}$)</p>
-      <p><strong>Montant final de la facture:</strong> {{ r.final_invoice_amount || 'N/A' }}$</p>
+      <p><strong>Prises électriques:</strong> {{ r.nb_electrical_outlets }} ({{ r.nb_electrical_outlets * 250 }}€)</p>
 
       @if (r.zones && r.zones.length > 0) {
-        <h3>Zones de prix</h3>
+        <h3>Zones et espace réservé</h3>
         <div class="zones-list">
           @for (zone of r.zones; track zone.id) {
             <div class="zone-item">
               <p><strong>Zone:</strong> {{ zone.priceZone.name }}</p>
-              <p><strong>Tables:</strong> {{ zone.table_count }}</p>
+              <p><strong>Tables:</strong> {{ zone.table_count }} <span class="m2-equiv">({{ zone.space_m2 || zone.table_count * 4 }} m²)</span></p>
+              <p><strong>Prix/table:</strong> {{ zone.priceZone.table_price }}€</p>
             </div>
           }
+          <div class="zone-total">
+            <p><strong>Total espace:</strong> {{ getTotalTables() }} tables = {{ getTotalM2() }} m²</p>
+            <p><strong>Montant final de la facture:</strong> {{ r.final_invoice_amount || 'N/A' }}€</p>
+          </div>
         </div>
       }
 
@@ -84,13 +88,23 @@
         <div class="add-game-form">
           <h4>Ajouter un jeu du catalogue</h4>
           <div class="form-row">
-            <select [(ngModel)]="selectedGameId" class="form-control">
-              <option [ngValue]="null">-- Sélectionner un jeu --</option>
+            <select [value]="selectedGameId()" (change)="onGameIdChange($event)" class="form-control">
+              <option [value]="null">-- Sélectionner un jeu --</option>
               @for (game of publisherGames(); track game.id) {
-                <option [ngValue]="game.id">{{ game.name }}</option>
+                <option [value]="game.id">{{ game.name }}</option>
               }
             </select>
-            <input type="number" [(ngModel)]="selectedCopyCount" min="1" max="20" class="form-control copy-count" placeholder="Nb">
+            <input type="number" [value]="selectedCopyCount()" (input)="onCopyCountChange($event)" min="1" max="20" class="form-control copy-count" placeholder="Nb ex.">
+          </div>
+          <div class="form-row">
+            <select [value]="selectedGameSize()" (change)="onGameSizeChange($event)" class="form-control">
+              @for (opt of gameSizeOptions; track opt.value) {
+                <option [value]="opt.value">{{ opt.label }}</option>
+              }
+            </select>
+            <label class="tables-info">
+              Tables: <input type="number" [value]="selectedAllocatedTables()" (input)="onAllocatedTablesChange($event)" min="0.5" max="10" step="0.5" class="form-control allocated-tables">
+            </label>
             <button class="btn btn-primary" (click)="addSelectedGame()" [disabled]="!selectedGameId() || isLoading()">
               Ajouter
             </button>
@@ -104,22 +118,70 @@
       <!-- Liste des jeux ajoutés -->
       @if (r.games && r.games.length > 0) {
         <div class="games-list">
+          <!-- Résumé d'utilisation des zones -->
+          @if (getZoneUsageSummary().length > 0) {
+            <div class="zone-usage-summary">
+              <h4>Occupation des zones</h4>
+              @for (zone of getZoneUsageSummary(); track zone.priceZoneId) {
+                <div class="zone-usage-bar">
+                  <span class="zone-name">{{ zone.zoneName }}</span>
+                  <div class="usage-bar">
+                    <div class="usage-fill" [style.width.%]="(zone.used / zone.max) * 100" [class.overbooked]="zone.used > zone.max"></div>
+                  </div>
+                  <span class="usage-text" [class.overbooked]="zone.used > zone.max">{{ zone.used }}/{{ zone.max }}</span>
+                </div>
+              }
+            </div>
+          }
+
           <table class="games-table">
             <thead>
               <tr>
                 <th>Jeu</th>
-                <th>Exemplaires</th>
-                <th>Tables allouées</th>
+                <th>Ex.</th>
+                <th>Taille</th>
+                <th>Tables</th>
+                <th>Zone</th>
                 <th>Reçu</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               @for (fg of r.games; track fg.id) {
-                <tr [class.received]="fg.is_received">
+                <tr [class.received]="fg.is_received" [class.placed]="fg.map_zone_id">
                   <td>{{ fg.game?.name || 'Jeu #' + fg.game_id }}</td>
                   <td>{{ fg.copy_count }}</td>
-                  <td>{{ fg.allocated_tables || '-' }}</td>
+                  <td>{{ getGameSizeLabel(fg.game_size) }}</td>
+                  <td>{{ fg.allocated_tables || 1 }}</td>
+                  <td>
+                    @if (editingGameId() === fg.id) {
+                      <!-- Mode édition: sélection de zone et type de table -->
+                      <div class="zone-select-inline">
+                        <select [value]="selectedMapZoneId()" (change)="onMapZoneChange($event)" class="form-control form-control-sm">
+                          <option [value]="null">-- Zone --</option>
+                          @for (zone of availableMapZones(); track zone.id) {
+                            <option [value]="zone.id" [disabled]="!isZoneValidForGame(zone)">
+                              {{ zone.name }} @if (!isZoneValidForGame(zone)) { (non dispo) }
+                            </option>
+                          }
+                        </select>
+                        <select [value]="selectedTableSize()" (change)="onTableSizeChange($event)" class="form-control form-control-sm table-size-select">
+                          @for (opt of tableSizeOptions; track opt.value) {
+                            <option [value]="opt.value">{{ opt.label }}</option>
+                          }
+                        </select>
+                        <button class="btn btn-xs btn-success" (click)="placeGameInZone(fg)" [disabled]="!selectedMapZoneId() || isLoading()">✓</button>
+                        <button class="btn btn-xs btn-secondary" (click)="cancelPlacing()">✗</button>
+                      </div>
+                    } @else {
+                      <!-- Affichage normal -->
+                      @if (fg.mapZone) {
+                        <span class="zone-badge">📍 {{ fg.mapZone.name }}</span>
+                      } @else {
+                        <span class="no-zone">Non placé</span>
+                      }
+                    }
+                  </td>
                   <td>
                     @if (fg.is_received) {
                       <span class="received-badge">✅</span>
@@ -127,11 +189,21 @@
                       <span class="pending-badge">⏳</span>
                     }
                   </td>
-                  <td>
-                    @if (!fg.is_received) {
-                      <button class="btn btn-sm btn-success" (click)="markGameAsReceived(fg.id)" [disabled]="isLoading()">
-                        Pointer
+                  <td class="actions-cell">
+                    @if (editingGameId() !== fg.id) {
+                      <button class="btn btn-xs btn-outline" (click)="startPlacingGame(fg)" [disabled]="isLoading()" title="Placer dans une zone">
+                        📍
                       </button>
+                      @if (fg.map_zone_id) {
+                        <button class="btn btn-xs btn-outline-danger" (click)="unplaceGame(fg.id)" [disabled]="isLoading()" title="Retirer de la zone">
+                          ✗
+                        </button>
+                      }
+                      @if (!fg.is_received) {
+                        <button class="btn btn-xs btn-success" (click)="markGameAsReceived(fg.id)" [disabled]="isLoading()" title="Marquer comme reçu">
+                          ✓
+                        </button>
+                      }
                     }
                   </td>
                 </tr>
@@ -140,6 +212,7 @@
           </table>
           <div class="games-summary">
             <p><strong>Total jeux:</strong> {{ r.games.length }}</p>
+            <p><strong>Jeux placés:</strong> {{ getPlacedGamesCount() }} / {{ r.games.length }}</p>
             <p><strong>Jeux reçus:</strong> {{ getReceivedGamesCount() }} / {{ r.games.length }}</p>
             <p><strong>Tables allouées:</strong> {{ getTotalAllocatedTables() }}</p>
           </div>

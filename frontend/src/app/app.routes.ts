@@ -31,7 +31,8 @@ export const routes: Routes = [
     // Super-Organisateur : réservations, zones et réservants
     { path: 'reservations', component: ReservationList, canActivate: [authGuard, superOrganisatorGuard] },
     { path: 'reservation/:id', component: ReservationDetail, canActivate: [authGuard, superOrganisatorGuard] },
-    { path: 'price-zone/:id', component: PriceZoneCard, canActivate: [authGuard, superOrganisatorGuard] },
+    { path: 'reservation/:id/edit', component: ReservationEdit, canActivate: [authGuard, superOrganisatorGuard] },
+    { path: 'price-zone/:id', component: PriceZoneDetailsComponent, canActivate: [authGuard, superOrganisatorGuard] },
     { path: 'reservants', component: ReservantList, canActivate: [authGuard, superOrganisatorGuard] },
     
     // Admin uniquement : gestion des utilisateurs

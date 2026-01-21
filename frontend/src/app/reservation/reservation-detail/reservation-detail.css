@@ -136,6 +136,25 @@
 	color: #1f2937;
 }
 
+:host .m2-equiv {
+	color: #6b7280;
+	font-size: 0.85em;
+	margin-left: 4px;
+}
+
+:host .zone-total {
+	padding: 12px;
+	background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+	color: white;
+	border-radius: 6px;
+	margin-top: 8px;
+}
+
+:host .zone-total p {
+	margin: 0;
+	font-weight: 600;
+}
+
 /* Comments styling */
 :host .comments {
 	padding: 12px !important;
@@ -529,4 +548,172 @@
 	padding: 40px;
 	text-align: center;
 	color: #6b7280;
+}
+/* ============================================
+   Placement des jeux dans les zones
+   ============================================ */
+
+/* Résumé d'utilisation des zones */
+:host .zone-usage-summary {
+	margin-bottom: 16px;
+	padding: 12px;
+	background: #f8fafc;
+	border-radius: 8px;
+}
+
+:host .zone-usage-summary h4 {
+	margin: 0 0 12px 0;
+	font-size: 0.95rem;
+	color: #475569;
+}
+
+:host .zone-usage-bar {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 8px;
+}
+
+:host .zone-usage-bar:last-child {
+	margin-bottom: 0;
+}
+
+:host .zone-name {
+	min-width: 120px;
+	font-size: 0.85rem;
+	color: #334155;
+}
+
+:host .usage-bar {
+	flex: 1;
+	height: 12px;
+	background: #e2e8f0;
+	border-radius: 6px;
+	overflow: hidden;
+}
+
+:host .usage-fill {
+	height: 100%;
+	background: #10b981;
+	border-radius: 6px;
+	transition: width 0.3s ease;
+}
+
+:host .usage-fill.overbooked {
+	background: #ef4444;
+}
+
+:host .usage-text {
+	min-width: 50px;
+	text-align: right;
+	font-size: 0.8rem;
+	font-weight: 600;
+	color: #475569;
+}
+
+:host .usage-text.overbooked {
+	color: #ef4444;
+}
+
+/* Badges de zone */
+:host .zone-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 4px 8px;
+	background: #dbeafe;
+	color: #1d4ed8;
+	border-radius: 4px;
+	font-size: 0.8rem;
+	font-weight: 500;
+}
+
+:host .no-zone {
+	color: #9ca3af;
+	font-style: italic;
+	font-size: 0.85rem;
+}
+
+/* Ligne placée */
+:host tr.placed {
+	background: #f0fdf4;
+}
+
+/* Sélection de zone inline */
+:host .zone-select-inline {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	flex-wrap: wrap;
+}
+
+:host .zone-select-inline select {
+	flex: 1;
+	min-width: 80px;
+	max-width: 120px;
+}
+
+:host .zone-select-inline .table-size-select {
+	min-width: 90px;
+	max-width: 100px;
+}
+
+/* Boutons très petits */
+:host .btn-xs {
+	padding: 2px 6px;
+	font-size: 0.75rem;
+	border-radius: 4px;
+}
+
+:host .btn-outline {
+	background: transparent;
+	border: 1px solid #cbd5e1;
+	color: #475569;
+}
+
+:host .btn-outline:hover {
+	background: #f1f5f9;
+}
+
+:host .btn-outline-danger {
+	background: transparent;
+	border: 1px solid #fca5a5;
+	color: #dc2626;
+}
+
+:host .btn-outline-danger:hover {
+	background: #fef2f2;
+}
+
+/* Formulaire d'ajout amélioré */
+:host .add-game-form .form-row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-bottom: 8px;
+	align-items: center;
+}
+
+:host .allocated-tables {
+	width: 60px !important;
+}
+
+:host .tables-info {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 0.9rem;
+	color: #475569;
+}
+
+/* Cellule d'actions */
+:host .actions-cell {
+	display: flex;
+	gap: 4px;
+	flex-wrap: nowrap;
+}
+
+:host .form-control-sm {
+	padding: 4px 8px;
+	font-size: 0.85rem;
 }

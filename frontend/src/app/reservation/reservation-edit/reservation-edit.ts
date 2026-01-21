@@ -36,16 +36,16 @@ export class ReservationEdit implements OnInit {
   isLoading = true;
 
   readonly form = new FormGroup({
-    festival_id: new FormControl<number | null>(null, {
-      nonNullable: false,
+    festival_id: new FormControl<string>('', {
+      nonNullable: true,
       validators: [Validators.required]
     }),
-    reservant_id: new FormControl<number | null>(null, {
-      nonNullable: false,
+    reservant_id: new FormControl<string>('', {
+      nonNullable: true,
       validators: [Validators.required]
     }),
-    game_publisher_id: new FormControl<number | null>(null, {
-      nonNullable: false
+    game_publisher_id: new FormControl<string>('', {
+      nonNullable: true
     }),
     status: new FormControl<ReservationStatus>(ReservationStatus.NOT_CONTACTED, {
       nonNullable: true
@@ -57,9 +57,6 @@ export class ReservationEdit implements OnInit {
       nonNullable: true
     }),
     needs_festival_animators: new FormControl(false, {
-      nonNullable: true
-    }),
-    large_table_request: new FormControl('', {
       nonNullable: true
     }),
     discount_amount: new FormControl<number | null>(null),
@@ -101,14 +98,13 @@ export class ReservationEdit implements OnInit {
 
   private populateForm(reservation: Reservation): void {
     this.form.patchValue({
-      festival_id: reservation.festival_id,
-      reservant_id: reservation.reservant_id,
-      game_publisher_id: reservation.game_publisher_id ?? null,
+      festival_id: String(reservation.festival_id),
+      reservant_id: String(reservation.reservant_id),
+      game_publisher_id: reservation.game_publisher_id ? String(reservation.game_publisher_id) : '',
       status: reservation.status ?? ReservationStatus.NOT_CONTACTED,
       comments: reservation.comments ?? '',
       is_publisher_presenting: reservation.is_publisher_presenting,
       needs_festival_animators: reservation.needs_festival_animators ?? false,
-      large_table_request: reservation.large_table_request ?? '',
       discount_amount: reservation.discount_amount ?? null,
       discount_tables: reservation.discount_tables ?? null,
       nb_electrical_outlets: reservation.nb_electrical_outlets ?? 0
@@ -122,13 +118,13 @@ export class ReservationEdit implements OnInit {
       reservation.zones.forEach(zone => {
         tablesArray.push(
           new FormGroup({
-            price_zone_id: new FormControl<number | null>(zone.priceZone.id, {
-              nonNullable: false,
+            price_zone_id: new FormControl<string>(String(zone.priceZone.id), {
+              nonNullable: true,
               validators: [Validators.required]
             }),
             table_count: new FormControl<number | null>(zone.table_count, {
               nonNullable: false,
-              validators: [Validators.required, Validators.min(1)]
+              validators: [Validators.required, Validators.min(0.5)]
             })
           })
         );
@@ -144,13 +140,13 @@ export class ReservationEdit implements OnInit {
     const tablesArray = this.form.get('tables') as FormArray;
     tablesArray.push(
       new FormGroup({
-        price_zone_id: new FormControl<number | null>(null, {
-          nonNullable: false,
+        price_zone_id: new FormControl<string>('', {
+          nonNullable: true,
           validators: [Validators.required]
         }),
         table_count: new FormControl<number | null>(null, {
           nonNullable: false,
-          validators: [Validators.required, Validators.min(1)]
+          validators: [Validators.required, Validators.min(0.5)]
         })
       })
     );
@@ -172,19 +168,22 @@ export class ReservationEdit implements OnInit {
 
     const formValue = this.form.value;
 
+    // Convertir les strings en numbers pour l'API
     const payload: Partial<CreateReservationDTO> = {
-      game_publisher_id: formValue.game_publisher_id ?? undefined,
-      festival_id: formValue.festival_id!,
-      reservant_id: formValue.reservant_id!,
+      game_publisher_id: formValue.game_publisher_id ? Number(formValue.game_publisher_id) : undefined,
+      festival_id: Number(formValue.festival_id),
+      reservant_id: Number(formValue.reservant_id),
       status: formValue.status || ReservationStatus.NOT_CONTACTED,
       comments: formValue.comments || '',
       is_publisher_presenting: formValue.is_publisher_presenting || false,
       needs_festival_animators: formValue.needs_festival_animators || false,
-      large_table_request: formValue.large_table_request || undefined,
       discount_amount: formValue.discount_amount || undefined,
       discount_tables: formValue.discount_tables || undefined,
       nb_electrical_outlets: formValue.nb_electrical_outlets || 0,
-      tables: (formValue.tables as any[]) || []
+      tables: (formValue.tables as any[])?.map(t => ({
+        price_zone_id: Number(t.price_zone_id),
+        table_count: Number(t.table_count)
+      })) || []
     };
 
     this.reservationService.update(this.reservationId, payload).subscribe({

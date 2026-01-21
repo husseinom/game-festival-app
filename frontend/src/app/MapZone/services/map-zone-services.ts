@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
+import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { MapZone } from '../../types/map-zone';
 
@@ -11,6 +12,11 @@ export class MapZoneService {
   private readonly _mapZones = signal<MapZone[]>([]);
 
   mapZones = this._mapZones.asReadonly();
+
+  // Retourne un Observable (utile pour forkJoin)
+  getByPriceZoneObs(priceZoneId: number): Observable<MapZone[]> {
+    return this.http.get<MapZone[]>(`${environment.apiUrl}/map_zones/price-zone/${priceZoneId}`, { withCredentials: true });
+  }
 
   getByPriceZone(priceZoneId: number): void {
     this.http.get<MapZone[]>(`${environment.apiUrl}/map_zones/price-zone/${priceZoneId}`, { withCredentials: true })

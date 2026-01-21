@@ -1,8 +1,31 @@
 import prisma from '../config/prisma.js';
-import { ReservationStatus, InvoiceStatus, TableSize } from '@prisma/client';
+import { ReservationStatus, InvoiceStatus, TableSize, GameSize } from '@prisma/client';
 
 // Prix fixe d'une prise électrique (triplette) en euros HT
 const ELECTRICAL_OUTLET_PRICE = 250;
+
+// Constante de conversion : 1 unité de table = 4 m²
+const M2_PER_TABLE_UNIT = 4;
+
+// Équivalent en unités de table par taille de jeu
+const GAME_SIZE_UNITS: Record<GameSize, number> = {
+  SMALL: 0.5,    // Petit jeu = 0.5 unité = 2 m²
+  STANDARD: 1,   // Jeu standard = 1 unité = 4 m²
+  LARGE: 2       // Gros jeu = 2 unités = 8 m²
+};
+
+// Fonctions utilitaires de conversion
+function tablesToM2(tableUnits: number): number {
+  return tableUnits * M2_PER_TABLE_UNIT;
+}
+
+function m2ToTables(m2: number): number {
+  return m2 / M2_PER_TABLE_UNIT;
+}
+
+function getGameUnits(gameSize: GameSize): number {
+  return GAME_SIZE_UNITS[gameSize] ?? 1;
+}
 
 // Include standard pour les requêtes
 const reservationInclude = {
@@ -140,10 +163,14 @@ export const createReservation = async (data: any) => {
         nb_electrical_outlets: Number(nb_electrical_outlets) || 0,
         zones: {
           create: tables && Array.isArray(tables)
-            ? tables.map((t: any) => ({
-                price_zone_id: Number(t.price_zone_id),
-                table_count: Number(t.table_count || t.quantity)
-              }))
+            ? tables.map((t: any) => {
+                const tableCount = Number(t.table_count || t.quantity);
+                return {
+                  price_zone_id: Number(t.price_zone_id),
+                  table_count: tableCount,
+                  space_m2: tablesToM2(tableCount)
+                };
+              })
             : []
         }
       },
@@ -185,23 +212,49 @@ export const getReservationsByFestival = async (festivalId: number) => {
 export const updateReservation = async (id: number, data: any) => {
   const { tables, ...restData } = data;
 
-  const updated = await prisma.reservation.update({
-    where: { reservation_id: id },
-    data: restData,
-    include: reservationInclude
-  });
+  return prisma.$transaction(async (tx) => {
+    // Mettre à jour la réservation
+    const updated = await tx.reservation.update({
+      where: { reservation_id: id },
+      data: restData,
+      include: reservationInclude
+    });
 
-  // Recalculer le montant si nécessaire
-  if (data.discount_amount !== undefined || data.discount_tables !== undefined || data.nb_electrical_outlets !== undefined) {
-    const finalAmount = await calculatePrice(updated);
-    return prisma.reservation.update({
+    // Mettre à jour les zones si fournies
+    if (tables && Array.isArray(tables) && tables.length > 0) {
+      // Supprimer les anciennes zones
+      await tx.zoneReservation.deleteMany({
+        where: { reservation_id: id }
+      });
+
+      // Créer les nouvelles zones
+      await tx.zoneReservation.createMany({
+        data: tables.map((t: any) => {
+          const tableCount = Number(t.table_count || t.quantity);
+          return {
+            reservation_id: id,
+            price_zone_id: Number(t.price_zone_id),
+            table_count: tableCount,
+            space_m2: tablesToM2(tableCount)
+          };
+        })
+      });
+    }
+
+    // Recalculer le montant final
+    const reservationWithZones = await tx.reservation.findUnique({
+      where: { reservation_id: id },
+      include: reservationInclude
+    });
+
+    const finalAmount = await calculatePrice(reservationWithZones!);
+    
+    return tx.reservation.update({
       where: { reservation_id: id },
       data: { final_invoice_amount: finalAmount },
       include: reservationInclude
     });
-  }
-
-  return updated;
+  });
 };
 
 export const deleteReservation = async (id: number) => {
@@ -332,15 +385,23 @@ export const markGameListReceived = async (id: number) => {
 
 export const addGamesToReservation = async (
   reservationId: number,
-  games: Array<{ game_id: number; copy_count: number }>
+  games: Array<{ game_id: number; copy_count: number; game_size?: GameSize; allocated_tables?: number }>
 ) => {
-  // Créer les entrées FestivalGame
+  // Créer les entrées FestivalGame avec calcul automatique des unités et m²
   await prisma.festivalGame.createMany({
-    data: games.map(g => ({
-      reservation_id: reservationId,
-      game_id: g.game_id,
-      copy_count: g.copy_count
-    }))
+    data: games.map(g => {
+      const gameSize = (g.game_size as GameSize) || 'STANDARD';
+      // Utiliser allocated_tables fourni ou calculer automatiquement
+      const allocatedTables = g.allocated_tables ?? (getGameUnits(gameSize) * g.copy_count);
+      return {
+        reservation_id: reservationId,
+        game_id: g.game_id,
+        copy_count: g.copy_count,
+        game_size: gameSize,
+        allocated_tables: allocatedTables,
+        space_m2: tablesToM2(allocatedTables)
+      };
+    })
   });
 
   return getReservationById(reservationId);
@@ -412,7 +473,8 @@ export const placeGame = async (
       data: {
         map_zone_id: mapZoneId,
         table_size: tableSize,
-        allocated_tables: allocatedTables
+        allocated_tables: allocatedTables,
+        space_m2: tablesToM2(allocatedTables)
       },
       include: {
         game: true,

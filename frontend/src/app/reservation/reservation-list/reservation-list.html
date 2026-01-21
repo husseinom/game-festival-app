@@ -12,7 +12,7 @@
     <div class="filters">
       <label class="filter-item">
         <span>Statut:</span>
-        <select [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event)">
+        <select [value]="statusFilter()" (change)="onStatusFilterChange($event)">
           @for (opt of statusOptions; track opt.value) {
             <option [value]="opt.value">{{ opt.label }}</option>
           }
@@ -21,7 +21,7 @@
       
       <label class="filter-item">
         <span>Facturation:</span>
-        <select [ngModel]="invoiceFilter()" (ngModelChange)="invoiceFilter.set($event)">
+        <select [value]="invoiceFilter()" (change)="onInvoiceFilterChange($event)">
           @for (opt of invoiceOptions; track opt.value) {
             <option [value]="opt.value">{{ opt.label }}</option>
           }
