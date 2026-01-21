@@ -1,14 +1,14 @@
-# 🎮 Game Festival App
+# Game Festival App
 
 Application web de gestion de festival de jeux de société.
 
-## 🛠️ Stack technique
+## Stack technique
 
 - **Frontend** : Angular
 - **Backend** : Node.js / Express / Prisma
 - **Base de données** : PostgreSQL
 
-## 🚀 Lancer le projet
+## Lancer le projet
 
 ### Prérequis
 
