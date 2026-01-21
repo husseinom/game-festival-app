@@ -6,9 +6,11 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
+import { MatDialog } from '@angular/material/dialog';
 import { PriceZoneServices } from '../services/price-zone-services';
 import { MapZoneService } from '../../MapZone/services/map-zone-services';
 import { PriceZone } from '../../types/price-zone';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/confirm-dialog-data/confirm-dialog-data';
 
 @Component({
   selector: 'app-price-zone-details',
@@ -29,6 +31,7 @@ export class PriceZoneDetailsComponent {
   private readonly router = inject(Router);
   private readonly _priceZoneService = inject(PriceZoneServices);
   private readonly _mapZoneService = inject(MapZoneService);
+  private readonly dialog = inject(MatDialog);
 
   priceZoneId = signal<number | null>(null);
   festivalId = signal<number | null>(null);
@@ -215,17 +218,46 @@ export class PriceZoneDetailsComponent {
   }
 
   deleteMapZone(id: number): void {
-    if (confirm('Delete this map zone?')) {
-      this._mapZoneService.delete(id);
-      
-      // Reload games after deletion
-      setTimeout(() => {
-        const pzId = this.priceZoneId();
-        if (pzId !== null) {
-          this._priceZoneService.getGamesByPriceZone(pzId);
-        }
-      }, 500);
+    const mapZone = this.mapZones().find(mz => mz.id === id);
+    
+    if (!mapZone) {
+      return;
     }
+
+    const hasGames = mapZone.festivalGames && mapZone.festivalGames.length > 0;
+    const gameCount = hasGames ? mapZone.festivalGames!.length : 0;
+
+    const message = hasGames
+      ? `Êtes-vous sûr de vouloir supprimer la zone "${mapZone.name}" ?\n\n⚠️ Cette zone contient ${gameCount} jeu(x) qui seront désassignés.\n⚠️ Les tables seront libérées dans la zone de prix.`
+      : `Êtes-vous sûr de vouloir supprimer la zone "${mapZone.name}" ?\n\nLes tables seront libérées dans la zone de prix.`;
+
+    const dialogData: ConfirmDialogData = {
+      title: '⚠️ Confirmer la suppression',
+      message: message,
+      confirmText: 'Supprimer',
+      cancelText: 'Annuler'
+    };
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '450px',
+      data: dialogData,
+      enterAnimationDuration: '300ms',
+      exitAnimationDuration: '200ms',
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        this._mapZoneService.delete(id);
+        
+        // Reload games after deletion
+        setTimeout(() => {
+          const pzId = this.priceZoneId();
+          if (pzId !== null) {
+            this._priceZoneService.getGamesByPriceZone(pzId);
+          }
+        }, 500);
+      }
+    });
   }
 
   viewReservation(reservationId: number): void {

@@ -183,7 +183,7 @@ model ZoneReservation {
   table_count    Int         @default(0)
 
   reservation    Reservation @relation(fields: [reservation_id], references: [reservation_id])
-  priceZone      PriceZone   @relation(fields: [price_zone_id], references: [id])
+  priceZone      PriceZone   @relation(fields: [price_zone_id], references: [id], onDelete: Cascade)
 
   @@unique([reservation_id, price_zone_id]) // Un éditeur ne peut pas avoir 2 lignes pour la même zone dans la même résa
 }
@@ -197,9 +197,9 @@ model FestivalGame {
   copy_count      Int         @default(1) // Nombre d'exemplaires du jeu
   allocated_tables Int        @default(1) // Combien de tables ça prend
 
-  reservation     Reservation @relation(fields: [reservation_id], references: [reservation_id])
-  game            Game        @relation(fields: [game_id], references: [id])
-  mapZone         MapZone?    @relation(fields: [map_zone_id], references: [id])
+  reservation     Reservation @relation(fields: [reservation_id], references: [reservation_id], onDelete:Cascade)
+  game            Game        @relation(fields: [game_id], references: [id], onDelete:Cascade)
+  mapZone         MapZone?    @relation(fields: [map_zone_id], references: [id], onDelete:Cascade)
 }
 
 model Contact {
@@ -218,5 +218,5 @@ model ContactLog {
   contact_date   DateTime    @default(now())
   notes          String?     @db.Text
 
-  reservation    Reservation @relation(fields: [reservation_id], references: [reservation_id])
+  reservation    Reservation @relation(fields: [reservation_id], references: [reservation_id], onDelete: Cascade)
 }

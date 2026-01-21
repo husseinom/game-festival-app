@@ -22,7 +22,7 @@
 
 /* Page title */
 .header-section::before {
-  content: "🏢 Publishers";
+  content: "🏢 Editeurs";
   font-size: 2rem;
   font-weight: bold;
   color: white;

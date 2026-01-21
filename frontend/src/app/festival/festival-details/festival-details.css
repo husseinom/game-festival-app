@@ -23,7 +23,7 @@
 
 /* Back button inside header */
 .back-btn {
-  align-self: flex-start; /* place at the start of the header */
+  align-self: flex-start;
   margin-bottom: 12px;
   padding: 8px 14px;
   background: rgba(255, 255, 255, 0.12);
@@ -113,15 +113,11 @@
     box-shadow: 0 6px 20px rgba(255, 65, 108, 0.4);
 }
 
-/* Form section */
+/* Form section - FIXED: removed white background */
 .form-section {
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 20px;
-    padding: 30px;
+    /* No background or transparent background */
     margin-bottom: 30px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     animation: slideDown 0.4s ease-out;
-    color: #333; /* Reset text color for form */
 }
 
 @keyframes slideDown {
@@ -158,4 +154,23 @@
   font-size: 1.2rem;
   color: white;
   padding: 40px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .header-section {
+    padding: 20px;
+  }
+
+  .festival-title {
+    font-size: 2rem;
+  }
+
+  .festival-info {
+    font-size: 1rem;
+  }
+
+  .priceZone-grid {
+    grid-template-columns: 1fr;
+  }
 }

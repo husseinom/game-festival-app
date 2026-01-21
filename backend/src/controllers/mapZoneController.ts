@@ -37,7 +37,7 @@ export const create = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Name and price_zone_id are required' });
     }
 
-    // Get the price zone to check available tables
+    // Get the price zone to check available tables and get festival_id
     const priceZone = await prisma.priceZone.findUnique({
       where: { id: price_zone_id },
       include: {
@@ -84,11 +84,12 @@ export const create = async (req: Request, res: Response) => {
       });
     }
 
-    // Create map zone
+    // Create map zone with festival_id
     const mapZone = await prisma.mapZone.create({
       data: { 
         name, 
         price_zone_id,
+        festival_id: priceZone.festival_id, // Add this line
         small_tables: requestedSmall,
         large_tables: requestedLarge,
         city_tables: requestedCity
@@ -184,11 +185,15 @@ export const deleteMapZone = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Invalid map zone id' });
     }
     
+    // Unassign all games from this map zone before deleting
     await prisma.festivalGame.updateMany({
       where: { map_zone_id: id },
       data: { map_zone_id: null }
     });
-    await prisma.mapZone.delete({ where: { id: id } });
+    
+    // Delete the map zone
+    await prisma.mapZone.delete({ where: { id } });
+    
     res.status(204).send();
   } catch (error) {
     console.error('Error deleting map zone:', error);

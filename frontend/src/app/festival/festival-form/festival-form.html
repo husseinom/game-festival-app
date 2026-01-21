@@ -1,21 +1,21 @@
 <form [formGroup]="form" (ngSubmit)="onSubmit($event)" class="festival-form">
-  <h2>{{ isEditing ? 'Edit Festival' : 'Create Festival' }}</h2>
+  <h2>{{ isEditing ? 'Modifier le Festival' : 'Créer un Festival' }}</h2>
   
   <div class="form-group">
     <input 
       type="text" 
       formControlName="name" 
-      placeholder="Festival Name (min 3 characters)"
+      placeholder="Nom du Festival (min 3 caractères)"
       [class.error]="form.controls.name.invalid && form.controls.name.touched"
       required
     />
     @if(form.controls.name.invalid && form.controls.name.touched) {
       <div class="error-message">
         @if (form.controls.name.errors?.['required']) {
-          Festival name is required
+          Le nom du festival est requis
         }
         @if(form.controls.name.errors?.['minlength']){
-          At least 3 characters required
+          Au moins 3 caractères requis
         }
       </div>
     }
@@ -25,28 +25,28 @@
     <input 
       type="text" 
       formControlName="location" 
-      placeholder="Festival Location"
+      placeholder="Lieu du Festival"
       [class.error]="form.controls.location.invalid && form.controls.location.touched"
       required
     />
     @if(form.controls.location.invalid && form.controls.location.touched) {
       <div class="error-message">
         @if (form.controls.location.errors?.['required']) {
-          Location is required
+          Le lieu est requis
         }
         @if(form.controls.location.errors?.['minlength']){
-          At least 2 characters required
+          Au moins 2 caractères requis
         }
       </div>
     }
   </div>
 
   <div class="form-group">
-    <label for="small_tables">Small Tables Number</label>
+    <label for="small_tables">Nombre de Petites Tables</label>
     <input 
       type="number" 
       formControlName="small_tables" 
-      placeholder="Number of Small Tables"
+      placeholder="Nombre de Petites Tables"
       [class.error]="form.controls.small_tables.invalid && form.controls.small_tables.touched"
       min="1"
       max="1000"
@@ -55,24 +55,24 @@
     @if(form.controls.small_tables.invalid && form.controls.small_tables.touched) {
       <div class="error-message">
         @if (form.controls.small_tables.errors?.['required']) {
-          Number of tables is required
+          Le nombre de tables est requis
         }
         @if(form.controls.small_tables.errors?.['min']){
-          Minimum 1 table required
+          Minimum 1 table requise
         }
         @if(form.controls.small_tables.errors?.['max']){
-          Maximum 1000 tables allowed
+          Maximum 1000 tables autorisées
         }
       </div>
     }
   </div>
 
   <div class="form-group">
-    <label for="large_tables">large Tables Number</label>
+    <label for="large_tables">Nombre de Grandes Tables</label>
     <input 
       type="number" 
       formControlName="large_tables" 
-      placeholder="Number of Large Tables"
+      placeholder="Nombre de Grandes Tables"
       [class.error]="form.controls.large_tables.invalid && form.controls.large_tables.touched"
       min="1"
       max="1000"
@@ -81,24 +81,24 @@
     @if(form.controls.large_tables.invalid && form.controls.large_tables.touched) {
       <div class="error-message">
         @if (form.controls.large_tables.errors?.['required']) {
-          Number of tables is required
+          Le nombre de tables est requis
         }
         @if(form.controls.large_tables.errors?.['min']){
-          Minimum 1 table required
+          Minimum 1 table requise
         }
         @if(form.controls.large_tables.errors?.['max']){
-          Maximum 1000 tables allowed
+          Maximum 1000 tables autorisées
         }
       </div>
     }
   </div>
 
   <div class="form-group">
-    <label for="city_tables">City Tables Number</label>
+    <label for="city_tables">Nombre de Tables Ville</label>
     <input 
       type="number" 
       formControlName="city_tables" 
-      placeholder="Number of City Tables"
+      placeholder="Nombre de Tables Mairie"
       [class.error]="form.controls.city_tables.invalid && form.controls.city_tables.touched"
       min="1"
       max="1000"
@@ -107,50 +107,53 @@
     @if(form.controls.city_tables.invalid && form.controls.city_tables.touched) {
       <div class="error-message">
         @if (form.controls.city_tables.errors?.['required']) {
-          Number of tables is required
+          Le nombre de tables est requis
         }
         @if(form.controls.city_tables.errors?.['min']){
-          Minimum 1 table required
+          Minimum 1 table requise
         }
         @if(form.controls.city_tables.errors?.['max']){
-          Maximum 1000 tables allowed
+          Maximum 1000 tables autorisées
         }
       </div>
     }
   </div>
 
   <div class="form-group">
+    <label for="startDate">Date de Début</label>
     <input 
       type="date" 
       formControlName="startDate" 
-      placeholder="Start Date"
+      placeholder="Date de Début"
       [class.error]="form.controls.startDate.invalid && form.controls.startDate.touched"
       required
     />
     @if(form.controls.startDate.invalid && form.controls.startDate.touched) {
-      <div class="error-message">Start date is required</div>
+      <div class="error-message">La date de début est requise</div>
     }
   </div>
 
   <div class="form-group">
+    <label for="endDate">Date de Fin</label>
     <input 
       type="date" 
       formControlName="endDate" 
-      placeholder="End Date"
+      placeholder="Date de Fin"
       [class.error]="form.controls.endDate.invalid && form.controls.endDate.touched"
       required
     />
     @if(form.controls.endDate.invalid && form.controls.endDate.touched) {
-      <div class="error-message">End date is required</div>
+      <div class="error-message">La date de fin est requise</div>
     }
   </div>
 
   <!-- Custom validator error for date range -->
   @if(form.hasError('startAfterEnd') && form.controls.startDate.touched && form.controls.endDate.touched) {
-    <div class="error-message">End date must be after start date</div>
+    <div class="error-message">La date de fin doit être après la date de début</div>
   }
 
   <div class="form-group">
+    <label for="priceZoneTypes">Types des Zones Tarifiares</label>
     <select formControlName="priceZoneTypeId">
       <option value="" disabled selected>Choisir type de zones de prix</option>
       @for (type of priceZoneTypes(); track type.id) {
@@ -164,6 +167,6 @@
     [class.valid]="form.valid"
     [class.invalid]="form.invalid"
   >
-    {{form.valid ? (isEditing ? '✅ Update Festival' : '✅ Create Festival') : '❌ Fill All Fields'}}
+    {{form.valid ? (isEditing ? '✅ Mettre à Jour le Festival' : '✅ Créer le Festival') : '❌ Remplir Tous les Champs'}}
   </button>
 </form>

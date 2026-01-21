@@ -54,6 +54,37 @@ export class PriceZoneServices {
       });
   }
 
+  updatePriceZone(id: number, updates: Partial<PriceZone>): void {
+    this.http.put<PriceZone>(`${environment.apiUrl}/price_zone/${id}`, updates, { withCredentials: true })
+      .subscribe({
+        next: (updated) => {
+          const current = this._priceZones();
+          const index = current.findIndex(pz => pz.id === id);
+          if (index > -1) {
+            const newPriceZones = [...current];
+            newPriceZones[index] = updated;
+            this._priceZones.set(newPriceZones);
+          }
+        },
+        error: (error) => {
+          console.error('Error updating price zone:', error);
+        }
+      });
+  }
+
+  deletePriceZone(id: number): void {
+    this.http.delete(`${environment.apiUrl}/price_zone/${id}`, { withCredentials: true })
+      .subscribe({
+        next: () => {
+          const current = this._priceZones();
+          this._priceZones.set(current.filter(pz => pz.id !== id));
+        },
+        error: (error) => {
+          console.error('Error deleting price zone:', error);
+        }
+      });
+  }
+
   getReservationsByPriceZone(priceZoneId: number): void {
     this.http.get<any[]>(`${environment.apiUrl}/price_zone/${priceZoneId}/reservations`, { withCredentials: true })
       .subscribe({

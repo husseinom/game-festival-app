@@ -3,7 +3,7 @@
     <!-- Logo / Brand -->
     <span class="app-title">
       <a routerLink="/festival-list" class="brand-link">
-        🎮 Game Festival
+        🎮 Festival de Jeux
       </a>
     </span>
     
@@ -18,32 +18,27 @@
 
     <button mat-raised-button color="accent" class="nav-button">
       <a routerLink="/games" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
-        🎮 Games
+        🎮 Jeux
       </a>
     </button>
 
     <button mat-raised-button color="accent" class="nav-button">
       <a routerLink="/publishers" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
-         🏢 Games Publishers
+         🏢 Éditeurs de Jeux
       </a>
     </button>
 
     <button mat-raised-button color="accent" class="nav-button">
       <a routerLink="/reservations" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
-         Reservations
+         📋 Réservations
       </a>
     </button>
 
     <!-- Bouton Admin (si admin connecté) -->
     @if (loggedIn() && isAdmin()) {
       <button mat-raised-button color="accent" class="nav-button">
-        <a routerLink="/admin/users" routerLinkActive="active">
-          ⚙️ Users
-        </a>
-      </button>
-      <button mat-raised-button color="accent" class="nav-button">
-        <a routerLink="/admin/reservants" routerLinkActive="active">
-          ⚙️ Reservants
+        <a routerLink="/admin" routerLinkActive="active">
+          ⚙️ Admin
         </a>
       </button>
     }

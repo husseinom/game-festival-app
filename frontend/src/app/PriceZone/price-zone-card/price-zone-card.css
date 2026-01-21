@@ -24,6 +24,18 @@ mat-card.pz-card:hover {
   border-color: rgba(255, 255, 255, 0.4) !important;
 }
 
+/* Selected state */
+mat-card.pz-card.selected {
+  border: 2px solid #ffd93d;
+  box-shadow: 0 0 20px rgba(255, 217, 61, 0.5);
+}
+
+/* Editing state */
+mat-card.pz-card.editing {
+  border: 2px solid #00f260;
+  box-shadow: 0 0 20px rgba(0, 242, 96, 0.5);
+}
+
 /* Material Card Header */
 mat-card-header.card-header {
   display: flex !important;
@@ -31,6 +43,8 @@ mat-card-header.card-header {
   align-items: flex-start !important;
   padding: 20px 20px 0 20px !important;
   margin-bottom: 0 !important;
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* Status badge */
@@ -76,6 +90,9 @@ mat-card-actions.card-actions {
   display: flex !important;
   gap: 10px !important;
   margin: 0 !important;
+  justify-content: flex-end;
+  background: rgba(255, 255, 255, 0.05);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .edit-btn, .delete-btn {
@@ -96,4 +113,25 @@ mat-card-actions.card-actions {
 .delete-btn {
   background: linear-gradient(45deg, #ff9a9e, #fad0c4) !important;
   color: white !important;
+}
+
+/* Row styling */
+.pz-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.pz-row:last-child {
+  border-bottom: none;
+}
+
+.pz-row strong {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.pz-row span {
+  color: white;
+  font-weight: 500;
 }
