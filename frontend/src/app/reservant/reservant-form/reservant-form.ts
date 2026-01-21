@@ -27,7 +27,10 @@ export class ReservantForm {
 
   readonly form = new FormGroup({
     name: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(2)] }),
-    type: new FormControl<string>(this.defaultType, { nonNullable: true, validators: [Validators.required] })
+    type: new FormControl<string>(this.defaultType, { nonNullable: true, validators: [Validators.required] }),
+    email: new FormControl('', { validators: [Validators.email] }),
+    mobile: new FormControl(''),
+    role: new FormControl('')
   });
 
   readonly isEdit = computed(() => !!this.reservant());
@@ -40,9 +43,21 @@ export class ReservantForm {
     effect(() => {
       const current = this.reservant();
       if (current) {
-        this.form.setValue({ name: current.name, type: current.type });
+        this.form.setValue({ 
+          name: current.name, 
+          type: current.type,
+          email: current.email || '',
+          mobile: current.mobile || '',
+          role: current.role || ''
+        });
       } else {
-        this.form.reset({ name: '', type: this.defaultType });
+        this.form.reset({ 
+          name: '', 
+          type: this.defaultType,
+          email: '',
+          mobile: '',
+          role: ''
+        });
       }
     });
   }
@@ -55,23 +70,38 @@ export class ReservantForm {
       return;
     }
 
-    const { name, type } = this.form.getRawValue();
+    const { name, type, email, mobile, role } = this.form.getRawValue();
 
     if (this.isEdit()) {
       const current = this.reservant();
       if (!current) return;
 
-      const updatePayload: UpdateReservantDTO = { name, type };
+      const updatePayload: UpdateReservantDTO = { 
+        name, 
+        type,
+        email: email || undefined,
+        mobile: mobile || undefined,
+        role: role || undefined
+      };
       this.reservantService.onUpdateReservant(current.reservant_id, updatePayload);
     } else {
-      const reservantData: CreateReservantDTO = { name, type };
+      const reservantData: CreateReservantDTO = { 
+        name, 
+        type,
+        email: email || undefined,
+        mobile: mobile || undefined,
+        role: role || undefined
+      };
       this.reservantService.onNewReservant(reservantData);
     }
 
-    this.form.reset({ name: '', type: this.defaultType });
+    this.form.reset({ name: '', type: this.defaultType, email: '', mobile: '', role: '' });
     this.reservantSaved.emit();
   }
 
   get nameControl() { return this.form.controls.name; }
   get typeControl() { return this.form.controls.type; }
+  get emailControl() { return this.form.controls.email; }
+  get mobileControl() { return this.form.controls.mobile; }
+  get roleControl() { return this.form.controls.role; }
 }
