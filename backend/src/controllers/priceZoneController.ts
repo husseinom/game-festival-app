@@ -150,7 +150,12 @@ export const getGamesByPriceZone = async (req: Request, res: Response) => {
         map_zone_id: { in: mapZoneIds }
       },
       include: {
-        game: true,
+        game: {
+          include: {
+            type: true,
+            publisher: true
+          }
+        },
         reservation: {
           include: {
             publisher: true,

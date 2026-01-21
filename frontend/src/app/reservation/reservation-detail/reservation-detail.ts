@@ -118,6 +118,8 @@ export class ReservationDetail {
 
   private refreshReservation(): void {
     this.refresh$.next();
+    // Recharger aussi les MapZones pour mettre à jour nb_available
+    this.loadAvailableMapZones();
   }
 
   goBack(): void {
@@ -561,18 +563,29 @@ export class ReservationDetail {
     if (!r?.games || mapZones.length === 0) return [];
 
     return mapZones.map(mapZone => {
-      // Compter les tables utilisées dans cette MapZone
-      const used = (r.games || [])
-        .filter((g: FestivalGame) => g.map_zone_id === mapZone.id)
-        .reduce((sum: number, g: FestivalGame) => sum + (g.allocated_tables || 0), 0);
-
-      // Calculer le max à partir des TableTypes ou des tables de la zone
+      // Calculer le max et used à partir des TableTypes
       let max = 0;
+      let usedByOthers = 0;
+      
       if (mapZone.tableTypes && mapZone.tableTypes.length > 0) {
-        max = mapZone.tableTypes.reduce((sum, tt) => sum + tt.nb_total, 0);
+        for (const tt of mapZone.tableTypes) {
+          max += tt.nb_total;
+          // nb_total - nb_available = tables utilisées par TOUTES les réservations
+          usedByOthers += (tt.nb_total - tt.nb_available);
+        }
       } else {
         max = (mapZone.small_tables || 0) + (mapZone.large_tables || 0) + (mapZone.city_tables || 0);
       }
+
+      // Ajouter les tables de la réservation courante qui sont dans cette zone
+      // (car elles comptent déjà dans usedByOthers depuis le backend)
+      const usedByCurrentReservation = (r.games || [])
+        .filter((g: FestivalGame) => g.map_zone_id === mapZone.id)
+        .reduce((sum: number, g: FestivalGame) => sum + (g.allocated_tables || 0), 0);
+
+      // Le total utilisé est ce qui est marqué comme utilisé dans le backend
+      // Si la réservation courante a déjà des jeux placés, ils sont déjà comptés
+      const used = usedByOthers;
 
       return {
         zoneName: mapZone.name,

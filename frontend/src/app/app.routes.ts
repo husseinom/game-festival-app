@@ -11,6 +11,7 @@ import { PublisherDetails } from './GamePublisher/publisher-details/publisher-de
 import { UserList } from './admin/user-list/user-list';
 import { FestivalDetails } from './festival/festival-details/festival-details';
 import { PriceZoneDetailsComponent } from './PriceZone/price-zone-details/price-zone-details';
+import { PriceZonePublicComponent } from './PriceZone/price-zone-public/price-zone-public';
 import { ReservationList } from './reservation/reservation-list/reservation-list';
 import { ReservationDetail } from './reservation/reservation-detail/reservation-detail';
 import { ReservationEdit } from './reservation/reservation-edit/reservation-edit';
@@ -23,6 +24,7 @@ export const routes: Routes = [
     // Pages publiques (visiteur non connecté)
     { path: 'festival-list', component: FestivalList },
     { path: 'festival/:id', component: FestivalDetails },
+    { path: 'festival/:festivalId/zone/:id', component: PriceZonePublicComponent },
     { path: 'games', component: GameList, title: 'liste des jeux' },
     { path: 'game/:id', component: GameDetails },
     { path: 'publishers', component: GamePubList, title: 'liste des éditeurs' },

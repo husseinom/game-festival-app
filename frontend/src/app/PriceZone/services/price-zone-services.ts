@@ -78,6 +78,19 @@ export class PriceZoneServices {
       });
   }
 
+  // Public endpoint for viewing games (no auth required)
+  getPublicGamesByPriceZone(priceZoneId: number): void {
+    this.http.get<any[]>(`${environment.apiUrl}/price_zone/${priceZoneId}/games/public`)
+      .subscribe({
+        next: (data) => {
+          this._priceZoneGames.set(data);
+        },
+        error: (error) => {
+          console.error('Error fetching price zone games:', error);
+        }
+      });
+  }
+
   findPriceZoneById(id: number): PriceZone | undefined {
     return this._priceZones().find(pz => pz.id === id);
   }

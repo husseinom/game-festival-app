@@ -6,6 +6,7 @@ import { Festival } from '../../types/festival';
 import { PriceZone } from '../../types/price-zone';
 import { MapZone } from '../../types/map-zone';
 import { PriceZoneCard } from '../../PriceZone/price-zone-card/price-zone-card';
+import { RoleService } from '../../shared/services/role.service';
 
 @Component({
   selector: 'app-festival-details',
@@ -18,6 +19,7 @@ export class FestivalDetails {
   private readonly router = inject(Router)
   private readonly _festivalServices = inject(FestivalServices)
   private readonly _priceZoneService = inject(PriceZoneServices)
+  private readonly roleService = inject(RoleService)
 
   festivalId = signal<number | null>(null)
   showForm = signal(false)
@@ -91,7 +93,16 @@ export class FestivalDetails {
   //   }
   // }
   goToPriceZone(id: number): void {
-    this.router.navigate(['/price-zone', id])
+    const festId = this.festivalId();
+    // SUPER_ORGANISATOR et ADMIN voient la vue de gestion
+    if (this.roleService.isSuperOrganisator()) {
+      this.router.navigate(['/price-zone', id]);
+    } else {
+      // VISITOR, VOLUNTEER, ORGANISATOR voient la vue publique
+      if (festId) {
+        this.router.navigate(['/festival', festId, 'zone', id]);
+      }
+    }
   }
 
   back(): void {

@@ -14,7 +14,7 @@
         <h3 class="priceZone-section-title">Festival's Price Zones </h3>
         
         <div class="priceZone-grid">
-            @for (pz of priceZones(); track pz.id) {
+            @for (pz of festivalPZ(); track pz.id) {
                 <app-price-zone-card
                 [pz]="pz"
                 (card)="goToPriceZone($event)"
