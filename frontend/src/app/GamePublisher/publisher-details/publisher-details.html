@@ -14,13 +14,15 @@
             <div class="publisher-info">Détails éditeur</div>
         </div>
 
-        <div class="button-container">
-            <button (click)="toggleForm()" class="action-btn" [class.add-btn]="!showForm()" [class.cancel-btn]="showForm()">
-                @if (showForm()) { Fermer le formulaire } @else { Ajouter un jeu }
-            </button>
-        </div>
+        @if (canEdit()) {
+            <div class="button-container">
+                <button (click)="toggleForm()" class="action-btn" [class.add-btn]="!showForm()" [class.cancel-btn]="showForm()">
+                    @if (showForm()) { Fermer le formulaire } @else { Ajouter un jeu }
+                </button>
+            </div>
+        }
 
-        @if (showForm()) {
+        @if (showForm() && canEdit()) {
             <div class="form-section">
                 <app-game-form
                     [editingGame]="editingGame()"

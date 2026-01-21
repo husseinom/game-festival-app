@@ -1,8 +1,13 @@
 <mat-card class="reservation-card" (click)="onCardClick($event)">
-  <!-- Card Header -->
+  <!-- Card Header with Status Badges -->
   <mat-card-header class="card-header">
-    <div class="status-badge" [class]="getStatusClass()">
-      {{ reservation.status }}
+    <div class="badges-row">
+      <div class="status-badge" [class]="getStatusClass()">
+        {{ statusLabel }}
+      </div>
+      <div class="invoice-badge" [class]="getInvoiceClass()">
+        {{ invoiceStatusLabel }}
+      </div>
     </div>
   </mat-card-header>
 
@@ -14,7 +19,7 @@
     <!-- Tables Info -->
     <div class="tables-section">
       <div class="section-header">
-        <span class="section-title">Espace réservé</span>
+        <span class="section-title">Espace reserve</span>
         <span class="tables-badge">{{ totalTables }} tables</span>
       </div>
       
@@ -27,33 +32,67 @@
         }
         
         @if (!reservation.zones?.length) {
-          <li class="zone-item empty">
-            Aucune table sélectionnée
-          </li>
+          <li class="zone-item empty">Aucune table selectionnee</li>
         }
       </ul>
+      
+      @if (reservation.nb_electrical_outlets > 0) {
+        <div class="electrical-info">
+          {{ reservation.nb_electrical_outlets }} prise(s) electrique(s)
+        </div>
+      }
+    </div>
+
+    <!-- Logistics Progress -->
+    <div class="logistics-section">
+      <div class="progress-item" [class.done]="reservation.game_list_requested">
+        <span class="progress-icon">{{ reservation.game_list_requested ? 'ok' : '-' }}</span>
+        Liste demandee
+      </div>
+      <div class="progress-item" [class.done]="reservation.game_list_received">
+        <span class="progress-icon">{{ reservation.game_list_received ? 'ok' : '-' }}</span>
+        Liste recue
+      </div>
+      <div class="progress-item" [class.done]="reservation.games_received">
+        <span class="progress-icon">{{ reservation.games_received ? 'ok' : '-' }}</span>
+        Jeux recus
+      </div>
     </div>
 
     <!-- Presence Info -->
     <div class="presence-info" [class.presenting]="reservation.is_publisher_presenting">
-      <span class="presence-icon">{{ reservation.is_publisher_presenting ? '🎤' : '👻' }}</span>
-      <span class="presence-text">{{ reservation.is_publisher_presenting ? 'Sera présent' : 'Ne sera pas présent' }}</span>
+      <span class="presence-text">
+        {{ reservation.is_publisher_presenting ? 'Editeur present' : 'Editeur absent' }}
+        @if (reservation.needs_festival_animators) {
+          <span class="animator-needed">- Animateurs requis</span>
+        }
+      </span>
     </div>
   </mat-card-content>
 
   <!-- Card Actions -->
   <mat-card-actions class="card-actions">
     <div class="price-section">
-      <span class="price-label">Total à payer</span>
+      <span class="price-label">Total</span>
       <span class="price-amount">
         {{ reservation.final_invoice_amount | currency:'EUR':'symbol':'1.0-0' }}
       </span>
     </div>
-    <button mat-raised-button color="primary" class="edit-btn" (click)="onEdit($event)">
-      Edit
-    </button>
-    <button mat-raised-button color="warn" class="delete-btn" (click)="onDelete($event)">
-      Delete
-    </button>
+    
+    <div class="action-buttons">
+      @if (reservation.invoice_status === 'PENDING') {
+        <button mat-stroked-button class="invoice-btn" (click)="onMarkInvoiced($event)">
+          Facturer
+        </button>
+      }
+      @if (reservation.invoice_status === 'INVOICED') {
+        <button mat-stroked-button class="paid-btn" (click)="onMarkPaid($event)">
+          Paye
+        </button>
+      }
+      <button mat-raised-button color="warn" class="delete-btn" (click)="onDelete($event)">
+        Suppr
+      </button>
+    </div>
   </mat-card-actions>
 </mat-card>

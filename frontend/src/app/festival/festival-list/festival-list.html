@@ -19,7 +19,17 @@
         [editingFestival]="editingFestival()"
       ></app-festival-form>
     </div>
-      
+
+    <!-- Form Section -->
+    @if(showform()){
+      <div class="form-section">
+        <app-festival-form 
+          (newFestival)="add($event)" 
+          (updatedFestival)="update($event)"
+          [editingFestival]="editingFestival()"
+        ></app-festival-form>
+      </div>
+    }
   }
  <!-- Festival Cards Grid -->
   <div class="festivals-grid">

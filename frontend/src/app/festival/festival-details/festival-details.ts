@@ -6,8 +6,14 @@ import { PriceZoneCard } from '../../PriceZone/price-zone-card/price-zone-card';
 import { PriceZoneEditForm } from '../../PriceZone/price-zone-edit-form/price-zone-edit-form';
 import { Festival } from '../../types/festival';
 import { PriceZone } from '../../types/price-zone';
+<<<<<<< HEAD
 import { MatButtonModule } from '@angular/material/button';
 import { CommonModule } from '@angular/common';
+=======
+import { MapZone } from '../../types/map-zone';
+import { PriceZoneCard } from '../../PriceZone/price-zone-card/price-zone-card';
+import { RoleService } from '../../shared/services/role.service';
+>>>>>>> Nabil_back
 
 @Component({
   selector: 'app-festival-details',
@@ -17,10 +23,18 @@ import { CommonModule } from '@angular/common';
   styleUrl: './festival-details.css',
 })
 export class FestivalDetails {
+<<<<<<< HEAD
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly _festivalServices = inject(FestivalServices);
   private readonly _priceZoneService = inject(PriceZoneServices);
+=======
+  private readonly route = inject(ActivatedRoute)
+  private readonly router = inject(Router)
+  private readonly _festivalServices = inject(FestivalServices)
+  private readonly _priceZoneService = inject(PriceZoneServices)
+  private readonly roleService = inject(RoleService)
+>>>>>>> Nabil_back
 
   festivalId = signal<number | null>(null);
   showEditForm = signal(false);
@@ -103,7 +117,20 @@ export class FestivalDetails {
   }
 
   goToPriceZone(id: number): void {
+<<<<<<< HEAD
     this.router.navigate(['/price-zone', id]);
+=======
+    const festId = this.festivalId();
+    // SUPER_ORGANISATOR et ADMIN voient la vue de gestion
+    if (this.roleService.isSuperOrganisator()) {
+      this.router.navigate(['/price-zone', id]);
+    } else {
+      // VISITOR, VOLUNTEER, ORGANISATOR voient la vue publique
+      if (festId) {
+        this.router.navigate(['/festival', festId, 'zone', id]);
+      }
+    }
+>>>>>>> Nabil_back
   }
 
   back(): void {

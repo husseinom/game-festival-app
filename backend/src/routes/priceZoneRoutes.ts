@@ -12,6 +12,10 @@ router.get('/zones', priceZoneControlleer.getAllZones)
 
 router.get('/festival/:festivalId', priceZoneControlleer.getZonesByFestival)
 
+// Public endpoint for viewing games in a price zone (for visitors)
+router.get('/:priceZoneId/games/public', priceZoneControlleer.getGamesByPriceZone)
+
+// Protected endpoints (for management)
 router.get('/:priceZoneId/reservations', verifyToken, priceZoneControlleer.getReservationsByPriceZone)
 
 router.get('/:priceZoneId/games', verifyToken, priceZoneControlleer.getGamesByPriceZone)

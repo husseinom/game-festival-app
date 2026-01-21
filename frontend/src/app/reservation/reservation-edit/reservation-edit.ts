@@ -7,12 +7,13 @@ import { PriceZoneServices } from '../../PriceZone/services/price-zone-services'
 import { GamePubListService } from '../../GamePublisher/service/game-pub-list-service';
 import { ReservantService } from '../../reservant/services/reservant-service';
 import { FestivalServices } from '../../festival/services/festival-services';
-import { CreateReservationDTO, Reservation } from '../../types/reservation';
+import { CreateReservationDTO, Reservation, ReservationStatus } from '../../types/reservation';
+import { ReservantTypeLabelPipe } from '../../shared/pipes/reservant-type-label.pipe';
 
 @Component({
   selector: 'app-reservation-edit',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [ReactiveFormsModule, CommonModule, ReservantTypeLabelPipe],
   templateUrl: './reservation-edit.html',
   styleUrl: './reservation-edit.css'
 })
@@ -35,18 +36,18 @@ export class ReservationEdit implements OnInit {
   isLoading = true;
 
   readonly form = new FormGroup({
-    festival_id: new FormControl<number | null>(null, {
-      nonNullable: false,
+    festival_id: new FormControl<string>('', {
+      nonNullable: true,
       validators: [Validators.required]
     }),
-    reservant_id: new FormControl<number | null>(null, {
-      nonNullable: false,
+    reservant_id: new FormControl<string>('', {
+      nonNullable: true,
       validators: [Validators.required]
     }),
-    game_publisher_id: new FormControl<number | null>(null, {
-      nonNullable: false
+    game_publisher_id: new FormControl<string>('', {
+      nonNullable: true
     }),
-    status: new FormControl('Contact pris', {
+    status: new FormControl<ReservationStatus>(ReservationStatus.NOT_CONTACTED, {
       nonNullable: true
     }),
     comments: new FormControl('', {
@@ -55,13 +56,7 @@ export class ReservationEdit implements OnInit {
     is_publisher_presenting: new FormControl(false, {
       nonNullable: true
     }),
-    game_list_requested: new FormControl(false, {
-      nonNullable: true
-    }),
-    game_list_received: new FormControl(false, {
-      nonNullable: true
-    }),
-    games_received: new FormControl(false, {
+    needs_festival_animators: new FormControl(false, {
       nonNullable: true
     }),
     discount_amount: new FormControl<number | null>(null),
@@ -103,15 +98,13 @@ export class ReservationEdit implements OnInit {
 
   private populateForm(reservation: Reservation): void {
     this.form.patchValue({
-      festival_id: reservation.festival_id,
-      reservant_id: reservation.reservant_id,
-      game_publisher_id: reservation.game_publisher_id ?? null,
-      status: reservation.status ?? 'Contact pris',
+      festival_id: String(reservation.festival_id),
+      reservant_id: String(reservation.reservant_id),
+      game_publisher_id: reservation.game_publisher_id ? String(reservation.game_publisher_id) : '',
+      status: reservation.status ?? ReservationStatus.NOT_CONTACTED,
       comments: reservation.comments ?? '',
       is_publisher_presenting: reservation.is_publisher_presenting,
-      game_list_requested: reservation.game_list_requested,
-      game_list_received: reservation.game_list_received,
-      games_received: reservation.games_received,
+      needs_festival_animators: reservation.needs_festival_animators ?? false,
       discount_amount: reservation.discount_amount ?? null,
       discount_tables: reservation.discount_tables ?? null,
       nb_electrical_outlets: reservation.nb_electrical_outlets ?? 0
@@ -125,13 +118,13 @@ export class ReservationEdit implements OnInit {
       reservation.zones.forEach(zone => {
         tablesArray.push(
           new FormGroup({
-            price_zone_id: new FormControl<number | null>(zone.priceZone.id, {
-              nonNullable: false,
+            price_zone_id: new FormControl<string>(String(zone.priceZone.id), {
+              nonNullable: true,
               validators: [Validators.required]
             }),
             table_count: new FormControl<number | null>(zone.table_count, {
               nonNullable: false,
-              validators: [Validators.required, Validators.min(1)]
+              validators: [Validators.required, Validators.min(0.5)]
             })
           })
         );
@@ -147,13 +140,13 @@ export class ReservationEdit implements OnInit {
     const tablesArray = this.form.get('tables') as FormArray;
     tablesArray.push(
       new FormGroup({
-        price_zone_id: new FormControl<number | null>(null, {
-          nonNullable: false,
+        price_zone_id: new FormControl<string>('', {
+          nonNullable: true,
           validators: [Validators.required]
         }),
         table_count: new FormControl<number | null>(null, {
           nonNullable: false,
-          validators: [Validators.required, Validators.min(1)]
+          validators: [Validators.required, Validators.min(0.5)]
         })
       })
     );
@@ -165,30 +158,30 @@ export class ReservationEdit implements OnInit {
   }
 
   onSubmit(event: Event): void {
-    console.log('Submitting form...');
     event.preventDefault();
 
     if (this.form.invalid || !this.reservationId) {
-      console.warn('Formulaire invalide', this.form.errors);
       return;
     }
 
     const formValue = this.form.value;
 
+    // Convertir les strings en numbers pour l'API
     const payload: Partial<CreateReservationDTO> = {
-      game_publisher_id: formValue.game_publisher_id ?? undefined,
-      festival_id: formValue.festival_id!,
-      reservant_id: formValue.reservant_id!,
-      status: formValue.status || 'Contact pris',
+      game_publisher_id: formValue.game_publisher_id ? Number(formValue.game_publisher_id) : undefined,
+      festival_id: Number(formValue.festival_id),
+      reservant_id: Number(formValue.reservant_id),
+      status: formValue.status || ReservationStatus.NOT_CONTACTED,
       comments: formValue.comments || '',
       is_publisher_presenting: formValue.is_publisher_presenting || false,
-      game_list_requested: formValue.game_list_requested || false,
-      game_list_received: formValue.game_list_received || false,
-      games_received: formValue.games_received || false,
+      needs_festival_animators: formValue.needs_festival_animators || false,
       discount_amount: formValue.discount_amount || undefined,
       discount_tables: formValue.discount_tables || undefined,
       nb_electrical_outlets: formValue.nb_electrical_outlets || 0,
-      tables: (formValue.tables as any[]) || []
+      tables: (formValue.tables as any[])?.map(t => ({
+        price_zone_id: Number(t.price_zone_id),
+        table_count: Number(t.table_count)
+      })) || []
     };
 
     this.reservationService.update(this.reservationId, payload).subscribe({

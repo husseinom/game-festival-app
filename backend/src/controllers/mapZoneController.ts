@@ -1,6 +1,36 @@
 import type { Request, Response } from 'express';
 import prisma from '../config/prisma.js';
 
+export const getByFestival = async (req: Request, res: Response) => {
+  try {
+    const festivalId = Number(req.params.festivalId);
+    if (Number.isNaN(festivalId)) {
+      return res.status(400).json({ error: 'Invalid festivalId' });
+    }
+    const mapZones = await prisma.mapZone.findMany({
+      where: { festival_id: festivalId },
+      include: {
+        price_zone: true,
+        tableTypes: true,
+        festivalGames: {
+          include: {
+            game: true,
+            reservation: {
+              include: {
+                publisher: true
+              }
+            }
+          }
+        }
+      }
+    });
+    res.json(mapZones);
+  } catch (error) {
+    console.error('Error fetching map zones by festival:', error);
+    res.status(500).json({ message: 'Error fetching map zones' });
+  }
+};
+
 export const getByPriceZone = async (req: Request, res: Response) => {
   try {
     const priceZoneId = Number(req.params.priceZoneId);
@@ -9,7 +39,8 @@ export const getByPriceZone = async (req: Request, res: Response) => {
     }
     const mapZones = await prisma.mapZone.findMany({
       where: { price_zone_id: priceZoneId },
-      include: { 
+      include: {
+        tableTypes: true,
         festivalGames: {
           include: {
             game: true,
@@ -32,7 +63,7 @@ export const getByPriceZone = async (req: Request, res: Response) => {
 export const create = async (req: Request, res: Response) => {
   try {
     const { name, price_zone_id, small_tables, large_tables, city_tables, gameIds } = req.body;
-    
+
     if (!name || !price_zone_id) {
       return res.status(400).json({ error: 'Name and price_zone_id are required' });
     }
@@ -69,37 +100,73 @@ export const create = async (req: Request, res: Response) => {
     const requestedCity = city_tables || 0;
 
     if (requestedSmall > availableTables.small) {
-      return res.status(400).json({ 
-        error: `Not enough small tables available. Requested: ${requestedSmall}, Available: ${availableTables.small}` 
+      return res.status(400).json({
+        error: `Not enough small tables available. Requested: ${requestedSmall}, Available: ${availableTables.small}`
       });
     }
     if (requestedLarge > availableTables.large) {
-      return res.status(400).json({ 
-        error: `Not enough large tables available. Requested: ${requestedLarge}, Available: ${availableTables.large}` 
+      return res.status(400).json({
+        error: `Not enough large tables available. Requested: ${requestedLarge}, Available: ${availableTables.large}`
       });
     }
     if (requestedCity > availableTables.city) {
-      return res.status(400).json({ 
-        error: `Not enough city tables available. Requested: ${requestedCity}, Available: ${availableTables.city}` 
+      return res.status(400).json({
+        error: `Not enough city tables available. Requested: ${requestedCity}, Available: ${availableTables.city}`
       });
     }
 
     // Create map zone with festival_id
     const mapZone = await prisma.mapZone.create({
-      data: { 
-        name, 
+      data: {
+        name,
         price_zone_id,
-        festival_id: priceZone.festival_id, // Add this line
+        festival_id: priceZone.festival_id,
         small_tables: requestedSmall,
         large_tables: requestedLarge,
         city_tables: requestedCity
       }
     });
 
+    // Create TableTypes for this map zone
+    const tableTypesToCreate = [];
+    if (requestedSmall > 0) {
+      tableTypesToCreate.push({
+        map_zone_id: mapZone.id,
+        name: 'STANDARD' as const,
+        nb_total: requestedSmall,
+        nb_available: requestedSmall,
+        nb_total_player: 4
+      });
+    }
+    if (requestedLarge > 0) {
+      tableTypesToCreate.push({
+        map_zone_id: mapZone.id,
+        name: 'LARGE' as const,
+        nb_total: requestedLarge,
+        nb_available: requestedLarge,
+        nb_total_player: 6
+      });
+    }
+    if (requestedCity > 0) {
+      tableTypesToCreate.push({
+        map_zone_id: mapZone.id,
+        name: 'CITY' as const,
+        nb_total: requestedCity,
+        nb_available: requestedCity,
+        nb_total_player: 8
+      });
+    }
+
+    if (tableTypesToCreate.length > 0) {
+      await prisma.tableType.createMany({
+        data: tableTypesToCreate
+      });
+    }
+
     // Assign games to this map zone
     if (gameIds && gameIds.length > 0) {
       await prisma.festivalGame.updateMany({
-        where: { 
+        where: {
           id: { in: gameIds },
           map_zone_id: null
         },
@@ -134,11 +201,11 @@ export const addFestivalGame = async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.id);
     const { festivalGameId } = req.body;
-    
+
     if (Number.isNaN(id)) {
       return res.status(400).json({ error: 'Invalid map zone id' });
     }
-    
+
     const festivalGame = await prisma.festivalGame.update({
       where: { id: festivalGameId },
       data: { map_zone_id: id },
@@ -161,11 +228,11 @@ export const addFestivalGame = async (req: Request, res: Response) => {
 export const removeFestivalGame = async (req: Request, res: Response) => {
   try {
     const festivalGameId = Number(req.params.festivalGameId);
-    
+
     if (Number.isNaN(festivalGameId)) {
       return res.status(400).json({ error: 'Invalid festival game id' });
     }
-    
+
     const festivalGame = await prisma.festivalGame.update({
       where: { id: festivalGameId },
       data: { map_zone_id: null }
@@ -180,20 +247,29 @@ export const removeFestivalGame = async (req: Request, res: Response) => {
 export const deleteMapZone = async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.id);
-    
+
     if (Number.isNaN(id)) {
       return res.status(400).json({ error: 'Invalid map zone id' });
     }
-    
-    // Unassign all games from this map zone before deleting
-    await prisma.festivalGame.updateMany({
-      where: { map_zone_id: id },
-      data: { map_zone_id: null }
+
+    // Vérifier s'il y a des jeux associés à cette zone
+    const gamesInZone = await prisma.festivalGame.count({
+      where: { map_zone_id: id }
     });
-    
-    // Delete the map zone
-    await prisma.mapZone.delete({ where: { id } });
-    
+
+    if (gamesInZone > 0) {
+      return res.status(400).json({
+        error: `Impossible de supprimer cette zone : ${gamesInZone} jeu(x) sont encore placés dans cette zone. Retirez-les d'abord.`
+      });
+    }
+
+    // Supprimer les TableType associés à cette zone
+    await prisma.tableType.deleteMany({
+      where: { map_zone_id: id }
+    });
+
+    // Supprimer la zone
+    await prisma.mapZone.delete({ where: { id: id } });
     res.status(204).send();
   } catch (error) {
     console.error('Error deleting map zone:', error);

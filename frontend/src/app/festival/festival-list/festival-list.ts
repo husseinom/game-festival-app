@@ -20,6 +20,7 @@ export class FestivalList {
   readonly currentUser = this.authservice.currentUser;
   readonly loggedIn = this.authservice.isLoggedIn;
   readonly isAdmin = this.authservice.isAdmin;
+  readonly canManageFestivals = this.authservice.canManageFestivals;
   readonly showform = signal(false);
   readonly editingFestival = signal<Festival | undefined>(undefined);
 
@@ -50,14 +51,8 @@ export class FestivalList {
     this.festivalService.addFestival(Festival);
     this.hideform();
   }
-  // remove(Festival: Festival):void{
-  //   this.svc.remove(Festival);
-  // }
-  // findbyid(id:number):Festival | undefined{
-  //   return this.svc.findById(id);
-  // }
+
   remove(festival: Festival): void {
-    console.log('Removing festival:', festival);
     this.festivalService.deleteFestival(festival);
   }
 

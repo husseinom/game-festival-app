@@ -9,10 +9,10 @@
     
     <span class="spacer"></span>
     
-    <!-- Navigation buttons -->
+    <!-- Navigation publique (tous) -->
     <button mat-raised-button color="accent" class="nav-button">
       <a routerLink="/festival-list" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
-        🎪 Festivals
+        Festivals
       </a>
     </button>
 
@@ -45,21 +45,25 @@
 
     <!-- Section authentification -->
     @if (loggedIn()) {
-      <button mat-raised-button color="warn"  (click)="LoggedOut()" class="nav-button">
-        🚪 Déconnexion
+      <span class="user-role">{{ currentUser()?.role }}</span>
+      <button mat-raised-button color="warn" (click)="LoggedOut()" class="nav-button">
+        Déconnexion
       </button>
     } @else {
-      <!-- Utilisateur non connecté -->
       <button mat-raised-button color="accent" class="nav-button">
         <a routerLink="/login" routerLinkActive="active">
-          🔑 Connexion
+          Connexion
         </a>
       </button>
+      <!-- <button mat-raised-button color="accent" class="nav-button">
+        <a routerLink="/register" routerLinkActive="active">
+          Register
+        </a>
+      </button> -->
     }
   </mat-toolbar-row>
 </mat-toolbar>
 
-<!-- Wrap router-outlet in main-content for better control -->
 <main class="main-content">
   <router-outlet />
 </main>

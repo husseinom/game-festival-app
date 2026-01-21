@@ -1,7 +1,7 @@
 import { Component, computed, effect, inject, input, output } from '@angular/core';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ReservantService } from '../services/reservant-service';
-import { CreateReservantDTO, Reservant, UpdateReservantDTO } from '../../types/reservant';
+import { CreateReservantDTO, Reservant, UpdateReservantDTO, ReservantType, RESERVANT_TYPE_LABELS } from '../../types/reservant';
 
 @Component({
   selector: 'app-reservant-form',
@@ -12,12 +12,12 @@ import { CreateReservantDTO, Reservant, UpdateReservantDTO } from '../../types/r
 })
 export class ReservantForm {
   private readonly reservantService = inject(ReservantService);
-  readonly types: { value: string; label: string }[] = [
-    { value: 'Éditeur', label: 'Éditeur' },
-    { value: 'Prestataire', label: 'Prestataire' },
-    { value: 'Boutique', label: 'Boutique' },
-    { value: 'Association', label: 'Association' },
-    { value: 'Animation / Zone Proto', label: 'Animation / Zone Proto' }
+  readonly types: { value: ReservantType; label: string }[] = [
+    { value: ReservantType.PUBLISHER, label: RESERVANT_TYPE_LABELS[ReservantType.PUBLISHER] },
+    { value: ReservantType.PROVIDER, label: RESERVANT_TYPE_LABELS[ReservantType.PROVIDER] },
+    { value: ReservantType.SHOP, label: RESERVANT_TYPE_LABELS[ReservantType.SHOP] },
+    { value: ReservantType.ASSOCIATION, label: RESERVANT_TYPE_LABELS[ReservantType.ASSOCIATION] },
+    { value: ReservantType.ANIMATION, label: RESERVANT_TYPE_LABELS[ReservantType.ANIMATION] }
   ];
 
   private readonly defaultType = this.types[0].value;
