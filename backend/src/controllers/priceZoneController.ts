@@ -61,30 +61,67 @@ export const getReservationsByPriceZone = async (req: Request, res: Response) =>
       return res.status(400).json({ error: 'Invalid priceZoneId' });
     }
 
+    // Get all MapZones for this PriceZone
+    const mapZones = await prisma.mapZone.findMany({
+      where: { price_zone_id: priceZoneId },
+      select: { id: true }
+    });
+    
+    const mapZoneIds = mapZones.map(mz => mz.id);
+
+    // Get reservations that have games placed in these MapZones
+    const festivalGames = await prisma.festivalGame.findMany({
+      where: { 
+        map_zone_id: { in: mapZoneIds }
+      },
+      select: { reservation_id: true },
+      distinct: ['reservation_id']
+    });
+
+    const reservationIdsFromGames = festivalGames.map(fg => fg.reservation_id);
+
+    // Also get reservations from ZoneReservation (explicit zone allocation)
     const zoneReservations = await prisma.zoneReservation.findMany({
       where: { price_zone_id: priceZoneId },
+      select: { reservation_id: true, table_count: true }
+    });
+
+    // Merge unique reservation IDs
+    const allReservationIds = [...new Set([
+      ...reservationIdsFromGames,
+      ...zoneReservations.map(zr => zr.reservation_id)
+    ])];
+
+    if (allReservationIds.length === 0) {
+      return res.json([]);
+    }
+
+    // Get full reservation details
+    const reservations = await prisma.reservation.findMany({
+      where: { reservation_id: { in: allReservationIds } },
       include: {
-        reservation: {
+        publisher: true,
+        reservant: true,
+        games: {
+          where: { map_zone_id: { in: mapZoneIds } },
           include: {
-            publisher: true,
-            reservant: true,
-            games: {
-              include: {
-                game: true
-              }
-            }
+            game: true,
+            mapZone: true
           }
         }
       }
     });
 
-    // Flatten the structure for frontend
-    const reservations = zoneReservations.map(zr => ({
-      ...zr.reservation,
-      table_count: zr.table_count
-    }));
+    // Add table_count from ZoneReservation if available
+    const reservationsWithTableCount = reservations.map(r => {
+      const zr = zoneReservations.find(z => z.reservation_id === r.reservation_id);
+      return {
+        ...r,
+        table_count: zr?.table_count || r.games.reduce((sum, g) => sum + (g.allocated_tables || 0), 0)
+      };
+    });
 
-    res.json(reservations);
+    res.json(reservationsWithTableCount);
   } catch (error) {
     console.error('Error fetching reservations:', error);
     res.status(500).json({ message: 'Error fetching reservations' });
@@ -99,28 +136,25 @@ export const getGamesByPriceZone = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Invalid priceZoneId' });
     }
 
-    // Get all reservations for this price zone
-    const zoneReservations = await prisma.zoneReservation.findMany({
+    // Get all MapZones for this PriceZone
+    const mapZones = await prisma.mapZone.findMany({
       where: { price_zone_id: priceZoneId },
-      select: { reservation_id: true }
+      select: { id: true }
     });
+    
+    const mapZoneIds = mapZones.map(mz => mz.id);
 
-    const reservationIds = zoneReservations.map(zr => zr.reservation_id);
-
-    if (reservationIds.length === 0) {
-      return res.json([]);
-    }
-
-    // Get all festival games for these reservations
+    // Get all festival games placed in these MapZones
     const festivalGames = await prisma.festivalGame.findMany({
       where: { 
-        reservation_id: { in: reservationIds }
+        map_zone_id: { in: mapZoneIds }
       },
       include: {
         game: true,
         reservation: {
           include: {
-            publisher: true
+            publisher: true,
+            reservant: true
           }
         },
         mapZone: true
