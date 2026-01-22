@@ -7,11 +7,32 @@ export const add = async (req: Request, res: Response) => {
   try {
     const newFestival = await festivalService.createFestival(req.body);
     
-    // Calculate tables from MapZones (will be 0 initially)
+    // Fetch complete festival with all relations
+    const festivalWithData = await prisma.festival.findUnique({
+      where: { id: newFestival.id },
+      include: {
+        priceZoneType: true,
+        priceZones: {
+          include: {
+            mapZones: {
+              include: {
+                tableTypes: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    if (!festivalWithData) {
+      return res.status(404).json({ error: 'Festival not found after creation' });
+    }
+    
+    // Calculate tables from MapZones/TableTypes
     const totals = await TableConverter.calculateFestivalTotals(prisma, newFestival.id);
     
     res.status(201).json({
-      ...newFestival,
+      ...festivalWithData,
       ...totals
     });
   } catch (error: any) {
@@ -25,7 +46,15 @@ export const getAllFestivals = async (req: Request, res: Response) => {
     const festivals = await prisma.festival.findMany({
       include: {
         priceZoneType: true,
-        priceZones: true
+        priceZones: {
+          include: {
+            mapZones: {
+              include: {
+                tableTypes: true
+              }
+            }
+          }
+        }
       }
     });
 
@@ -55,9 +84,14 @@ export const getFestivalById = async (req: Request, res: Response) => {
       where: { id: Number(id) },
       include: {
         priceZoneType: true,
-        priceZones: true,
-        mapZones: {
-          include: { tableTypes: true }
+        priceZones: {
+          include: {
+            mapZones: {
+              include: {
+                tableTypes: true
+              }
+            }
+          }
         }
       }
     });
@@ -87,11 +121,32 @@ export const update = async (req: Request, res: Response) => {
     const { id } = req.params;
     const updatedFestival = await festivalService.updateFestival(Number(id), req.body);
     
+    // Fetch complete festival with all relations
+    const festivalWithData = await prisma.festival.findUnique({
+      where: { id: updatedFestival.id },
+      include: {
+        priceZoneType: true,
+        priceZones: {
+          include: {
+            mapZones: {
+              include: {
+                tableTypes: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    if (!festivalWithData) {
+      return res.status(404).json({ error: 'Festival not found after update' });
+    }
+    
     // Calculate tables after update
     const totals = await TableConverter.calculateFestivalTotals(prisma, updatedFestival.id);
     
     res.status(200).json({
-      ...updatedFestival,
+      ...festivalWithData,
       ...totals
     });
   } catch (error: any) {
