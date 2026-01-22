@@ -254,25 +254,50 @@ export class PriceZoneDetailsComponent {
   createMapZone(): void {
     const zone = this.newMapZone();
     const pzId = this.priceZoneId();
+    const festId = this.festivalId(); // ✅ Récupérer le festival_id
 
     if (!zone.name.trim() || this.totalTables() === 0 || pzId === null) {
       this.validationError.set('Please provide a name and at least one table');
       return;
     }
 
-    // Validate tables
-    if (!this.validateTables()) {
-      return;
-    }
+    // ✅ Vérifier que festivalId existe
+    if (festId === null) {
+      // Fallback: essayer de récupérer depuis la priceZone
+      const priceZone = this.priceZone();
+      if (!priceZone) {
+        this.validationError.set('Festival ID not available. Please reload the page.');
+        return;
+      }
+      // Utiliser le festival_id de la priceZone
+      const actualFestId = priceZone.festival_id;
+      
+      this._mapZoneService.create({
+        festival_id: actualFestId, // ✅ AJOUT
+        name: zone.name,
+        small_tables: zone.small_tables || 0,
+        large_tables: zone.large_tables || 0,
+        city_tables: zone.city_tables || 0,
+        price_zone_id: pzId,
+        gameIds: zone.gameIds
+      });
+    } else {
+      // ✅ Utiliser le festival_id des query params
+      // Validate tables
+      if (!this.validateTables()) {
+        return;
+      }
 
-    this._mapZoneService.create({
-      name: zone.name,
-      small_tables: zone.small_tables || 0,
-      large_tables: zone.large_tables || 0,
-      city_tables: zone.city_tables || 0,
-      price_zone_id: pzId,
-      gameIds: zone.gameIds
-    });
+      this._mapZoneService.create({
+        festival_id: festId, // ✅ AJOUT
+        name: zone.name,
+        small_tables: zone.small_tables || 0,
+        large_tables: zone.large_tables || 0,
+        city_tables: zone.city_tables || 0,
+        price_zone_id: pzId,
+        gameIds: zone.gameIds
+      });
+    }
 
     // Reload data after creation
     setTimeout(() => {

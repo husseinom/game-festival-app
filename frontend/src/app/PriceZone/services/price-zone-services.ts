@@ -55,15 +55,21 @@ export class PriceZoneServices {
   }
 
   updatePriceZone(id: number, updates: Partial<PriceZone>): void {
-    this.http.put<PriceZone>(`${environment.apiUrl}/price_zone/${id}`, updates, { withCredentials: true })
+    this.http.put<PriceZone[]>(`${environment.apiUrl}/price_zone/${id}`, updates, { withCredentials: true })
       .subscribe({
-        next: (updated) => {
-          const current = this._priceZones();
-          const index = current.findIndex(pz => pz.id === id);
-          if (index > -1) {
-            const newPriceZones = [...current];
-            newPriceZones[index] = updated;
-            this._priceZones.set(newPriceZones);
+        next: (allUpdatedZones) => {
+          const festivalId = allUpdatedZones[0]?.festival_id;
+          
+          if (festivalId) {
+            const current = this._priceZones();
+            // Remove ALL old zones for this festival (by ID, not just festival_id filter)
+            const updatedZoneIds = allUpdatedZones.map(z => z.id);
+            const otherZones = current.filter(pz => 
+              pz.festival_id !== festivalId || !updatedZoneIds.includes(pz.id)
+            );
+            this._priceZones.set([...otherZones, ...allUpdatedZones]);
+          } else {
+            this._priceZones.set(allUpdatedZones);
           }
         },
         error: (error) => {

@@ -92,7 +92,6 @@ export const createReservation = async (data: any) => {
     let finalReservantId = reservant_id ? Number(reservant_id) : null;
     
     if (publisher_is_reservant && parsedGamePublisherId) {
-      // Récupérer l'éditeur
       const publisher = await tx.gamePublisher.findUnique({
         where: { id: parsedGamePublisherId }
       });
@@ -101,7 +100,6 @@ export const createReservation = async (data: any) => {
         throw new Error(`L'éditeur avec l'ID ${parsedGamePublisherId} n'existe pas.`);
       }
       
-      // Chercher un réservant existant avec le même nom et type PUBLISHER
       let existingReservant = await tx.reservant.findFirst({
         where: {
           name: publisher.name,
@@ -112,7 +110,6 @@ export const createReservation = async (data: any) => {
       if (existingReservant) {
         finalReservantId = existingReservant.reservant_id;
       } else {
-        // Créer un nouveau réservant basé sur l'éditeur
         const newReservant = await tx.reservant.create({
           data: {
             name: publisher.name,
@@ -135,27 +132,40 @@ export const createReservation = async (data: any) => {
 
         const priceZone = await tx.priceZone.findUnique({
           where: { id: zoneId },
-          select: { total_tables: true, name: true }
+          include: {
+            mapZones: {
+              include: {
+                tableTypes: true
+              }
+            }
+          }
         });
 
         if (!priceZone) {
           throw new Error(`La zone de prix ID ${zoneId} n'existe pas.`);
         }
 
-        if (priceZone.total_tables !== null) {
-          const aggregation = await tx.zoneReservation.aggregate({
-            _sum: { table_count: true },
-            where: { price_zone_id: zoneId }
-          });
-
-          const currentReserved = aggregation._sum.table_count || 0;
-
-          if (currentReserved + requestedQty > priceZone.total_tables) {
-            throw new Error(
-              `Plus assez de tables disponibles dans la zone "${priceZone.name}". ` +
-              `(Capacité: ${priceZone.total_tables}, Réservées: ${currentReserved}, Demandées: ${requestedQty})`
-            );
+        // Calculate total capacity from MapZone TableTypes
+        let totalCapacity = 0;
+        for (const mapZone of priceZone.mapZones) {
+          for (const tableType of mapZone.tableTypes) {
+            totalCapacity += tableType.nb_total;
           }
+        }
+
+        // Calculate currently reserved tables in this price zone
+        const aggregation = await tx.zoneReservation.aggregate({
+          _sum: { table_count: true },
+          where: { price_zone_id: zoneId }
+        });
+
+        const currentReserved = aggregation._sum.table_count || 0;
+
+        if (currentReserved + requestedQty > totalCapacity) {
+          throw new Error(
+            `Plus assez de tables disponibles dans la zone "${priceZone.name}". ` +
+            `(Capacité: ${totalCapacity}, Réservées: ${currentReserved}, Demandées: ${requestedQty})`
+          );
         }
       }
     }
