@@ -1,0 +1,28 @@
+<div class="admin-container">
+  <!-- Header -->
+  <div class="header">
+    <button mat-icon-button class="back-btn" (click)="back()">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h1>⚙️ Admin</h1>
+  </div>
+
+  <!-- Tabs -->
+  <mat-tab-group class="tabs-container" animationDuration="300ms">
+    
+    <!-- Tab 1: Utilisateurs -->
+    <mat-tab label="👤 Utilisateurs">
+      <div class="tab-content">
+        <app-user-list></app-user-list>
+      </div>
+    </mat-tab>
+
+    <!-- Tab 2: Réservants -->
+    <mat-tab label="📋 Réservants">
+      <div class="tab-content">
+        <app-reservant-list></app-reservant-list>
+      </div>
+    </mat-tab>
+
+  </mat-tab-group>
+</div>

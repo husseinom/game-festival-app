@@ -1,0 +1,120 @@
+<div class="reservation-list-container">
+  <!-- Header Section -->
+  <div class="header-section">
+    <h1 class="page-title">Reservations</h1>
+    <button (click)="toggleForm()" class="action-btn add-btn">
+      {{ showForm() ? 'Fermer' : '+ Nouvelle Reservation' }}
+    </button>
+  </div>
+
+  <!-- Filtres et Actions en masse -->
+  <div class="toolbar">
+    <div class="filters">
+      <label class="filter-item">
+        <span>Statut:</span>
+        <select [value]="statusFilter()" (change)="onStatusFilterChange($event)">
+          @for (opt of statusOptions; track opt.value) {
+            <option [value]="opt.value">{{ opt.label }}</option>
+          }
+        </select>
+      </label>
+      
+      <label class="filter-item">
+        <span>Facturation:</span>
+        <select [value]="invoiceFilter()" (change)="onInvoiceFilterChange($event)">
+          @for (opt of invoiceOptions; track opt.value) {
+            <option [value]="opt.value">{{ opt.label }}</option>
+          }
+        </select>
+      </label>
+    </div>
+    
+    <div class="selection-controls">
+      <label class="checkbox-label">
+        <input type="checkbox" [checked]="selectAll()" (change)="toggleSelectAll()">
+        Tout selectionner
+      </label>
+      
+      @if (hasSelection()) {
+        <span class="selection-count">{{ selectedCount() }} selection(s)</span>
+        
+        <div class="batch-actions">
+          <select (change)="batchUpdateStatus($any($event.target).value); $any($event.target).value = ''">
+            <option value="">Changer statut...</option>
+            <option value="NOT_CONTACTED">Pas contacte</option>
+            <option value="CONTACTED">Contact pris</option>
+            <option value="IN_DISCUSSION">Discussion</option>
+            <option value="CONFIRMED">Present</option>
+            <option value="ABSENT">Absent</option>
+          </select>
+          
+          <select (change)="batchUpdateInvoiceStatus($any($event.target).value); $any($event.target).value = ''">
+            <option value="">Facturation...</option>
+            <option value="INVOICED">Marquer facturees</option>
+            <option value="PAID">Marquer payees</option>
+          </select>
+          
+          <button class="clear-btn" (click)="clearSelection()">Annuler</button>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Form Section -->
+  @if (showForm()) {
+    <div class="form-container">
+      <app-reservation-form 
+        (newReservation)="onNewReservation($event)"
+      ></app-reservation-form>
+    </div>
+  }
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="loading-container">
+      <div class="spinner"></div>
+    </div>
+  }
+
+  <!-- Reservations Grid -->
+  @if (!isLoading()) {
+    <div class="reservations-grid">
+      @for (resa of filteredReservations(); track resa.reservation_id) {
+        <div class="reservation-wrapper" [class.selected]="isSelected(resa.reservation_id)">
+          <label class="select-checkbox">
+            <input 
+              type="checkbox" 
+              [checked]="isSelected(resa.reservation_id)"
+              (change)="toggleSelection(resa.reservation_id)"
+              (click)="$event.stopPropagation()"
+            >
+          </label>
+          <div (click)="onReservationClick(resa.reservation_id)">
+            <app-reservation-card 
+              [reservation]="resa"
+              (delete)="onDeleteReservation($event)"
+              (statusChange)="onStatusChange($event.id, $event.status)"
+              (invoiceAction)="onInvoiceAction($event.id, $event.action)"
+            ></app-reservation-card>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Empty State -->
+  @if (!isLoading() && filteredReservations().length === 0) {
+    <div class="empty-state">
+      <p class="empty-message">Aucune reservation trouvee.</p>
+      @if (statusFilter() !== 'ALL' || invoiceFilter() !== 'ALL') {
+        <button class="action-btn" (click)="statusFilter.set('ALL'); invoiceFilter.set('ALL')">
+          Effacer les filtres
+        </button>
+      } @else {
+        <button (click)="toggleForm()" class="action-btn add-btn">
+          Creer la premiere reservation
+        </button>
+      }
+    </div>
+  }
+</div>

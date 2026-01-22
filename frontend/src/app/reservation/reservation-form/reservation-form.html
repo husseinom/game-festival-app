@@ -1,0 +1,338 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit($event)" class="reservation-form">
+  <div class="form-section">
+    <h2>{{ 'Nouvelle réservation' }}</h2>
+
+    <div class="form-group">
+      <label for="festival_id">Festival</label>
+      <select
+        id="festival_id"
+        formControlName="festival_id"
+      >
+        <option [value]="null" disabled>Sélectionner un festival</option>
+        @for (festival of activeFestivals(); track festival.id) {
+          <option [value]="festival.id">
+            {{ festival.name }} - {{ festival.location }}
+          </option>
+        }
+      </select>
+      @if (activeFestivals().length === 0) {
+        <span class="warning">Aucun festival actif disponible</span>
+      }
+      @if (form.get('festival_id')?.hasError('required') && form.get('festival_id')?.touched) {
+        <span class="error">
+          Le festival est obligatoire
+        </span>
+      }
+    </div>
+
+    <div class="form-group">
+      <label for="game_publisher_id">Éditeur de jeu (provenance des jeux)</label>
+      <select
+        id="game_publisher_id"
+        formControlName="game_publisher_id"
+      >
+        <option [value]="null">Aucun éditeur</option>
+        @for (publisher of gamePublishers(); track publisher.id) {
+          <option [value]="publisher.id">
+            {{ publisher.name }}
+          </option>
+        }
+      </select>
+      @if (form.get('game_publisher_id')?.hasError('required') && publisherIsReservant()) {
+        <span class="error">
+          L'éditeur est obligatoire quand il réserve pour lui-même
+        </span>
+      }
+    </div>
+
+    <!-- Option: L'éditeur réserve pour lui-même -->
+    <div class="publisher-reservant-option">
+      <label class="toggle-label">
+        <input 
+          type="checkbox" 
+          [checked]="publisherIsReservant()"
+          (change)="togglePublisherIsReservant()"
+        />
+        <span class="toggle-text">🏢 L'éditeur réserve pour lui-même</span>
+      </label>
+      @if (publisherIsReservant()) {
+        <p class="option-hint">
+          Un réservant sera automatiquement créé avec le nom et le type "Éditeur" de l'éditeur sélectionné ci-dessus.
+        </p>
+      }
+    </div>
+
+    @if (!publisherIsReservant()) {
+      <div class="form-group">
+        <label for="reservant_id">Réservant</label>
+        <select
+          id="reservant_id"
+          formControlName="reservant_id"
+        >
+          <option value="" disabled>Sélectionner un réservant</option>
+          @for (reservant of reservants(); track reservant.reservant_id) {
+            <option [value]="reservant.reservant_id">
+              {{ reservant.name }} ({{ reservant.type | reservantTypeLabel }})
+            </option>
+          }
+        </select>
+        @if (form.get('reservant_id')?.hasError('required')) {
+          <span class="error">
+            Le réservant est obligatoire
+          </span>
+        }
+      </div>
+    }
+
+    <div class="form-group">
+      <label for="status">Statut</label>
+      <select
+        id="status"
+        formControlName="status"
+      >
+        <option value="NOT_CONTACTED">Pas contacté</option>
+        <option value="CONTACTED">Contact pris</option>
+        <option value="IN_DISCUSSION">Discussion en cours</option>
+        <option value="CONFIRMED">Présent</option>
+        <option value="ABSENT">Absent</option>
+        <option value="CONSIDERED_ABSENT">Considéré absent</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="comments">Commentaires</label>
+      <textarea
+        id="comments"
+        formControlName="comments"
+        placeholder="Commentaires"
+        rows="4"
+      ></textarea>
+    </div>
+
+    <div class="checkbox-group">
+      <label>
+        <input type="checkbox" formControlName="is_publisher_presenting" />
+        Éditeur présent
+      </label>
+      <label>
+        <input type="checkbox" formControlName="needs_festival_animators" />
+        Besoin d'animateurs du festival
+      </label>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="discount_amount">Montant de la réduction (€)</label>
+        <input
+          type="number"
+          id="discount_amount"
+          formControlName="discount_amount"
+          placeholder="0.00"
+          step="0.01"
+          min="0"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="discount_tables">Nombre de tables de réduction</label>
+        <input
+          type="number"
+          id="discount_tables"
+          formControlName="discount_tables"
+          placeholder="0"
+          min="0"
+        />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="nb_electrical_outlets">Nombre de prises électriques *</label>
+      <input
+        type="number"
+        id="nb_electrical_outlets"
+        formControlName="nb_electrical_outlets"
+        placeholder="0"
+        min="0"
+      />
+      <small class="form-text">250€ par prise électrique</small>
+      @if (form.get('nb_electrical_outlets')?.hasError('required') && form.get('nb_electrical_outlets')?.touched) {
+        <span class="error">
+          Le nombre de prises est obligatoire
+        </span>
+      }
+      @if (form.get('nb_electrical_outlets')?.hasError('min')) {
+        <span class="error">
+          Le nombre doit être au moins 0
+        </span>
+      }
+    </div>
+  </div>
+
+  <div class="form-section">
+    <div class="section-header">
+      <h3>Zones de prix et espace</h3>
+      @if (!selectedFestivalId) {
+        <p class="warning-message">
+          ⚠️ Veuillez d'abord sélectionner un festival pour ajouter des zones
+        </p>
+      }
+    </div>
+
+    <!-- Toggle unité de saisie -->
+    <div class="unit-toggle">
+      <span class="unit-label">Saisir en :</span>
+      <button 
+        type="button" 
+        class="unit-btn"
+        [class.active]="inputUnit() === 'tables'"
+        (click)="inputUnit() !== 'tables' && toggleInputUnit()"
+      >
+        📊 Tables
+      </button>
+      <button 
+        type="button" 
+        class="unit-btn"
+        [class.active]="inputUnit() === 'm2'"
+        (click)="inputUnit() !== 'm2' && toggleInputUnit()"
+      >
+        📐 m²
+      </button>
+      <span class="unit-info">1 table = {{ M2_PER_TABLE }} m²</span>
+    </div>
+
+    <div formArrayName="tables">
+      @for (table of tablesArray.controls; track i; let i = $index) {
+        <div
+          [formGroupName]="i"
+          class="table-entry"
+        >
+          <div class="form-group">
+            <label [for]="'price_zone_' + i">Zone de prix *</label>
+            <select
+              [id]="'price_zone_' + i"
+              formControlName="price_zone_id"
+            >
+              <option [value]="null" disabled>Sélectionner une zone</option>
+              @for (zone of filteredPriceZones(); track zone.id) {
+                <option [value]="zone.id">
+                  {{ zone.name }} - {{ zone.table_price }}€/table ({{ zone.total_tables }} tables = {{ tablesToM2(zone.total_tables || 0) }} m²)
+                </option>
+              }
+            </select>
+            @if (form.get('tables')?.get([i, 'price_zone_id'])?.hasError('required') && form.get('tables')?.get([i, 'price_zone_id'])?.touched) {
+              <span class="error">
+                La zone est obligatoire
+              </span>
+            }
+          </div>
+
+          @if (inputUnit() === 'tables') {
+            <!-- Saisie en nombre de tables -->
+            <div class="form-group">
+              <label [for]="'table_count_' + i">
+                Nombre de tables * 
+                @if (tablesArray.at(i).get('price_zone_id')?.value) {
+                  <span class="max-info">(Max: {{ getMaxTablesForZone(tablesArray.at(i).get('price_zone_id')?.value) }})</span>
+                }
+              </label>
+              <div class="input-with-conversion">
+                <input
+                  type="number"
+                  [id]="'table_count_' + i"
+                  formControlName="table_count"
+                  placeholder="1"
+                  min="0.5"
+                  step="0.5"
+                  [max]="getMaxTablesForZone(tablesArray.at(i).get('price_zone_id')?.value)"
+                  (input)="onTableCountChange(i, $event)"
+                />
+                <span class="conversion-display">
+                  = {{ tablesToM2(tablesArray.at(i).get('table_count')?.value || 0) }} m²
+                </span>
+              </div>
+              @if (form.get('tables')?.get([i, 'table_count'])?.hasError('required') && form.get('tables')?.get([i, 'table_count'])?.touched) {
+                <span class="error">
+                  Le nombre de tables est obligatoire
+                </span>
+              }
+              @if (form.get('tables')?.get([i, 'table_count'])?.hasError('min')) {
+                <span class="error">
+                  Minimum 0.5 table (2 m²)
+                </span>
+              }
+              @if (tablesArray.at(i).get('table_count')?.value > getMaxTablesForZone(tablesArray.at(i).get('price_zone_id')?.value)) {
+                <span class="error">
+                  Maximum {{ getMaxTablesForZone(tablesArray.at(i).get('price_zone_id')?.value) }} tables disponibles
+                </span>
+              }
+            </div>
+          } @else {
+            <!-- Saisie en m² -->
+            <div class="form-group">
+              <label [for]="'space_m2_' + i">
+                Espace en m² * 
+                @if (tablesArray.at(i).get('price_zone_id')?.value) {
+                  <span class="max-info">(Max: {{ getMaxM2ForZone(tablesArray.at(i).get('price_zone_id')?.value) }} m²)</span>
+                }
+              </label>
+              <div class="input-with-conversion">
+                <input
+                  type="number"
+                  [id]="'space_m2_' + i"
+                  formControlName="space_m2"
+                  placeholder="4"
+                  min="2"
+                  step="2"
+                  [max]="getMaxM2ForZone(tablesArray.at(i).get('price_zone_id')?.value)"
+                  (input)="onSpaceM2Change(i, $event)"
+                />
+                <span class="conversion-display">
+                  = {{ m2ToTables(tablesArray.at(i).get('space_m2')?.value || 0) }} tables
+                </span>
+              </div>
+              @if (form.get('tables')?.get([i, 'space_m2'])?.hasError('required') && form.get('tables')?.get([i, 'space_m2'])?.touched) {
+                <span class="error">
+                  L'espace en m² est obligatoire
+                </span>
+              }
+              @if (form.get('tables')?.get([i, 'space_m2'])?.hasError('min')) {
+                <span class="error">
+                  Minimum 2 m² (0.5 table)
+                </span>
+              }
+              @if (tablesArray.at(i).get('space_m2')?.value > getMaxM2ForZone(tablesArray.at(i).get('price_zone_id')?.value)) {
+                <span class="error">
+                  Maximum {{ getMaxM2ForZone(tablesArray.at(i).get('price_zone_id')?.value) }} m² disponibles
+                </span>
+              }
+            </div>
+          }
+
+          <button type="button" (click)="removeTable(i)" class="btn-remove" title="Supprimer cette zone">
+            🗑️ Supprimer
+          </button>
+        </div>
+      }
+
+      @if (tablesArray.length === 0) {
+        <p class="empty-message">Aucune zone ajoutée. Cliquez sur "Ajouter une zone" pour commencer.</p>
+      }
+    </div>
+
+    <button 
+      type="button" 
+      (click)="addTable()" 
+      class="btn-add"
+      [disabled]="!selectedFestivalId"
+      [title]="!selectedFestivalId ? 'Sélectionnez d\'abord un festival' : 'Ajouter une zone de prix'"
+    >
+      + Ajouter une zone
+    </button>
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" [disabled]="form.invalid" class="btn-submit">
+      Créer la réservation
+    </button>
+  </div>
+</form>

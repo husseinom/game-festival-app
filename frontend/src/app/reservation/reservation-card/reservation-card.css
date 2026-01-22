@@ -1,0 +1,362 @@
+/* Override Material Card styling */
+mat-card.reservation-card {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05)) !important;
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 20px !important;
+  padding: 0 !important;
+  margin-bottom: 0px;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    0 4px 16px rgba(255, 255, 255, 0.1) inset !important;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Hover effects */
+mat-card.reservation-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.2),
+    0 8px 24px rgba(255, 255, 255, 0.1) inset !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+}
+
+/* Material Card Header */
+mat-card-header.card-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: flex-start !important;
+  padding: 20px 20px 0 20px !important;
+  margin-bottom: 0 !important;
+}
+
+/* Reservation logo (using mat-card-avatar) */
+.reservation-logo {
+  display: none !important;
+}
+
+/* Status badge */
+.badges-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.status-badge, .invoice-badge {
+  padding: 5px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Status colors */
+.status-confirmed {
+  background: linear-gradient(45deg, #00f260, #0575e6);
+  color: white;
+}
+
+.status-discussion {
+  background: linear-gradient(45deg, #f093fb, #f5576c);
+  color: white;
+}
+
+.status-contacted {
+  background: linear-gradient(45deg, #4facfe, #00f2fe);
+  color: white;
+}
+
+.status-not-contacted {
+  background: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.status-absent {
+  background: linear-gradient(45deg, #636363, #333);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.status-default {
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  color: white;
+  opacity: 0.7;
+}
+
+/* Invoice status colors */
+.invoice-paid {
+  background: linear-gradient(45deg, #00c853, #64dd17);
+  color: white;
+}
+
+.invoice-invoiced {
+  background: linear-gradient(45deg, #ff9800, #ff5722);
+  color: white;
+}
+
+.invoice-pending {
+  background: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Material Card Content */
+mat-card-content.reservation-info {
+  padding: 15px 20px !important;
+  flex-grow: 1;
+}
+
+/* Material Card Title */
+mat-card-title.publisher-name {
+  font-size: 1.5rem !important;
+  font-weight: bold !important;
+  color: white !important;
+  margin-bottom: 8px !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+  background: linear-gradient(45deg, #ff9a9e, #fecfef) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+mat-card-subtitle.festival-name {
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-size: 0.9rem !important;
+  margin-bottom: 15px !important;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Tables Section */
+.tables-section {
+  margin: 15px 0;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.section-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tables-badge {
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  color: white;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+/* Zones List */
+.zones-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.zone-item {
+  display: flex;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.8rem;
+  margin-bottom: 6px;
+  padding: 4px 0;
+}
+
+.zone-item.empty {
+  color: rgba(255, 255, 255, 0.4);
+  font-style: italic;
+}
+
+.zone-bullet {
+  width: 6px;
+  height: 6px;
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  border-radius: 50%;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+/* Electrical info */
+.electrical-info {
+  margin-top: 10px;
+  padding: 6px 10px;
+  background: rgba(255, 193, 7, 0.2);
+  border-radius: 8px;
+  font-size: 0.75rem;
+  color: #ffd93d;
+}
+
+/* Logistics Section */
+.logistics-section {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.progress-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.4);
+  padding: 3px 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+
+.progress-item.done {
+  color: #00f260;
+  background: rgba(0, 242, 96, 0.1);
+}
+
+.progress-icon {
+  font-size: 0.7rem;
+}
+
+/* Presence Info */
+.presence-info {
+  display: flex;
+  align-items: center;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.presence-info.presenting {
+  color: rgba(0, 242, 96, 0.9);
+}
+
+.presence-text {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.animator-needed {
+  color: #ffd93d;
+  margin-left: 5px;
+}
+
+/* Material Card Actions */
+mat-card-actions.card-actions {
+  padding: 15px 20px !important;
+  background: rgba(255, 255, 255, 0.05);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin: 0 !important;
+}
+
+.price-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.price-label {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.price-amount {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: white;
+  background: linear-gradient(45deg, #ffd93d, #ff6b6b);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Action buttons container */
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Invoice button */
+.invoice-btn {
+  background: rgba(255, 152, 0, 0.2) !important;
+  color: #ff9800 !important;
+  border: 1px solid rgba(255, 152, 0, 0.5) !important;
+  border-radius: 15px !important;
+  padding: 4px 12px !important;
+  font-weight: 600 !important;
+  font-size: 0.75rem !important;
+  text-transform: uppercase !important;
+}
+
+.invoice-btn:hover {
+  background: rgba(255, 152, 0, 0.3) !important;
+}
+
+/* Paid button */
+.paid-btn {
+  background: rgba(0, 200, 83, 0.2) !important;
+  color: #00c853 !important;
+  border: 1px solid rgba(0, 200, 83, 0.5) !important;
+  border-radius: 15px !important;
+  padding: 4px 12px !important;
+  font-weight: 600 !important;
+  font-size: 0.75rem !important;
+  text-transform: uppercase !important;
+}
+
+.paid-btn:hover {
+  background: rgba(0, 200, 83, 0.3) !important;
+}
+
+/* Delete button */
+.delete-btn {
+  background: rgba(255, 107, 107, 0.2) !important;
+  color: #ff6b6b !important;
+  border: 1px solid rgba(255, 107, 107, 0.5) !important;
+  border-radius: 15px !important;
+  padding: 4px 12px !important;
+  font-weight: 600 !important;
+  font-size: 0.75rem !important;
+  text-transform: uppercase !important;
+  box-shadow: none !important;
+}
+
+.delete-btn:hover {
+  background: rgba(255, 107, 107, 0.3) !important;
+}
+
+:host {
+  display: block;
+  height: 100%;
+}

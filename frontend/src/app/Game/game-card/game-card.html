@@ -1,0 +1,24 @@
+@if (game()) {
+	@let g = game()!;
+	<mat-card class="game-card" [class.selected]="isSelected()" (click)="onCardClick($event)">
+		<mat-card-header class="card-header">
+            @if (g.imageUrl) {
+                <img mat-card-avatar [src]="g.imageUrl" alt="Logo du jeu" class="game-logo-img">
+            } @else {
+                <div mat-card-avatar class="game-logo"></div>
+            }
+		</mat-card-header>
+
+        <mat-card-content class="game-info">
+            <mat-card-title class="game-name">{{ g.name }}</mat-card-title>
+            <mat-card-subtitle class="game-type">{{ g.type }}</mat-card-subtitle>
+        </mat-card-content>
+        @if (canEdit()) {
+            <mat-card-actions class="card-actions">
+			    <button mat-raised-button class="delete-btn" (click)="onRemove($event)">Supprimer</button>
+			    <button mat-raised-button class="edit-btn" (click)="onEditClick($event)" >Modifier</button>
+		    </mat-card-actions>
+        }
+		
+	</mat-card>
+}

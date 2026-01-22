@@ -1,0 +1,55 @@
+<div class="publisher-details-container">
+    @if (publisher()) {
+        @let pb= publisher()!;
+        
+        <!-- Header Section -->
+        <div class="header-section">
+            <button mat-stroked-button class="back-btn" (click)="back()">Retour</button>
+            <div class="publisher-header">
+                @if (pb.logoUrl) {
+                    <img [src]="pb.logoUrl" alt="Logo {{ pb.name }}" class="publisher-logo">
+                }
+                <h2 class="publisher-title">{{ pb.name }}</h2>
+            </div>
+            <div class="publisher-info">Détails éditeur</div>
+        </div>
+
+        @if (canEdit()) {
+            <div class="button-container">
+                <button (click)="toggleForm()" class="action-btn" [class.add-btn]="!showForm()" [class.cancel-btn]="showForm()">
+                    @if (showForm()) { Fermer le formulaire } @else { Ajouter un jeu }
+                </button>
+            </div>
+        }
+
+        @if (showForm() && canEdit()) {
+            <div class="form-section">
+                <app-game-form
+                    [editingGame]="editingGame()"
+                    [publishers]="[pb]"
+                    (newGame)="onNewGame($event)"
+                    (updateGame)="onUpdateGame($event)">
+                </app-game-form>
+            </div>
+        }
+
+        <h3 class="games-section-title">Jeux de cet éditeur ({{ publisherGames().length }})</h3>
+        
+        <div class="games-grid">
+            @for (g of publisherGames(); track g.id) {
+                <app-game-card
+                    [game]="g"
+                    (card)="goToGame(g.id)"
+                    (edit)="onEdit($event)"
+                    (remove)="onDelete($event)">
+                </app-game-card>
+            }
+        </div>
+
+    } 
+    @else {
+        <div class="state-message">
+            <p>Éditeur introuvable.</p>
+        </div>
+    }
+</div>

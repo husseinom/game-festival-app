@@ -1,0 +1,39 @@
+<div class="reservant-container">
+  <header class="reservant-header">
+    <h1>Gestion des réservants</h1>
+    <div class="header-actions">
+      <span class="reservant-count">{{ reservantCount() }} réservant(s)</span>
+      <button class="btn-refresh" (click)="refreshReservants()">Rafraîchir</button>
+      <button class="btn-add" (click)="toggleForm()">
+        {{ showForm() ? 'Fermer' : 'Créer un réservant' }}
+      </button>
+    </div>
+  </header>
+
+  @if (error()) {
+    <div class="alert alert-error">{{ error() }}</div>
+  }
+
+  @if (showForm()) {
+    <app-reservant-form 
+      [reservant]="editingReservant()"
+      (reservantSaved)="onReservantSaved()">
+    </app-reservant-form>
+  }
+
+  @if (isLoading()) {
+    <div class="loading">Chargement...</div>
+  }
+
+  <div class="reservants-grid">
+    @for (reservant of reservants(); track reservant.reservant_id) {
+      <app-reservant-card 
+        [reservant]="reservant"
+        (editRequested)="startEdit($event)"
+        (deleteRequested)="onDeleteReservant($event)">
+      </app-reservant-card>
+    } @empty {
+      <p class="no-reservants">Aucun réservant trouvé</p>
+    }
+  </div>
+</div>

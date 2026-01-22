@@ -1,0 +1,94 @@
+<form [formGroup]="form" (ngSubmit)="submit()" class="game-form">
+  <h2>{{ isEditing ? 'Modifier le jeu' : 'Ajouter un jeu' }}</h2>
+
+  <div class="form-group">
+    <input
+      type="text"
+      formControlName="name"
+      placeholder="Nom du jeu (min 2 caractères)"
+      [class.error]="form.controls.name.invalid && form.controls.name.touched"
+      required
+    />
+    @if(form.controls.name.invalid && form.controls.name.touched) {
+      <div class="error-message">
+        @if (form.controls.name.errors?.['required']) { Le nom est requis }
+        @if (form.controls.name.errors?.['minlength']) { Au moins 2 caractères requis }
+        @if (form.controls.name.errors?.['maxlength']) { Maximum 50 caractères }
+      </div>
+    }
+  </div>
+
+  <div class="form-group">
+    <select formControlName="type" [class.error]="form.controls.type.invalid && form.controls.type.touched" required>
+      <option value="" disabled selected>Sélectionnez un type de jeu</option>
+      @for (gameType of gameTypes(); track gameType.id) {
+        <option [value]="gameType.label">{{ gameType.label}}</option>
+      }
+    </select>
+    @if(form.controls.type.invalid && form.controls.type.touched) {
+      <div class="error-message">Le type est requis</div>
+    }
+  </div>
+
+  <div class="form-group">
+    <label for="ageMin">Âge minimum</label>
+    <input
+      type="number"
+      formControlName="ageMin"
+      placeholder="Âge minimum"
+      [class.error]="form.controls.ageMin.invalid && form.controls.ageMin.touched"
+      min="0"
+      required
+    />
+    @if(form.controls.ageMin.invalid && form.controls.ageMin.touched) {
+      <div class="error-message">
+        @if(form.controls.ageMin.errors?.['required']) { L'âge minimum est requis }
+        @if(form.controls.ageMin.errors?.['min']) { L'âge doit être positif }
+      </div>
+    }
+  </div>
+
+  <div class="form-group">
+    <label for="pubId">Sélectionnez un éditeur</label>
+    @if (publishers().length === 1) {
+      <p><strong>Éditeur :</strong> {{ publishers()[0].name }}</p>
+    } @else {
+      <select formControlName="pubId" [disabled]="publishers().length === 0" [class.error]="form.controls.pubId.invalid && form.controls.pubId.touched" required>
+        <option value="" disabled selected>Sélectionnez un éditeur</option>
+        @for (pub of publishers(); track pub.id) {
+          <option [value]="pub.id">{{ pub.name }}</option>
+        }
+      </select>
+      @if(form.controls.pubId.invalid && form.controls.pubId.touched) {
+        <div class="error-message">L'éditeur est requis</div>
+      }
+    }
+  </div>
+
+  <div class="form-group">
+    <label for="MaxPlayers">Nombre Maximale des Joueurs</label>
+    <input
+      type="number"
+      formControlName="MaxPlayers"
+      placeholder="Nombre maximum de joueurs"
+      [class.error]="form.controls.MaxPlayers.invalid && form.controls.MaxPlayers.touched"
+      min="1"
+      required
+    />
+    @if(form.controls.MaxPlayers.invalid && form.controls.MaxPlayers.touched) {
+      <div class="error-message">
+        @if(form.controls.MaxPlayers.errors?.['required']) { Le nombre maximum est requis }
+        @if(form.controls.MaxPlayers.errors?.['min']) { Doit être au moins 1 }
+      </div>
+    }
+  </div>
+
+  <button
+    type="submit"
+    [class.valid]="form.valid"
+    [class.invalid]="form.invalid || publishers().length === 0"
+    [disabled]="form.invalid || publishers().length === 0"
+  >
+    {{ form.valid ? (isEditing ? '✅ Mettre à jour' : '✅ Ajouter') : '❌ Remplir tous les champs' }}
+  </button>
+</form>

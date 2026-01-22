@@ -1,0 +1,128 @@
+/* Override Material Card styling */
+mat-card.game-pub-card {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05)) !important;
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 20px !important;
+  padding: 0 !important;
+  margin-bottom: 0px;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    0 4px 16px rgba(255, 255, 255, 0.1) inset !important;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+/* Hover effects */
+mat-card.game-pub-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.2),
+    0 8px 24px rgba(255, 255, 255, 0.1) inset !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+}
+
+/* Material Card Header */
+mat-card-header.card-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: flex-start !important;
+  padding: 20px 20px 0 20px !important;
+  margin-bottom: 0 !important;
+}
+
+/* Game Publisher logo (using mat-card-avatar) */
+.game-pub-logo {
+  width: 60px !important;
+  height: 60px !important;
+  border-radius: 15px !important;
+  background: linear-gradient(45deg, #ff6b6b, #4ecdc4) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 24px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+  flex-shrink: 0 !important;
+}
+
+.game-pub-logo-img {
+  width: 60px !important;
+  height: 60px !important;
+  border-radius: 15px !important;
+  object-fit: cover !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+  flex-shrink: 0 !important;
+}
+
+.game-pub-logo::before {
+  content: "🏢";
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Status badge */
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  margin-left: auto;
+}
+
+/* Material Card Content */
+mat-card-content.game-pub-info {
+  padding: 15px 20px !important;
+}
+
+/* Material Card Title */
+mat-card-title.game-pub-name {
+  font-size: 1.5rem !important;
+  font-weight: bold !important;
+  color: white !important;
+  margin-bottom: 8px !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+  background: linear-gradient(45deg, #ff9a9e, #fecfef) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+mat-card-subtitle.game-pub-details {
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-size: 0.9rem !important;
+  margin-bottom: 15px !important;
+}
+
+/* Action Buttons */
+mat-card-actions.card-actions {
+  padding: 15px 20px 20px 20px !important;
+  display: flex !important;
+  gap: 10px !important;
+  margin: 0 !important;
+}
+
+.edit-btn, .delete-btn {
+  flex: 1 !important;
+  border-radius: 12px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+  transition: all 0.3s ease !important;
+}
+
+.edit-btn {
+  background: linear-gradient(45deg, #4facfe, #00f2fe) !important;
+  color: white !important;
+}
+
+.delete-btn {
+  background: linear-gradient(45deg, #ff9a9e, #fad0c4) !important;
+  color: white !important;
+}

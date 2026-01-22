@@ -1,0 +1,87 @@
+services:
+  # --- Base de données (repris de votre fichier actuel) ---
+  db:
+    image: postgres:16-alpine
+    container_name: gamefestival_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: gamefest
+      POSTGRES_PASSWORD: gamefest
+      POSTGRES_DB: gamefest 
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    # Healthcheck pour s'assurer que la DB est prête avant de lancer le back
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gamefest"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+
+  # --- Adminer (Interface DB) ---
+  adminer:
+    image: adminer
+    container_name: gamefestival_adminer
+    ports:
+      - "8081:8080"
+    depends_on:
+      - db
+
+  # --- Backend (Node/Prisma) ---
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: gamefestival_backend
+    volumes:
+      - ./backend:/app              # Synchronise votre code local avec le container
+      - /app/node_modules           # Astuce: utilise les node_modules du container, pas ceux de votre PC
+    ports:
+      - "4000:4000"
+    environment:
+      DATABASE_URL: postgres://gamefest:gamefest@db:5432/gamefest
+      NODE_ENV: development
+    depends_on:
+      db:
+        condition: service_healthy
+    # Commande magique : Génère le client Prisma PUIS lance le serveur
+    command: sh -c "npx prisma generate && npm run dev"
+
+  importer:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: gamefestival_importer
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    environment:
+      DATABASE_URL: postgres://gamefest:gamefest@db:5432/gamefest
+      NODE_ENV: development
+    depends_on:
+      db:
+        condition: service_healthy
+    command: sh -c "npm install --silent && npx prisma generate && npx ts-node ./scripts/import-csv.ts && npx ts-node ./scripts/seed-test-data.ts"
+    restart: "no"
+
+  # --- Frontend (Angular) ---
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: gamefestival_frontend
+    volumes:
+      - ./frontend:/app             # Synchronise le code
+      - /app/node_modules           # Isole les dépendances
+    ports:
+      - "4200:4200"
+    environment:
+      # Permet au front de savoir où taper (utile si vous utilisez un proxy plus tard)
+      API_URL: http://localhost:4000
+    depends_on:
+      - backend
+
+volumes:
+  db_data:

@@ -1,0 +1,757 @@
+:host {
+	display: block;
+	box-sizing: border-box;
+	max-width: 980px;
+	margin: 18px auto;
+	padding: 20px;
+	background: #ffffff;
+	border-radius: 10px;
+	box-shadow: 0 6px 18px rgba(10, 25, 47, 0.08);
+	color: #1f2937;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+}
+
+/* Heading */
+:host h2 {
+	margin: 0 0 12px 0;
+	font-size: 1.5rem;
+	color: #0f172a;
+}
+
+:host h3 {
+	margin: 16px 0 8px 0;
+	font-size: 1.1rem;
+	color: #1f2937;
+	border-bottom: 2px solid #e5e7eb;
+	padding-bottom: 6px;
+}
+
+/* Grid layout for details — will gracefully fall back to single column on small screens */
+:host .details-grid {
+	display: grid;
+	grid-template-columns: 1fr 320px;
+	gap: 18px;
+	align-items: start;
+}
+
+/* Left column: metadata list */
+:host .meta {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+:host .meta p {
+	margin: 0;
+	padding: 8px 12px;
+	background: rgba(15, 23, 42, 0.03);
+	border-radius: 6px;
+	font-size: 0.95rem;
+	display: flex;
+	gap: 8px;
+	align-items: center;
+}
+
+:host .meta p strong {
+	width: 180px;
+	color: #0b1220;
+	font-weight: 600;
+}
+
+/* Publisher row styling */
+:host .publisher-row {
+	align-items: flex-start;
+	flex-wrap: wrap;
+}
+
+:host .publisher-info {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+	flex: 1;
+}
+
+:host .publisher-logo {
+	width: 32px;
+	height: 32px;
+	border-radius: 4px;
+	object-fit: contain;
+}
+
+/* Status badge */
+:host .status-badge {
+	display: inline-block;
+	padding: 4px 10px;
+	border-radius: 12px;
+	font-size: 0.85rem;
+	font-weight: 600;
+	text-transform: uppercase;
+}
+
+:host .status-pending {
+	background-color: #fef3c7;
+	color: #92400e;
+}
+
+:host .status-confirmed {
+	background-color: #d1fae5;
+	color: #065f46;
+}
+
+:host .status-cancelled {
+	background-color: #fee2e2;
+	color: #7f1d1d;
+}
+
+:host .status-completed {
+	background-color: #c7d2fe;
+	color: #3730a3;
+}
+
+:host .status-unknown {
+	background-color: #f3f4f6;
+	color: #4b5563;
+}
+
+/* Zones list styling */
+:host .zones-list {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+:host .zone-item {
+	padding: 10px;
+	background: #f9fafb;
+	border-left: 3px solid #3b82f6;
+	border-radius: 4px;
+}
+
+:host .zone-item p {
+	margin: 4px 0;
+	font-size: 0.9rem;
+}
+
+:host .zone-item strong {
+	color: #1f2937;
+}
+
+:host .m2-equiv {
+	color: #6b7280;
+	font-size: 0.85em;
+	margin-left: 4px;
+}
+
+:host .zone-total {
+	padding: 12px;
+	background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+	color: white;
+	border-radius: 6px;
+	margin-top: 8px;
+}
+
+:host .zone-total p {
+	margin: 0;
+	font-weight: 600;
+}
+
+/* Comments styling */
+:host .comments {
+	padding: 12px !important;
+	background: #f3f4f6 !important;
+	border-left: 3px solid #6b7280;
+	font-style: italic;
+	line-height: 1.5;
+}
+
+/* Right column: aside */
+:host .aside {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+:host .info-card {
+	padding: 16px;
+	background: #f9fafb;
+	border-radius: 8px;
+	border: 1px solid #e5e7eb;
+}
+
+:host .info-card h3 {
+	margin: 0 0 12px 0;
+	font-size: 1rem;
+}
+
+:host .summary {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+:host .summary-item {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 6px 0;
+	border-bottom: 1px solid #e5e7eb;
+}
+
+:host .summary-item:last-child {
+	border-bottom: none;
+}
+
+:host .summary-item .label {
+	font-size: 0.85rem;
+	color: #6b7280;
+	font-weight: 500;
+}
+
+:host .summary-item .value {
+	font-size: 0.95rem;
+	color: #1f2937;
+	font-weight: 600;
+}
+
+:host .divider {
+	height: 1px;
+	background: #e5e7eb;
+	margin: 8px 0;
+}
+
+:host .description {
+	padding: 12px;
+	background: #f3f4f6;
+	border-radius: 6px;
+	min-height: 100px;
+	font-size: 0.9rem;
+	color: #6b7280;
+}
+
+/* Actions */
+:host .actions {
+	display: flex;
+	gap: 8px;
+	margin-top: 12px;
+	flex-wrap: wrap;
+}
+
+:host .btn {
+	padding: 10px 20px;
+	border: none;
+	border-radius: 6px;
+	font-size: 0.95rem;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.3s ease;
+}
+
+:host .btn-secondary {
+	background-color: #e5e7eb;
+	color: #1f2937;
+}
+
+:host .btn-secondary:hover {
+	background-color: #d1d5db;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+	:host {
+		padding: 12px;
+		margin: 12px;
+	}
+
+	:host .details-grid {
+		grid-template-columns: 1fr;
+		gap: 12px;
+	}
+
+	:host .meta p {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+
+	:host .meta p strong {
+		width: auto;
+	}
+}
+
+/* Status badges étendus */
+:host .status-NOT_CONTACTED {
+	background-color: #f3f4f6;
+	color: #4b5563;
+}
+
+:host .status-CONTACTED {
+	background-color: #dbeafe;
+	color: #1e40af;
+}
+
+:host .status-IN_DISCUSSION {
+	background-color: #fef3c7;
+	color: #92400e;
+}
+
+:host .status-CONFIRMED {
+	background-color: #d1fae5;
+	color: #065f46;
+}
+
+:host .status-ABSENT {
+	background-color: #fee2e2;
+	color: #7f1d1d;
+}
+
+:host .status-CONSIDERED_ABSENT {
+	background-color: #fed7aa;
+	color: #9a3412;
+}
+
+/* Invoice badges */
+:host .invoice-badge {
+	display: inline-block;
+	padding: 4px 10px;
+	border-radius: 12px;
+	font-size: 0.85rem;
+	font-weight: 600;
+}
+
+:host .invoice-PENDING {
+	background-color: #f3f4f6;
+	color: #4b5563;
+}
+
+:host .invoice-INVOICED {
+	background-color: #dbeafe;
+	color: #1e40af;
+}
+
+:host .invoice-PAID {
+	background-color: #d1fae5;
+	color: #065f46;
+}
+
+/* Partner badge */
+/* :host .partner-badge {
+	background-color: #fef3c7 !important;
+	color: #92400e;
+	font-weight: 600;
+} */
+
+/* Games workflow */
+:host .games-workflow {
+	display: flex;
+	gap: 10px;
+	align-items: center;
+	margin: 12px 0;
+	flex-wrap: wrap;
+}
+
+:host .workflow-status {
+	margin: 0;
+	padding: 8px 12px;
+	background: #fef3c7;
+	border-radius: 6px;
+	font-size: 0.9rem;
+}
+
+/* Add game form */
+:host .add-game-form {
+	margin: 16px 0;
+	padding: 16px;
+	background: #f9fafb;
+	border-radius: 8px;
+	border: 1px dashed #d1d5db;
+}
+
+:host .add-game-form h4 {
+	margin: 0 0 12px 0;
+	font-size: 1rem;
+	color: #374151;
+}
+
+:host .form-row {
+	display: flex;
+	gap: 10px;
+	align-items: center;
+	flex-wrap: wrap;
+}
+
+:host .form-control {
+	padding: 10px 12px;
+	border: 1px solid #d1d5db;
+	border-radius: 6px;
+	font-size: 0.95rem;
+}
+
+:host .form-control:focus {
+	outline: none;
+	border-color: #3b82f6;
+	box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+:host select.form-control {
+	min-width: 250px;
+}
+
+:host .copy-count {
+	width: 80px;
+}
+
+:host .no-games-warning {
+	margin: 10px 0 0;
+	padding: 8px;
+	background: #fef3c7;
+	border-radius: 4px;
+	font-size: 0.9rem;
+	color: #92400e;
+}
+
+/* Games list table */
+:host .games-list {
+	margin-top: 12px;
+}
+
+:host .games-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 0.9rem;
+}
+
+:host .games-table th,
+:host .games-table td {
+	padding: 10px 12px;
+	text-align: left;
+	border-bottom: 1px solid #e5e7eb;
+}
+
+:host .games-table th {
+	background: #f9fafb;
+	font-weight: 600;
+	color: #374151;
+}
+
+:host .games-table tr.received {
+	background-color: rgba(16, 185, 129, 0.05);
+}
+
+:host .games-table tr:hover {
+	background-color: rgba(59, 130, 246, 0.05);
+}
+
+:host .received-badge {
+	color: #10b981;
+	font-size: 1.1rem;
+}
+
+:host .pending-badge {
+	color: #f59e0b;
+	font-size: 1.1rem;
+}
+
+:host .games-summary {
+	display: flex;
+	gap: 20px;
+	margin: 12px 0;
+	padding: 12px;
+	background: #f3f4f6;
+	border-radius: 6px;
+	flex-wrap: wrap;
+}
+
+:host .games-summary p {
+	margin: 0;
+	padding: 0;
+	background: none;
+	font-size: 0.9rem;
+}
+
+:host .games-summary .warning {
+	color: #dc2626;
+	font-weight: bold;
+}
+
+:host .games-summary .ok {
+	color: #16a34a;
+}
+
+/* Status actions */
+:host .status-actions {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+:host .status-actions .btn {
+	padding: 8px 12px;
+	font-size: 0.85rem;
+	text-align: left;
+	background: #fff;
+	border: 1px solid #e5e7eb;
+}
+
+:host .status-actions .btn:hover {
+	background: #f3f4f6;
+}
+
+:host .status-actions .btn.active {
+	background: #3b82f6;
+	color: white;
+	border-color: #3b82f6;
+}
+
+/* Invoice actions */
+:host .invoice-actions {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+:host .paid-badge {
+	margin: 0;
+	padding: 10px;
+	text-align: center;
+	background: #d1fae5;
+	color: #065f46;
+	font-weight: 600;
+	border-radius: 6px;
+}
+
+/* Button variants */
+:host .btn-primary {
+	background-color: #3b82f6;
+	color: white;
+}
+
+:host .btn-primary:hover {
+	background-color: #2563eb;
+}
+
+:host .btn-primary:disabled {
+	background-color: #93c5fd;
+	cursor: not-allowed;
+}
+
+:host .btn-success {
+	background-color: #10b981;
+	color: white;
+}
+
+:host .btn-success:hover {
+	background-color: #059669;
+}
+
+:host .btn-success:disabled {
+	background-color: #6ee7b7;
+	cursor: not-allowed;
+}
+
+:host .btn-sm {
+	padding: 6px 12px;
+	font-size: 0.85rem;
+}
+
+/* Loading */
+:host .loading {
+	padding: 40px;
+	text-align: center;
+	color: #6b7280;
+}
+
+/* ============================================
+   Placement des jeux dans les zones
+   ============================================ */
+
+/* Résumé d'utilisation des zones */
+:host .zone-usage-summary {
+	margin-bottom: 16px;
+	padding: 12px;
+	background: #f8fafc;
+	border-radius: 8px;
+}
+
+:host .zone-usage-summary h4 {
+	margin: 0 0 12px 0;
+	font-size: 0.95rem;
+	color: #475569;
+}
+
+:host .zone-usage-bar {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 8px;
+}
+
+:host .zone-usage-bar:last-child {
+	margin-bottom: 0;
+}
+
+:host .zone-name {
+	min-width: 120px;
+	font-size: 0.85rem;
+	color: #334155;
+}
+
+:host .usage-bar {
+	flex: 1;
+	height: 12px;
+	background: #e2e8f0;
+	border-radius: 6px;
+	overflow: hidden;
+}
+
+:host .usage-fill {
+	height: 100%;
+	background: #10b981;
+	border-radius: 6px;
+	transition: width 0.3s ease;
+}
+
+:host .usage-fill.overbooked {
+	background: #ef4444;
+}
+
+:host .usage-text {
+	min-width: 50px;
+	text-align: right;
+	font-size: 0.8rem;
+	font-weight: 600;
+	color: #475569;
+}
+
+:host .usage-text.overbooked {
+	color: #ef4444;
+}
+
+/* Badges de zone */
+:host .zone-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 4px 8px;
+	background: #dbeafe;
+	color: #1d4ed8;
+	border-radius: 4px;
+	font-size: 0.8rem;
+	font-weight: 500;
+}
+
+:host .no-zone {
+	color: #9ca3af;
+	font-style: italic;
+	font-size: 0.85rem;
+}
+
+/* Ligne placée */
+:host tr.placed {
+	background: #f0fdf4;
+}
+
+/* Sélection de zone inline */
+:host .zone-select-inline {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	flex-wrap: wrap;
+}
+
+:host .zone-select-inline select {
+	flex: 1;
+	min-width: 80px;
+	max-width: 120px;
+}
+
+:host .zone-select-inline .table-size-select {
+	min-width: 90px;
+	max-width: 100px;
+}
+
+/* Boutons très petits */
+:host .btn-xs {
+	padding: 2px 6px;
+	font-size: 0.75rem;
+	border-radius: 4px;
+}
+
+:host .btn-outline {
+	background: transparent;
+	border: 1px solid #cbd5e1;
+	color: #475569;
+}
+
+:host .btn-outline:hover {
+	background: #f1f5f9;
+}
+
+:host .btn-outline:disabled {
+	opacity: 0.4;
+	cursor: not-allowed;
+	background: #e5e7eb;
+}
+
+:host .btn-outline-danger {
+	background: transparent;
+	border: 1px solid #fca5a5;
+	color: #dc2626;
+}
+
+:host .btn-outline-danger:hover {
+	background: #fef2f2;
+}
+
+/* Formulaire d'ajout amélioré */
+:host .add-game-form .form-row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-bottom: 8px;
+	align-items: center;
+}
+
+:host .allocated-tables {
+	width: 60px !important;
+}
+
+:host .tables-info {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 0.9rem;
+	color: #475569;
+}
+
+:host .tables-info .min-info {
+	font-size: 0.75rem;
+	color: #94a3b8;
+}
+
+/* Cellule d'actions */
+:host .actions-cell {
+	display: flex;
+	gap: 4px;
+	flex-wrap: nowrap;
+}
+
+:host .form-control-sm {
+	padding: 4px 8px;
+	font-size: 0.85rem;
+}
+
+/* Zone availability hint */
+:host .zone-availability-hint {
+	margin-top: 6px;
+	padding: 6px 10px;
+	background: linear-gradient(135deg, #e0f2fe 0%, #f0fdf4 100%);
+	border-radius: 6px;
+	border-left: 3px solid #3b82f6;
+}
+
+:host .zone-availability-hint small {
+	font-size: 0.75rem;
+	color: #475569;
+	display: flex;
+	gap: 8px;
+	flex-wrap: wrap;
+}

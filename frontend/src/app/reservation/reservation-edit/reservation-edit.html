@@ -1,0 +1,139 @@
+<div class="reservation-edit-container">
+  <div class="header">
+    <button type="button" class="back-btn" (click)="goBack()">← Retour</button>
+    <h1>Modifier la réservation</h1>
+  </div>
+
+  @if (isLoading) {
+    <div class="loading">Chargement...</div>
+  } @else {
+    <form [formGroup]="form" (ngSubmit)="onSubmit($event)" class="reservation-form">
+      <div class="form-section">
+        <div class="form-group">
+          <label for="festival_id">Festival</label>
+          <select id="festival_id" formControlName="festival_id">
+            <option value="" disabled>Sélectionner un festival</option>
+            @for (festival of festivals(); track festival.id) {
+              <option [value]="festival.id">
+                {{ festival.name }} - {{ festival.location }}
+              </option>
+            }
+          </select>
+          @if (form.get('festival_id')?.hasError('required')) {
+            <span class="error">Le festival est obligatoire</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="reservant_id">Réservant</label>
+          <select id="reservant_id" formControlName="reservant_id">
+            <option value="" disabled>Sélectionner un réservant</option>
+            @for (reservant of reservants(); track reservant.reservant_id) {
+              <option [value]="reservant.reservant_id">
+                {{ reservant.name }} ({{ reservant.type | reservantTypeLabel }})
+              </option>
+            }
+          </select>
+          @if (form.get('reservant_id')?.hasError('required')) {
+            <span class="error">Le réservant est obligatoire</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="game_publisher_id">Éditeur de jeu (provenance des jeux)</label>
+          <select id="game_publisher_id" formControlName="game_publisher_id">
+            <option value="">Aucun éditeur</option>
+            @for (publisher of gamePublishers(); track publisher.id) {
+              <option [value]="publisher.id">
+                {{ publisher.name }}
+              </option>
+            }
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="status">Statut</label>
+          <select id="status" formControlName="status">
+            <option value="NOT_CONTACTED">Pas contacté</option>
+            <option value="CONTACTED">Contact pris</option>
+            <option value="IN_DISCUSSION">Discussion en cours</option>
+            <option value="CONFIRMED">Présent</option>
+            <option value="ABSENT">Absent</option>
+            <option value="CONSIDERED_ABSENT">Considéré absent</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="comments">Commentaires</label>
+          <textarea id="comments" formControlName="comments" placeholder="Commentaires" rows="4"></textarea>
+        </div>
+
+        <div class="checkbox-group">
+          <label>
+            <input type="checkbox" formControlName="is_publisher_presenting" />
+            Éditeur présent
+          </label>
+          <label>
+            <input type="checkbox" formControlName="needs_festival_animators" />
+            Besoin d'animateurs du festival
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label for="discount_amount">Montant de la réduction (€)</label>
+          <input type="number" id="discount_amount" formControlName="discount_amount" placeholder="Montant de réduction" step="0.01" />
+        </div>
+
+        <div class="form-group">
+          <label for="discount_tables">Nombre de tables de réduction</label>
+          <input type="number" id="discount_tables" formControlName="discount_tables" placeholder="Nombre de tables" />
+        </div>
+
+        <div class="form-group">
+          <label for="nb_electrical_outlets">Nombre de prises électriques</label>
+          <input type="number" id="nb_electrical_outlets" formControlName="nb_electrical_outlets" placeholder="Nombre de prises électriques" min="0" />
+          <small class="form-text">250€ par prise électrique</small>
+          @if (form.get('nb_electrical_outlets')?.hasError('required')) {
+            <span class="error">Le nombre de prises est obligatoire</span>
+          }
+          @if (form.get('nb_electrical_outlets')?.hasError('min')) {
+            <span class="error">Le nombre doit être au moins 0</span>
+          }
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3>Zones de prix et espace</h3>
+        <div formArrayName="tables">
+          @for (table of tablesArray.controls; track $index; let i = $index) {
+            <div class="table-row" [formGroupName]="i">
+              <div class="form-group">
+                <label>Zone de prix</label>
+                <select formControlName="price_zone_id">
+                  <option value="" disabled>Sélectionner une zone</option>
+                  @for (zone of priceZones(); track zone.id) {
+                    <option [value]="zone.id">
+                      {{ zone.name }} - {{ zone.table_price }}€/table
+                    </option>
+                  }
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Nombre de tables</label>
+                <input type="number" formControlName="table_count" min="0.5" step="0.5" placeholder="Nombre" />
+                <small class="m2-info">= {{ (tablesArray.at(i).get('table_count')?.value || 0) * 4 }} m²</small>
+              </div>
+              <button type="button" class="remove-btn" (click)="removeTable(i)">✕</button>
+            </div>
+          }
+        </div>
+        <button type="button" class="add-table-btn" (click)="addTable()">+ Ajouter une zone</button>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="cancel-btn" (click)="goBack()">Annuler</button>
+        <button type="submit" class="submit-btn" [disabled]="form.invalid">Enregistrer les modifications</button>
+      </div>
+    </form>
+  }
+</div>

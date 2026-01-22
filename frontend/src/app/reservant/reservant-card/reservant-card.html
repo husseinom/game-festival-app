@@ -1,0 +1,29 @@
+<div class="reservant-card">
+  @if (reservant() && reservant().name) {
+    <div class="reservant-info">
+      <div class="reservant-details">
+        <h3>{{ reservant().name }}</h3>
+        <span 
+          class="type-badge"
+          [class]="typeClass()"
+        >{{ reservant().type }}</span>
+      </div>
+    </div>
+
+    <div class="reservant-actions">
+      <button 
+        class="btn-edit"
+        (click)="onEdit()"
+        title="Modifier ce réservant">
+        Modifier
+      </button>
+
+      <button 
+        class="btn-delete" 
+        (click)="onDelete()" 
+        title="Supprimer ce réservant">
+        Supprimer
+      </button>
+    </div>
+  }
+</div>

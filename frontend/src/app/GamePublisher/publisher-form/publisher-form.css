@@ -1,0 +1,175 @@
+/* Form Container */
+.publisher-form {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  padding: 30px;
+  max-width: 500px;
+  margin: 0 auto 30px auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  animation: slideDown 0.4s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Title */
+.publisher-form h2 {
+  color: white;
+  text-align: center;
+  margin-bottom: 25px;
+  font-size: 1.8rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Form Groups */
+.form-group {
+  margin-bottom: 20px;
+  position: relative;
+}
+
+/* Inputs */
+.publisher-form input {
+  width: 100%;
+  padding: 12px 15px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  color: white;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.publisher-form input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.publisher-form input:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+}
+
+/* Error states */
+.publisher-form input.error {
+  border-color: #ff4757;
+  background: rgba(255, 71, 87, 0.1);
+}
+
+.error-message {
+  color: #ff6b6b;
+  font-size: 0.85rem;
+  margin-top: 5px;
+  padding-left: 5px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+/* Submit Button */
+.publisher-form button[type="submit"] {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 25px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 10px;
+  color: white;
+  background: linear-gradient(45deg, #4facfe, #00f2fe);
+  box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+}
+
+.publisher-form button[type="submit"]:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
+}
+
+.publisher-form button[type="submit"]:disabled,
+.publisher-form button[type="submit"].invalid {
+  background: linear-gradient(45deg, #a8c0ff, #3f2b96); /* Desaturated/Darker */
+  opacity: 0.7;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.publisher-form button[type="submit"].valid {
+  background: linear-gradient(45deg, #00f260, #0575e6);
+  box-shadow: 0 4px 15px rgba(5, 117, 230, 0.3);
+}
+
+/* Date inputs specific styling */
+.publisher-form input[type="date"] {
+  color-scheme: dark; /* Makes the calendar popup dark mode compatible */
+}
+
+/* Action button styling (used in publisher-list .action-btn) */
+.action-btn {
+  display: inline-block;
+  padding: 10px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: linear-gradient(45deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+}
+
+/* Add / Cancel variants */
+.action-btn.add-btn {
+  background: linear-gradient(45deg, #28a1ff, #00e0d6);
+  box-shadow: 0 6px 18px rgba(40,161,255,0.18);
+}
+
+.action-btn.cancel-btn {
+  background: linear-gradient(45deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+  color: #ffdede;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+/* Hover/active */
+.action-btn:hover:not(:disabled) { transform: translateY(-3px); }
+.action-btn:active { transform: translateY(0); }
+
+/* Disabled state */
+.action-btn:disabled,
+.action-btn[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Ensure selects inside other wrappers (mat-form-field) inherit look */
+.publisher-form .mat-form-field-wrapper select,
+.publisher-form .mat-select-trigger {
+  background: transparent;
+  color: #fff;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .publisher-form {
+    padding: 20px;
+    margin: 0 15px 30px 15px;
+  }
+  
+  .publisher-form h2 {
+    font-size: 1.5rem;
+  }
+}

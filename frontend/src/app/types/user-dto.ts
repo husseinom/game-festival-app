@@ -1,6 +1,9 @@
+export type Role = "VISITOR" | "ADMIN" | "VOLUNTEER" | "ORGANISATOR" | "SUPER_ORGANISATOR";
+
 export interface UserDto {
     id: number,
-    login: string,
-    password: string
-    role: "user"| "admin"
+    name: string,
+    email: string,
+    password?: string
+    role: Role
 }

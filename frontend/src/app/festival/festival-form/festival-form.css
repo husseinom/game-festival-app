@@ -1,0 +1,175 @@
+/* Form Container */
+.festival-form {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  padding: 30px;
+  max-width: 500px;
+  margin: 0 auto 30px auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  animation: slideDown 0.4s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Title */
+.festival-form h2 {
+  color: white;
+  text-align: center;
+  margin-bottom: 25px;
+  font-size: 1.8rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(45deg, #ff9a9e, #fecfef);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+/* Form Groups */
+.form-group {
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.form-group label {
+  display: block;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 8px;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+/* Inputs */
+.festival-form input {
+  width: 100%;
+  padding: 12px 15px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  color: white;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.festival-form input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.festival-form input:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+}
+
+/* Error states */
+.festival-form input.error {
+  border-color: #ff4757;
+  background: rgba(255, 71, 87, 0.1);
+}
+
+.error-message {
+  color: #ff6b6b;
+  font-size: 0.85rem;
+  margin-top: 5px;
+  padding-left: 5px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+/* Submit Button */
+.festival-form button[type="submit"] {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 25px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 10px;
+  color: white;
+  background: linear-gradient(45deg, #4facfe, #00f2fe);
+  box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+}
+
+.festival-form button[type="submit"]:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
+}
+
+.festival-form button[type="submit"]:disabled,
+.festival-form button[type="submit"].invalid {
+  background: linear-gradient(45deg, #a8c0ff, #3f2b96); /* Desaturated/Darker */
+  opacity: 0.7;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.festival-form button[type="submit"].valid {
+  background: linear-gradient(45deg, #00f260, #0575e6);
+  box-shadow: 0 4px 15px rgba(5, 117, 230, 0.3);
+}
+
+/* Date inputs specific styling */
+.festival-form input[type="date"] {
+  color-scheme: dark; /* Makes the calendar popup dark mode compatible */
+}
+
+/* Select styling (match festival glass style) */
+.festival-form select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 100%;
+  padding: 12px 40px 12px 15px; /* room for caret */
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #fff;
+  border-radius: 12px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all .2s ease;
+  box-sizing: border-box;
+  background-image: linear-gradient(45deg, transparent 50%, rgba(255,255,255,0.4) 50%),
+                    linear-gradient(135deg, rgba(255,255,255,0.4) 50%, transparent 50%);
+  background-position: calc(100% - 18px) calc(1em + 2px), calc(100% - 13px) calc(1em + 2px);
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+}
+
+.festival-form select:focus {
+  outline: none;
+  background: rgba(255,255,255,0.11);
+  border-color: rgba(255,255,255,0.36);
+  box-shadow: 0 0 12px rgba(255,255,255,0.06);
+}
+
+/* Option colours for better contrast in some browsers */
+.festival-form select option {
+  background: rgba(10,10,10,0.9);
+  color: #fff;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .festival-form {
+    padding: 20px;
+    margin: 0 15px 30px 15px;
+  }
+  
+  .festival-form h2 {
+    font-size: 1.5rem;
+  }
+}

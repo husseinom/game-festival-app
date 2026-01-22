@@ -1,0 +1,26 @@
+<form [formGroup]="form" (submit)="submit()" class="publisher-form">
+  <h2>{{ isEditing ? 'Modifier l\'éditeur' : 'Ajouter un éditeur' }}</h2>
+
+  <div class="form-group">
+    <input
+      type="text"
+      formControlName="name"
+      placeholder="Nom de l'éditeur"
+      [class.error]="form.controls.name.invalid && form.controls.name.touched"
+      required
+    />
+    @if (form.controls.name.invalid && form.controls.name.touched) {
+      <div class="error-message">
+        @if (form.controls.name.errors?.['required']) { Le nom est requis }
+        @if (form.controls.name.errors?.['minlength']) { Au moins 2 caractères requis }
+        @if (form.controls.name.errors?.['maxlength']) { Maximum 50 caractères }
+      </div>
+    }
+  </div>
+
+  <div class="form-group">
+    <button type="submit" [disabled]="form.invalid" [class.valid]="form.valid" [class.invalid]="form.invalid">
+      {{ isEditing ? 'Mettre à jour' : 'Ajouter' }}
+    </button>
+  </div>
+</form>
