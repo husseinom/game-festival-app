@@ -30,25 +30,15 @@ docker compose up --build
 
 > **Adminer** : Serveur = `db`, User = `gamefest`, Password = `gamefest`, Database = `gamefest`
 
+### Comptes utilisateurs de test
+
+| Rôle               | Email               | Mot de passe |
+| ------------------ | ------------------- | ------------ |
+| Admin              | admin@fest.com      | 123456       |
+| Organisateur       | justin@fest.com     | 123456       |
+| Super Organisateur | super@fest.com      | 123456       |
+| Bénévole           | benevole@fest.com   | 123456       |
+
 ### Importer les données CSV
 
 L'import se fait automatiquement au premier lancement via le service `importer`.
-
-Pour relancer manuellement :
-
-```bash
-docker compose run --rm importer
-```
-
-### Arrêter le projet
-
-```bash
-docker compose down
-```
-
-### Réinitialiser la base de données
-
-```bash
-docker compose down -v
-docker compose up --build
-```
