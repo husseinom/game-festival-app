@@ -1,6 +1,5 @@
 import type { Request, Response } from 'express';
 import prisma from '../config/prisma.js';
-import { TableConverter } from '../utils/tableConverter.js';
 
 export const getByFestival = async (req: Request, res: Response) => {
   try {
@@ -11,8 +10,9 @@ export const getByFestival = async (req: Request, res: Response) => {
     const mapZones = await prisma.mapZone.findMany({
       where: { festival_id: festivalId },
       include: {
-        price_zone: true,
-        tableTypes: true,
+        price_zone: {
+          include: { tableTypes: true }
+        },
         festivalGames: {
           include: {
             game: true,
@@ -41,7 +41,9 @@ export const getByPriceZone = async (req: Request, res: Response) => {
     const mapZones = await prisma.mapZone.findMany({
       where: { price_zone_id: priceZoneId },
       include: {
-        tableTypes: true,
+        price_zone: {
+          include: { tableTypes: true }
+        },
         festivalGames: {
           include: {
             game: true,
@@ -65,23 +67,24 @@ export const create = async (req: Request, res: Response) => {
   const { festival_id, price_zone_id, name, small_tables, large_tables, city_tables } = req.body;
 
   try {
-    const result = await prisma.$transaction(async (tx) => {
-      // Create MapZone
-      const mapZone = await tx.mapZone.create({
-        data: { festival_id, price_zone_id, name }
-      });
-
-      // Auto-convert to TableTypes
-      await TableConverter.createTableTypesFromLegacy(tx, mapZone.id, {
+    const mapZone = await prisma.mapZone.create({
+      data: { 
+        festival_id, 
+        price_zone_id, 
+        name,
         small_tables: small_tables || 0,
         large_tables: large_tables || 0,
         city_tables: city_tables || 0
-      });
-
-      return mapZone;
+      },
+      include: {
+        price_zone: {
+          include: { tableTypes: true }
+        },
+        festivalGames: true
+      }
     });
 
-    res.status(201).json(result);
+    res.status(201).json(mapZone);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
@@ -153,12 +156,7 @@ export const deleteMapZone = async (req: Request, res: Response) => {
       });
     }
 
-    // Supprimer les TableType associés à cette zone
-    await prisma.tableType.deleteMany({
-      where: { map_zone_id: id }
-    });
-
-    // Supprimer la zone
+    // Supprimer la zone (TableTypes sont maintenant sur PriceZone, pas sur MapZone)
     await prisma.mapZone.delete({ where: { id: id } });
     res.status(204).send();
   } catch (error) {

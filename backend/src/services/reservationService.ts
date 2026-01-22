@@ -133,11 +133,7 @@ export const createReservation = async (data: any) => {
         const priceZone = await tx.priceZone.findUnique({
           where: { id: zoneId },
           include: {
-            mapZones: {
-              include: {
-                tableTypes: true
-              }
-            }
+            tableTypes: true
           }
         });
 
@@ -145,12 +141,10 @@ export const createReservation = async (data: any) => {
           throw new Error(`La zone de prix ID ${zoneId} n'existe pas.`);
         }
 
-        // Calculate total capacity from MapZone TableTypes
+        // Calculate total capacity from PriceZone TableTypes
         let totalCapacity = 0;
-        for (const mapZone of priceZone.mapZones) {
-          for (const tableType of mapZone.tableTypes) {
-            totalCapacity += tableType.nb_total;
-          }
+        for (const tableType of priceZone.tableTypes) {
+          totalCapacity += tableType.nb_total;
         }
 
         // Calculate currently reserved tables in this price zone
@@ -287,15 +281,20 @@ export const deleteReservation = async (id: number) => {
       where: { 
         reservation_id: id,
         map_zone_id: { not: null }
+      },
+      include: {
+        mapZone: {
+          include: { price_zone: true }
+        }
       }
     });
 
     // Restaurer le stock de tables pour chaque jeu placé
     for (const game of placedGames) {
-      if (game.map_zone_id && game.allocated_tables) {
+      if (game.map_zone_id && game.allocated_tables && game.mapZone?.price_zone) {
         const tableType = await tx.tableType.findFirst({
           where: {
-            map_zone_id: game.map_zone_id,
+            price_zone_id: game.mapZone.price_zone.id,
             name: game.table_size
           }
         });
@@ -512,16 +511,26 @@ export const placeGame = async (
   allocatedTables: number
 ) => {
   return prisma.$transaction(async (tx) => {
-    // Vérifier le stock disponible
+    // Récupérer la MapZone et sa PriceZone
+    const mapZone = await tx.mapZone.findUnique({
+      where: { id: mapZoneId },
+      include: { price_zone: true }
+    });
+
+    if (!mapZone || !mapZone.price_zone) {
+      throw new Error('Zone non trouvée ou sans zone tarifaire associée');
+    }
+
+    // Vérifier le stock disponible sur la PriceZone
     const tableType = await tx.tableType.findFirst({
       where: {
-        map_zone_id: mapZoneId,
+        price_zone_id: mapZone.price_zone.id,
         name: tableSize
       }
     });
 
     if (!tableType) {
-      throw new Error(`Aucune table de type ${tableSize} dans cette zone`);
+      throw new Error(`Aucune table de type ${tableSize} dans cette zone tarifaire`);
     }
 
     if (tableType.nb_available < allocatedTables) {
@@ -556,17 +565,22 @@ export const placeGame = async (
 export const unplaceGame = async (festivalGameId: number) => {
   return prisma.$transaction(async (tx) => {
     const game = await tx.festivalGame.findUnique({
-      where: { id: festivalGameId }
+      where: { id: festivalGameId },
+      include: {
+        mapZone: {
+          include: { price_zone: true }
+        }
+      }
     });
 
-    if (!game || !game.map_zone_id) {
-      throw new Error('Ce jeu n\'est pas placé');
+    if (!game || !game.map_zone_id || !game.mapZone?.price_zone) {
+      throw new Error('Ce jeu n\'est pas placé ou la zone est invalide');
     }
 
-    // Rendre les tables au stock
+    // Rendre les tables au stock de la PriceZone
     const tableType = await tx.tableType.findFirst({
       where: {
-        map_zone_id: game.map_zone_id,
+        price_zone_id: game.mapZone.price_zone.id,
         name: game.table_size
       }
     });

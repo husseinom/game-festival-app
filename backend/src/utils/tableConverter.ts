@@ -33,29 +33,29 @@ export class TableConverter {
         };
     }
 
-    // When creating MapZone, convert festival's legacy fields to TableType records
+    // When creating PriceZone, convert festival's legacy fields to TableType records
     static async createTableTypesFromLegacy(
         tx: any, // PrismaClient transaction
-        mapZoneId: number,
+        priceZoneId: number,
         festivalData: { small_tables: number; large_tables: number; city_tables: number }
     ) {
         const tableTypes = [
             {
-                map_zone_id: mapZoneId,
+                price_zone_id: priceZoneId,
                 name: TableSize.STANDARD,
                 nb_total: festivalData.small_tables,
                 nb_available: festivalData.small_tables,
                 nb_total_player: 4
             },
             {
-                map_zone_id: mapZoneId,
+                price_zone_id: priceZoneId,
                 name: TableSize.LARGE,
                 nb_total: festivalData.large_tables,
                 nb_available: festivalData.large_tables,
                 nb_total_player: 6
             },
             {
-                map_zone_id: mapZoneId,
+                price_zone_id: priceZoneId,
                 name: TableSize.CITY,
                 nb_total: festivalData.city_tables,
                 nb_available: festivalData.city_tables,
@@ -71,13 +71,13 @@ export class TableConverter {
         }
     }
 
-    // Calculate festival totals from all MapZone TableTypes
+    // Calculate festival totals from all PriceZone TableTypes
     static async calculateFestivalTotals(tx: any, festivalId: number): Promise<{
         small_tables: number;
         large_tables: number;
         city_tables: number;
     }> {
-        const mapZones = await tx.mapZone.findMany({
+        const priceZones = await tx.priceZone.findMany({
             where: { festival_id: festivalId },
             include: { tableTypes: true }
         });
@@ -86,7 +86,7 @@ export class TableConverter {
         let large_tables = 0;
         let city_tables = 0;
 
-        for (const zone of mapZones) {
+        for (const zone of priceZones) {
             for (const tt of zone.tableTypes || []) {
                 switch (tt.name) {
                     case TableSize.STANDARD:
@@ -105,14 +105,14 @@ export class TableConverter {
         return { small_tables, large_tables, city_tables };
     }
 
-    // Calculate available tables for a specific MapZone
-    static async getMapZoneAvailability(tx: any, mapZoneId: number): Promise<{
+    // Calculate available tables for a specific PriceZone
+    static async getPriceZoneAvailability(tx: any, priceZoneId: number): Promise<{
         small_available: number;
         large_available: number;
         city_available: number;
     }> {
         const tableTypes = await tx.tableType.findMany({
-            where: { map_zone_id: mapZoneId }
+            where: { price_zone_id: priceZoneId }
         });
 
         let small_available = 0;

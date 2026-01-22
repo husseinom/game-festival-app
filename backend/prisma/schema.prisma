@@ -96,9 +96,11 @@ model MapZone {
   price_zone_id Int
   price_zone    PriceZone @relation(fields: [price_zone_id], references: [id])
   name          String
+  small_tables  Int @default(0)
+  large_tables  Int @default(0)
+  city_tables   Int @default(0)
   
   festivalGames FestivalGame[]
-  tableTypes    TableType[]
 }
 
 model PriceZoneType{
@@ -117,6 +119,7 @@ model PriceZone {
 
   mapZones         MapZone[]
   zoneReservations ZoneReservation[]
+  tableTypes       TableType[]
 }
 
 model GameMechanism {
@@ -271,10 +274,10 @@ model TableType {
   nb_available    Float     // Stock restant (décrémenté à l'affectation, peut être 0.5, 1.5, etc.)
   nb_total_player Int       // Capacité joueurs (ex: 4)
   
-  map_zone_id     Int
-  mapZone         MapZone   @relation(fields: [map_zone_id], references: [id], onDelete: Cascade)
+  price_zone_id   Int
+  priceZone       PriceZone @relation(fields: [price_zone_id], references: [id], onDelete: Cascade)
 
-  @@index([map_zone_id])
+  @@index([price_zone_id])
   @@index([name])
 }
 

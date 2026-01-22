@@ -9,6 +9,7 @@ export interface FestivalGame {
   map_zone_id: number | null;
   copy_count: number;
   allocated_tables: number;
+  table_size?: string;
   game?: GameDto;
   mapZone?: MapZone;
   reservation?: {

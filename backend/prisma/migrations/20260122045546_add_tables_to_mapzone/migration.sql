@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "MapZone" ADD COLUMN     "city_tables" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "large_tables" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "small_tables" INTEGER NOT NULL DEFAULT 0;

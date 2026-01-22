@@ -48,7 +48,7 @@ export const createFestival = async (festivalData: any) => {
       }
     });
 
-    // Create PriceZones and MapZones with table allocations
+    // Create PriceZones with TableTypes
     if (priceZoneTypeId) {
       const pzType = await tx.priceZoneType.findUnique({ 
         where: { id: Number(priceZoneTypeId) } 
@@ -57,85 +57,46 @@ export const createFestival = async (festivalData: any) => {
       if (!pzType) throw new Error('Selected price zone type not found');
 
       const zones = PRESET_MAP[pzType.key] ?? [];
+      const totalTables = small_tables + large_tables + city_tables;
+
+      let remainingSmall = small_tables;
+      let remainingLarge = large_tables;
+      let remainingCity = city_tables;
       
-      if (zones.length === 1) {
-        // Single zone: assign all tables to it
+      for (let i = 0; i < zones.length; i++) {
+        const zone = zones[i];
+        const isLast = i === zones.length - 1;
+        
+        // Calculate table distribution for this zone
+        let distribution;
+        if (isLast) {
+          distribution = {
+            small_tables: remainingSmall,
+            large_tables: remainingLarge,
+            city_tables: remainingCity
+          };
+        } else {
+          const ratio = zone.ratio ?? 1;
+          distribution = {
+            small_tables: Math.floor(small_tables * ratio),
+            large_tables: Math.floor(large_tables * ratio),
+            city_tables: Math.floor(city_tables * ratio)
+          };
+          remainingSmall -= distribution.small_tables;
+          remainingLarge -= distribution.large_tables;
+          remainingCity -= distribution.city_tables;
+        }
+
         const priceZone = await tx.priceZone.create({
           data: {
             festival_id: fest.id,
-            name: zones[0].name,
-            table_price: zones[0].table_price
+            name: zone.name,
+            table_price: zone.table_price
           }
         });
 
-        // Create MapZone
-        const mapZone = await tx.mapZone.create({
-          data: {
-            festival_id: fest.id,
-            price_zone_id: priceZone.id,
-            name: `${zones[0].name} - Main Area`
-          }
-        });
-
-        // Create TableTypes using TableConverter
-        await TableConverter.createTableTypesFromLegacy(tx, mapZone.id, {
-          small_tables,
-          large_tables,
-          city_tables
-        });
-
-      } else if (zones.length === 2) {
-        // Two zones: distribute tables based on ratio
-        let remainingSmall = small_tables;
-        let remainingLarge = large_tables;
-        let remainingCity = city_tables;
-
-        for (let i = 0; i < zones.length; i++) {
-          const zone = zones[i];
-          const isLast = i === zones.length - 1;
-          
-          let distribution;
-          if (isLast) {
-            // Last zone gets remaining tables
-            distribution = {
-              small_tables: remainingSmall,
-              large_tables: remainingLarge,
-              city_tables: remainingCity
-            };
-          } else {
-            // Distribute based on ratio
-            const ratio = zone.ratio ?? 1;
-            distribution = {
-              small_tables: Math.floor(small_tables * ratio),
-              large_tables: Math.floor(large_tables * ratio),
-              city_tables: Math.floor(city_tables * ratio)
-            };
-            remainingSmall -= distribution.small_tables;
-            remainingLarge -= distribution.large_tables;
-            remainingCity -= distribution.city_tables;
-          }
-
-          // Create PriceZone
-          const priceZone = await tx.priceZone.create({
-            data: {
-              festival_id: fest.id,
-              name: zone.name,
-              table_price: zone.table_price
-            }
-          });
-
-          // Create MapZone
-          const mapZone = await tx.mapZone.create({
-            data: {
-              festival_id: fest.id,
-              price_zone_id: priceZone.id,
-              name: `${zone.name} - Main Area`
-            }
-          });
-
-          // Create TableTypes with distributed allocation
-          await TableConverter.createTableTypesFromLegacy(tx, mapZone.id, distribution);
-        }
+        // Create TableTypes directly on PriceZone
+        await TableConverter.createTableTypesFromLegacy(tx, priceZone.id, distribution);
       }
     }
 
@@ -202,8 +163,7 @@ export const updateFestival = async (id: number, festivalData: any) => {
     // Handle price zone type changes
     if (oldPzTypeId !== newPzTypeId) {
       if (newPzTypeId === null) {
-        // Delete MapZones (cascades to TableTypes) and PriceZones
-        await tx.mapZone.deleteMany({ where: { festival_id: id } });
+        // Delete TableTypes (cascaded) and PriceZones
         await tx.priceZone.deleteMany({ where: { festival_id: id } });
       } else {
         const pzType = await tx.priceZoneType.findUnique({ where: { id: Number(newPzTypeId) } });
@@ -212,7 +172,7 @@ export const updateFestival = async (id: number, festivalData: any) => {
         const desired = PRESET_MAP[pzType.key] ?? [];
         const existingZones = await tx.priceZone.findMany({ 
           where: { festival_id: id },
-          include: { mapZones: { include: { tableTypes: true } } }
+          include: { tableTypes: true }
         });
         const existingNames = existingZones.map(z => z.name);
 
@@ -230,10 +190,6 @@ export const updateFestival = async (id: number, festivalData: any) => {
         const desiredNames = desired.map(d => d.name);
         const toDeleteNames = existingNames.filter(n => !desiredNames.includes(n));
         if (toDeleteNames.length) {
-          const zonesToDelete = existingZones.filter(z => toDeleteNames.includes(z.name));
-          for (const zone of zonesToDelete) {
-            await tx.mapZone.deleteMany({ where: { price_zone_id: zone.id } });
-          }
           await tx.priceZone.deleteMany({
             where: { festival_id: id, name: { in: toDeleteNames } }
           });
@@ -271,43 +227,39 @@ export const updateFestival = async (id: number, festivalData: any) => {
               data: { table_price: d.table_price }
             });
 
-            // Update TableTypes in existing MapZone
-            const mapZone = existingZone.mapZones[0];
-            if (mapZone) {
-              // Update each TableType
-              for (const [tableSizeName, count] of Object.entries({
-                STANDARD: distribution.small_tables,
-                LARGE: distribution.large_tables,
-                CITY: distribution.city_tables
-              })) {
-                const existing = mapZone.tableTypes.find(tt => tt.name === tableSizeName);
-                
-                if (existing) {
-                  if (count > 0) {
-                    await tx.tableType.update({
-                      where: { id: existing.id },
-                      data: { 
-                        nb_total: count,
-                        nb_available: count
-                      }
-                    });
-                  } else {
-                    // Delete if count is 0
-                    await tx.tableType.delete({ where: { id: existing.id } });
-                  }
-                } else if (count > 0) {
-                  // Create new TableType if it doesn't exist
-                  const playerCount = tableSizeName === 'STANDARD' ? 4 : tableSizeName === 'LARGE' ? 6 : 8;
-                  await tx.tableType.create({
-                    data: {
-                      map_zone_id: mapZone.id,
-                      name: tableSizeName as TableSize,
+            // Update TableTypes directly on PriceZone
+            for (const [tableSizeName, count] of Object.entries({
+              STANDARD: distribution.small_tables,
+              LARGE: distribution.large_tables,
+              CITY: distribution.city_tables
+            })) {
+              const existing = existingZone.tableTypes.find(tt => tt.name === tableSizeName);
+              
+              if (existing) {
+                if (count > 0) {
+                  await tx.tableType.update({
+                    where: { id: existing.id },
+                    data: { 
                       nb_total: count,
-                      nb_available: count,
-                      nb_total_player: playerCount
+                      nb_available: count
                     }
                   });
+                } else {
+                  // Delete if count is 0
+                  await tx.tableType.delete({ where: { id: existing.id } });
                 }
+              } else if (count > 0) {
+                // Create new TableType if it doesn't exist
+                const playerCount = tableSizeName === 'STANDARD' ? 4 : tableSizeName === 'LARGE' ? 6 : 8;
+                await tx.tableType.create({
+                  data: {
+                    price_zone_id: existingZone.id,
+                    name: tableSizeName as TableSize,
+                    nb_total: count,
+                    nb_available: count,
+                    nb_total_player: playerCount
+                  }
+                });
               }
             }
           } else {
@@ -320,15 +272,7 @@ export const updateFestival = async (id: number, festivalData: any) => {
               }
             });
 
-            const mapZone = await tx.mapZone.create({
-              data: {
-                festival_id: id,
-                price_zone_id: priceZone.id,
-                name: `${d.name} - Main Area`
-              }
-            });
-
-            await TableConverter.createTableTypesFromLegacy(tx, mapZone.id, distribution);
+            await TableConverter.createTableTypesFromLegacy(tx, priceZone.id, distribution);
           }
         }
       }
@@ -341,7 +285,7 @@ export const updateFestival = async (id: number, festivalData: any) => {
 
       const zones = await tx.priceZone.findMany({
         where: { festival_id: id },
-        include: { mapZones: { include: { tableTypes: true } } }
+        include: { tableTypes: true }
       });
 
       if (zones.length > 0) {
@@ -379,39 +323,37 @@ export const updateFestival = async (id: number, festivalData: any) => {
               remainingCity -= distribution.city_tables;
             }
 
-            const mapZone = zone.mapZones[0];
-            if (mapZone) {
-              for (const [tableSizeName, count] of Object.entries({
-                STANDARD: distribution.small_tables,
-                LARGE: distribution.large_tables,
-                CITY: distribution.city_tables
-              })) {
-                const existing = mapZone.tableTypes.find(tt => tt.name === tableSizeName);
-                
-                if (existing) {
-                  if (count > 0) {
-                    await tx.tableType.update({
-                      where: { id: existing.id },
-                      data: { 
-                        nb_total: count,
-                        nb_available: count
-                      }
-                    });
-                  } else {
-                    await tx.tableType.delete({ where: { id: existing.id } });
-                  }
-                } else if (count > 0) {
-                  const playerCount = tableSizeName === 'STANDARD' ? 4 : tableSizeName === 'LARGE' ? 6 : 8;
-                  await tx.tableType.create({
-                    data: {
-                      map_zone_id: mapZone.id,
-                      name: tableSizeName as TableSize,
+            // Update TableTypes directly on PriceZone
+            for (const [tableSizeName, count] of Object.entries({
+              STANDARD: distribution.small_tables,
+              LARGE: distribution.large_tables,
+              CITY: distribution.city_tables
+            })) {
+              const existing = zone.tableTypes.find(tt => tt.name === tableSizeName);
+              
+              if (existing) {
+                if (count > 0) {
+                  await tx.tableType.update({
+                    where: { id: existing.id },
+                    data: { 
                       nb_total: count,
-                      nb_available: count,
-                      nb_total_player: playerCount
+                      nb_available: count
                     }
                   });
+                } else {
+                  await tx.tableType.delete({ where: { id: existing.id } });
                 }
+              } else if (count > 0) {
+                const playerCount = tableSizeName === 'STANDARD' ? 4 : tableSizeName === 'LARGE' ? 6 : 8;
+                await tx.tableType.create({
+                  data: {
+                    price_zone_id: zone.id,
+                    name: tableSizeName as TableSize,
+                    nb_total: count,
+                    nb_available: count,
+                    nb_total_player: playerCount
+                  }
+                });
               }
             }
           }

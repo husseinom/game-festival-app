@@ -592,35 +592,27 @@ export class ReservationDetail {
     // Obtenir le type de table sélectionné
     const tableSize = this.selectedTableSize();
     
-    // ✅ Check nb_available from TableTypes (real-time availability)
-    if (mapZone.tableTypes && mapZone.tableTypes.length > 0) {
-      const tableType = mapZone.tableTypes.find(tt => tt.name === tableSize);
-      
-      if (!tableType) {
-        console.warn(`No TableType found for ${tableSize} in MapZone ${mapZoneId}`);
-        return false;
+    // Calculer les tables utilisées par les jeux déjà placés
+    let usedTables = 0;
+    if (mapZone.festivalGames && mapZone.festivalGames.length > 0) {
+      for (const fg of mapZone.festivalGames) {
+        const fgTableSize = fg.table_size || 'STANDARD';
+        if (fgTableSize === tableSize) {
+          usedTables += fg.allocated_tables || 1;
+        }
       }
-
-      // Check if there's enough available capacity
-      return (festivalGame.allocated_tables || 1) <= tableType.nb_available;
     }
 
-    // ❌ Fallback for legacy MapZones without TableTypes (shouldn't happen with new system)
-    console.warn('MapZone without TableTypes, using legacy fields');
-    let maxTables = 0;
+    // Tables allouées à la zone
+    let allocated = 0;
     switch (tableSize) {
-      case 'STANDARD':
-        maxTables = mapZone.small_tables || 0;
-        break;
-      case 'LARGE':
-        maxTables = mapZone.large_tables || 0;
-        break;
-      case 'CITY':
-        maxTables = mapZone.city_tables || 0;
-        break;
+      case 'STANDARD': allocated = mapZone.small_tables || 0; break;
+      case 'LARGE': allocated = mapZone.large_tables || 0; break;
+      case 'CITY': allocated = mapZone.city_tables || 0; break;
     }
 
-    return (festivalGame.allocated_tables || 1) <= maxTables;
+    const available = allocated - usedTables;
+    return (festivalGame.allocated_tables || 1) <= available;
   }
 
   // Obtenir un résumé des tables utilisées par MapZone
@@ -630,29 +622,16 @@ export class ReservationDetail {
     if (!r?.games || mapZones.length === 0) return [];
 
     return mapZones.map(mapZone => {
-      // Calculer le max et used à partir des TableTypes
-      let max = 0;
-      let usedByOthers = 0;
+      // Calculer le max (tables allouées à la zone)
+      const max = (mapZone.small_tables || 0) + (mapZone.large_tables || 0) + (mapZone.city_tables || 0);
       
-      if (mapZone.tableTypes && mapZone.tableTypes.length > 0) {
-        for (const tt of mapZone.tableTypes) {
-          max += tt.nb_total;
-          // nb_total - nb_available = tables utilisées par TOUTES les réservations
-          usedByOthers += (tt.nb_total - tt.nb_available);
+      // Calculer les tables utilisées par les jeux placés dans cette zone
+      let used = 0;
+      if (mapZone.festivalGames && mapZone.festivalGames.length > 0) {
+        for (const fg of mapZone.festivalGames) {
+          used += fg.allocated_tables || 1;
         }
-      } else {
-        max = (mapZone.small_tables || 0) + (mapZone.large_tables || 0) + (mapZone.city_tables || 0);
       }
-
-      // Ajouter les tables de la réservation courante qui sont dans cette zone
-      // (car elles comptent déjà dans usedByOthers depuis le backend)
-      const usedByCurrentReservation = (r.games || [])
-        .filter((g: FestivalGame) => g.map_zone_id === mapZone.id)
-        .reduce((sum: number, g: FestivalGame) => sum + (g.allocated_tables || 0), 0);
-
-      // Le total utilisé est ce qui est marqué comme utilisé dans le backend
-      // Si la réservation courante a déjà des jeux placés, ils sont déjà comptés
-      const used = usedByOthers;
 
       return {
         zoneName: mapZone.name,
@@ -681,18 +660,26 @@ export class ReservationDetail {
     const zone = this.availableMapZones().find(z => z.id === zoneId);
     if (!zone) return 0;
     
-    if (zone.tableTypes && zone.tableTypes.length > 0) {
-      const tt = zone.tableTypes.find(t => t.name === tableType);
-      return tt ? tt.nb_available : 0;
+    // Calculer les tables utilisées par les jeux déjà placés dans cette zone
+    let usedTables = 0;
+    if (zone.festivalGames && zone.festivalGames.length > 0) {
+      for (const fg of zone.festivalGames) {
+        const fgTableSize = fg.table_size || 'STANDARD';
+        if (fgTableSize === tableType) {
+          usedTables += fg.allocated_tables || 1;
+        }
+      }
     }
     
-    // Fallback sur les anciens champs
+    // Tables allouées à la zone moins celles utilisées
+    let allocated = 0;
     switch (tableType) {
-      case 'STANDARD': return zone.small_tables || 0;
-      case 'LARGE': return zone.large_tables || 0;
-      case 'CITY': return zone.city_tables || 0;
-      default: return 0;
+      case 'STANDARD': allocated = zone.small_tables || 0; break;
+      case 'LARGE': allocated = zone.large_tables || 0; break;
+      case 'CITY': allocated = zone.city_tables || 0; break;
     }
+    
+    return Math.max(0, allocated - usedTables);
   }
 
   // Compte de jeux placés

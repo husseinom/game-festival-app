@@ -12,11 +12,14 @@ export const register = async (req: Request, res: Response) => {
 
     const refreshToken = createRefreshToken({id: result.user.id, role: result.user.role})
     
+    // secure: false pour développement local (HTTP), true en production (HTTPS)
+    const isProduction = process.env.NODE_ENV === 'production';
+    
     res.cookie('access_token', result.token, {
-      httpOnly: true, secure: true, sameSite: 'strict', maxAge: 15 * 60 * 1000,
+      httpOnly: true, secure: isProduction, sameSite: 'lax', maxAge: 15 * 60 * 1000,
     });
     res.cookie('refresh_token', refreshToken, {
-      httpOnly: true, secure: true, sameSite: 'strict', maxAge: 60 * 60 * 1000, // une heure
+      httpOnly: true, secure: isProduction, sameSite: 'lax', maxAge: 60 * 60 * 1000, // une heure
     });
     // Réponse succès 201 (Created)
     res.status(201).json({
@@ -39,11 +42,15 @@ export const login = async (req: Request, res: Response) => {
     const result = await userService.login(req.body);
 
     const refreshToken = createRefreshToken({ id: result.user.id, role: result.user.role }) // création du refresh token
+    
+    // secure: false pour développement local (HTTP), true en production (HTTPS)
+    const isProduction = process.env.NODE_ENV === 'production';
+    
     res.cookie('access_token', result.token, { // --------------------------------- Cookies sécurisés pour le token d'accès
-        httpOnly: true, secure: true, sameSite: 'strict', maxAge: 15 * 60 * 1000,
+        httpOnly: true, secure: isProduction, sameSite: 'lax', maxAge: 15 * 60 * 1000,
     })
     res.cookie('refresh_token', refreshToken, { // --------------------------------- Cookies sécurisés pour le refresh token
-        httpOnly: true, secure: true, sameSite: 'strict', maxAge: 7 * 24 * 60 * 60 * 1000,
+        httpOnly: true, secure: isProduction, sameSite: 'lax', maxAge: 7 * 24 * 60 * 60 * 1000,
     })
     
     res.status(200).json({
@@ -119,11 +126,14 @@ export const refresh = async (req: Request, res: Response) => {
     const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET!) as any;
     const newAccessToken = createAccessToken({ id: decoded.id, role: decoded.role });
     
+    // secure: false pour développement local (HTTP), true en production (HTTPS)
+    const isProduction = process.env.NODE_ENV === 'production';
+    
     // Set new access token cookie
     res.cookie('access_token', newAccessToken, {
       httpOnly: true, 
-      secure: true, 
-      sameSite: 'strict', 
+      secure: isProduction, 
+      sameSite: 'lax', 
       maxAge: 15 * 60 * 1000
     });
     

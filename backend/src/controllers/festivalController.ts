@@ -14,11 +14,8 @@ export const add = async (req: Request, res: Response) => {
         priceZoneType: true,
         priceZones: {
           include: {
-            mapZones: {
-              include: {
-                tableTypes: true
-              }
-            }
+            tableTypes: true,
+            mapZones: true
           }
         }
       }
@@ -28,7 +25,7 @@ export const add = async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Festival not found after creation' });
     }
     
-    // Calculate tables from MapZones/TableTypes
+    // Calculate tables from PriceZones/TableTypes
     const totals = await TableConverter.calculateFestivalTotals(prisma, newFestival.id);
     
     res.status(201).json({
@@ -48,11 +45,8 @@ export const getAllFestivals = async (req: Request, res: Response) => {
         priceZoneType: true,
         priceZones: {
           include: {
-            mapZones: {
-              include: {
-                tableTypes: true
-              }
-            }
+            tableTypes: true,
+            mapZones: true
           }
         }
       }
@@ -86,11 +80,8 @@ export const getFestivalById = async (req: Request, res: Response) => {
         priceZoneType: true,
         priceZones: {
           include: {
-            mapZones: {
-              include: {
-                tableTypes: true
-              }
-            }
+            tableTypes: true,
+            mapZones: true
           }
         }
       }
@@ -100,7 +91,7 @@ export const getFestivalById = async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Festival not found' });
     }
 
-    // Calculate totals from MapZone TableTypes
+    // Calculate totals from PriceZone TableTypes
     const totals = await TableConverter.calculateFestivalTotals(prisma, festival.id);
 
     // Return festival with calculated legacy fields
@@ -128,11 +119,8 @@ export const update = async (req: Request, res: Response) => {
         priceZoneType: true,
         priceZones: {
           include: {
-            mapZones: {
-              include: {
-                tableTypes: true
-              }
-            }
+            tableTypes: true,
+            mapZones: true
           }
         }
       }

@@ -140,40 +140,20 @@ async function main() {
     }
   });
 
-  // --- 6. Création des Zones Tarifaires (PriceZone) ---
-  // Ces zones seront créées automatiquement par festivalService.ts
-  // mais on peut les créer manuellement ici pour le test
-  console.log('💰 Création des Zones Tarifaires...');
+  // --- 6. Création des Zones Tarifaires (PriceZone) avec TableTypes ---
+  // Les TableTypes sont maintenant liés directement aux PriceZones
+  console.log('💰 Création des Zones Tarifaires avec Tables...');
   const zoneStandard = await prisma.priceZone.create({
     data: {
       festival_id: festival.id,
       name: 'Standard',
-      table_price: 20.0
-    }
-  });
-
-  const zoneVIP = await prisma.priceZone.create({
-    data: {
-      festival_id: festival.id,
-      name: 'VIP',
-      table_price: 60.0
-    }
-  });
-
-  // --- 7. Création des Zones Physiques (MapZone) avec TableTypes ---
-  console.log('🗺️  Création des Zones Physiques (MapZone)...');
-  
-  const mapZoneHallA = await prisma.mapZone.create({
-    data: {
-      festival_id: festival.id,
-      price_zone_id: zoneStandard.id,
-      name: 'Hall A - Allée Centrale',
+      table_price: 20.0,
       tableTypes: {
         create: [
           { 
             name: TableSize.STANDARD, 
-            nb_total: 100, 
-            nb_available: 100, 
+            nb_total: 180, // 100 (Hall A) + 80 (Hall B)
+            nb_available: 180, 
             nb_total_player: 4 
           },
           { 
@@ -184,8 +164,8 @@ async function main() {
           },
           { 
             name: TableSize.CITY, 
-            nb_total: 10, 
-            nb_available: 10, 
+            nb_total: 30, // 10 (Hall A) + 20 (Hall B)
+            nb_available: 30, 
             nb_total_player: 8 
           }
         ]
@@ -193,12 +173,11 @@ async function main() {
     }
   });
 
-  // Zone Physique 2 : Le Carré Or (Lié au tarif VIP)
-  const mapZoneCarreOr = await prisma.mapZone.create({
+  const zoneVIP = await prisma.priceZone.create({
     data: {
       festival_id: festival.id,
-      price_zone_id: zoneVIP.id,
-      name: 'Carré Or',
+      name: 'VIP',
+      table_price: 60.0,
       tableTypes: {
         create: [
           { 
@@ -218,27 +197,32 @@ async function main() {
     }
   });
 
+  // --- 7. Création des Zones Physiques (MapZone) - sans TableTypes ---
+  // Les MapZones sont maintenant uniquement pour l'organisation physique
+  console.log('🗺️  Création des Zones Physiques (MapZone)...');
+  
+  const mapZoneHallA = await prisma.mapZone.create({
+    data: {
+      festival_id: festival.id,
+      price_zone_id: zoneStandard.id,
+      name: 'Hall A - Allée Centrale'
+    }
+  });
+
+  // Zone Physique 2 : Le Carré Or (Lié au tarif VIP)
+  const mapZoneCarreOr = await prisma.mapZone.create({
+    data: {
+      festival_id: festival.id,
+      price_zone_id: zoneVIP.id,
+      name: 'Carré Or'
+    }
+  });
+
   const mapZoneHallB = await prisma.mapZone.create({
     data: {
       festival_id: festival.id,
       price_zone_id: zoneStandard.id,
-      name: 'Hall B - Zone Famille',
-      tableTypes: {
-        create: [
-          { 
-            name: TableSize.STANDARD, 
-            nb_total: 80, 
-            nb_available: 80, 
-            nb_total_player: 4 
-          },
-          { 
-            name: TableSize.CITY, 
-            nb_total: 20, 
-            nb_available: 20, 
-            nb_total_player: 8 
-          }
-        ]
-      }
+      name: 'Hall B - Zone Famille'
     }
   });
 
@@ -410,10 +394,10 @@ async function main() {
             }
           });
 
-          // Update availability
+          // Update availability on PriceZone's TableType
           const tableType = await prisma.tableType.findFirst({
             where: {
-              map_zone_id: mapZoneHallA.id,
+              price_zone_id: zoneStandard.id,
               name: TableSize.STANDARD
             }
           });
@@ -453,7 +437,7 @@ async function main() {
 
   // Calculate and display total available tables
   const allTableTypes = await prisma.tableType.findMany({
-    include: { mapZone: true }
+    include: { priceZone: true }
   });
 
   const totalStandard = allTableTypes
@@ -474,8 +458,9 @@ async function main() {
   - ${users.length} utilisateurs créés
   - 6 réservants créés
   - 1 festival créé
-  - 2 zones tarifaires créées
-  - 3 zones physiques (map zones) créées avec TableTypes:
+  - 2 zones tarifaires créées (avec TableTypes)
+  - 3 zones physiques (map zones) créées
+  - Tables totales:
     * ${totalStandard} tables STANDARD (4m² chacune, 4 joueurs)
     * ${totalLarge} tables LARGE (8m² chacune, 6 joueurs)
     * ${totalCity} tables CITY (variable, 8 joueurs)
