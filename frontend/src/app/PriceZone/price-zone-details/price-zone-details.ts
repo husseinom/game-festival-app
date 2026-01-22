@@ -66,35 +66,78 @@ export class PriceZoneDetailsComponent {
     const result = { small: 0, large: 0, city: 0 };
 
     for (const zone of zones) {
-      if (zone.tableTypes) {
+      if (zone.tableTypes && zone.tableTypes.length > 0) {
+        // ✅ Calculate RESERVED/OCCUPIED tables (total - available = USED)
         for (const tt of zone.tableTypes) {
-          const used = tt.nb_total - tt.nb_available;
-          if (tt.name === 'STANDARD') result.small += used;
-          else if (tt.name === 'LARGE') result.large += used;
-          else if (tt.name === 'CITY') result.city += used;
+          const reserved = tt.nb_total - tt.nb_available; // Tables occupied by games
+          if (tt.name === 'STANDARD') result.small += reserved;
+          else if (tt.name === 'LARGE') result.large += reserved;
+          else if (tt.name === 'CITY') result.city += reserved;
         }
+      } else {
+        // Fallback: For legacy fields without TableTypes
+        // We assume all allocated tables are "used" since we can't distinguish
+        result.small += zone.small_tables || 0;
+        result.large += zone.large_tables || 0;
+        result.city += zone.city_tables || 0;
       }
     }
     return result;
   });
 
-  // Calculate allocated tables from existing map zones
-  allocatedTables = computed(() => {
+  // Free tables in MapZones (after usedTables)
+  availableInMapZones = computed(() => {
     const zones = this.mapZones();
-    return zones.reduce((acc, zone) => ({
-      small: acc.small + zone.small_tables,
-      large: acc.large + zone.large_tables,
-      city: acc.city + zone.city_tables
-    }), { small: 0, large: 0, city: 0 });
+    const result = { small: 0, large: 0, city: 0 };
+
+    for (const zone of zones) {
+      if (zone.tableTypes && zone.tableTypes.length > 0) {
+        // ✅ Sum nb_available from all TableTypes (free tables ready for games)
+        for (const tt of zone.tableTypes) {
+          if (tt.name === 'STANDARD') result.small += tt.nb_available;
+          else if (tt.name === 'LARGE') result.large += tt.nb_available;
+          else if (tt.name === 'CITY') result.city += tt.nb_available;
+        }
+      }
+      // No fallback for legacy - we can't know availability without TableTypes
+    }
+    return result;
   });
 
-  // Calculate available tables (total - already allocated in existing zones)
+  // totalAllocatedInMapZones stays the same (it's correct)
+  totalAllocatedInMapZones = computed(() => {
+    const zones = this.mapZones();
+    return zones.reduce((acc, zone) => {
+      if (zone.tableTypes && zone.tableTypes.length > 0) {
+        // ✅ Calculate from TableTypes (nb_total = total allocated to this MapZone)
+        const small = zone.tableTypes.find(tt => tt.name === 'STANDARD')?.nb_total || 0;
+        const large = zone.tableTypes.find(tt => tt.name === 'LARGE')?.nb_total || 0;
+        const city = zone.tableTypes.find(tt => tt.name === 'CITY')?.nb_total || 0;
+        
+        return {
+          small: acc.small + small,
+          large: acc.large + large,
+          city: acc.city + city
+        };
+      } else {
+        // Fallback to legacy fields
+        return {
+          small: acc.small + (zone.small_tables || 0),
+          large: acc.large + (zone.large_tables || 0),
+          city: acc.city + (zone.city_tables || 0)
+        };
+      }
+    }, { small: 0, large: 0, city: 0 });
+  });
+
+  // availableTables stays the same (it's correct - shows unallocated tables)
   availableTables = computed(() => {
     const zone = this.priceZone();
-    const allocated = this.allocatedTables();
+    const allocated = this.totalAllocatedInMapZones();
 
     if (!zone) return { small: 0, large: 0, city: 0 };
 
+    // ✅ PriceZone total - Total in MapZones = Available for new MapZones
     return {
       small: zone.small_tables - allocated.small,
       large: zone.large_tables - allocated.large,
@@ -245,23 +288,10 @@ export class PriceZoneDetailsComponent {
   }
 
   deleteMapZone(id: number): void {
-<<<<<<< HEAD
     const mapZone = this.mapZones().find(mz => mz.id === id);
     
     if (!mapZone) {
       return;
-=======
-    if (confirm('Delete this map zone?')) {
-      this._mapZoneService.delete(id);
-
-      // Reload games after deletion
-      setTimeout(() => {
-        const pzId = this.priceZoneId();
-        if (pzId !== null) {
-          this._priceZoneService.getGamesByPriceZone(pzId);
-        }
-      }, 500);
->>>>>>> Nabil_back
     }
 
     const hasGames = mapZone.festivalGames && mapZone.festivalGames.length > 0;

@@ -41,7 +41,8 @@
     </mat-card-content>
 
     <!-- Action Buttons -->
-    <mat-card-actions class="card-actions">
+     @if(canManageFestivals()) {
+      <mat-card-actions class="card-actions">
       <button mat-raised-button color="primary" class="edit-btn" (click)="onEdit($event)">
         Modifier
       </button>
@@ -49,6 +50,7 @@
         Supprimer
       </button>
     </mat-card-actions>
+  }
 
   }
 </mat-card>

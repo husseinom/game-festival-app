@@ -54,8 +54,6 @@ router.post('/:id/paid', verifyToken, requireRole(orgRoles), reservationControll
 // PATCH /api/reservations/batch/invoice-status - Mise à jour en masse
 router.patch('/batch/invoice-status', verifyToken, requireRole(orgRoles), reservationController.updateInvoiceStatusBatch);
 
-// POST /api/reservations/:id/partner-discount - Appliquer remise partenaire
-router.post('/:id/partner-discount', verifyToken, requireRole(orgRoles), reservationController.applyPartnerDiscount);
 
 // POST /api/reservations/:id/recalculate - Recalculer le prix
 router.post('/:id/recalculate', verifyToken, requireRole(orgRoles), reservationController.recalculatePrice);

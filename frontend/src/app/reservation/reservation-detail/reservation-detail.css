@@ -333,11 +333,11 @@
 }
 
 /* Partner badge */
-:host .partner-badge {
+/* :host .partner-badge {
 	background-color: #fef3c7 !important;
 	color: #92400e;
 	font-weight: 600;
-}
+} */
 
 /* Games workflow */
 :host .games-workflow {

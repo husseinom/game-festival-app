@@ -30,17 +30,20 @@
     </div>
   </mat-card-content>
 
-  <mat-card-actions class="card-actions">
-    @if(canEdit()) {
-      <button mat-raised-button color="primary" class="edit-btn" (click)="onEditClick($event)">
-        <mat-icon>edit</mat-icon>
-        Modifier
+  <!-- ✅ Only show actions if user can manage spaces -->
+  @if(canManage()) {
+    <mat-card-actions class="card-actions">
+      @if(canEdit()) {
+        <button mat-raised-button color="primary" class="edit-btn" (click)="onEditClick($event)">
+          <mat-icon>edit</mat-icon>
+          Modifier
+        </button>
+      }
+      <button mat-raised-button color="warn" class="delete-btn" (click)="onDeleteClick($event)">
+        <mat-icon>delete</mat-icon>
+        Supprimer
       </button>
-    }
-    <button mat-raised-button color="warn" class="delete-btn" (click)="onDeleteClick($event)">
-      <mat-icon>delete</mat-icon>
-      Supprimer
-    </button>
-  </mat-card-actions>
+    </mat-card-actions>
+  }
 </mat-card>
 }

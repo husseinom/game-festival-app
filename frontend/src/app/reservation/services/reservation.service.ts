@@ -101,13 +101,13 @@ export class ReservationService {
     );
   }
 
-  applyPartnerDiscount(id: number): Observable<ReservationResponse> {
-    return this.http.post<ReservationResponse>(
-      `${this.baseUrl}/${id}/partner-discount`, 
-      {}, 
-      { withCredentials: true }
-    );
-  }
+  // applyPartnerDiscount(id: number): Observable<ReservationResponse> {
+  //   return this.http.post<ReservationResponse>(
+  //     `${this.baseUrl}/${id}/partner-discount`, 
+  //     {}, 
+  //     { withCredentials: true }
+  //   );
+  // }
 
   recalculatePrice(id: number): Observable<ReservationResponse> {
     return this.http.post<ReservationResponse>(

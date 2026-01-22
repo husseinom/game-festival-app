@@ -5,14 +5,10 @@
       <button mat-icon-button class="back-btn" (click)="back()">
         <mat-icon>arrow_back</mat-icon>
       </button>
-<<<<<<< HEAD
-      <h1>{{ zone.name }} - Détails de la Zone</h1>
-=======
       <h1>{{ zone.name }} - Zone Details</h1>
       <button mat-icon-button class="refresh-btn" (click)="refreshData()" title="Rafraîchir les données">
         <mat-icon>refresh</mat-icon>
       </button>
->>>>>>> Nabil_back
     </div>
 
     <!-- Zone Info Card -->
@@ -23,34 +19,64 @@
             <span class="label">Prix de la Table:</span>
             <span class="value">{{ zone.table_price }} €</span>
           </div>
-          <div class="info-item">
-<<<<<<< HEAD
-            <span class="label">Petites Tables:</span>
-            <span class="value">{{ zone.small_tables }}</span>
+          
+          <!-- Section 1: Free tables in MapZones (for games/reservations) -->
+          <div class="info-section">
+            <h4><mat-icon>casino</mat-icon> Disponibles pour Jeux/Réservations</h4>
+            <div class="info-item">
+              <span class="label">Petites Tables:</span>
+              <span class="value success">{{ availableInMapZones().small }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Grandes Tables:</span>
+              <span class="value success">{{ availableInMapZones().large }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Tables Mairie:</span>
+              <span class="value success">{{ availableInMapZones().city }}</span>
+            </div>
+            <div class="info-item total">
+              <span class="label">Total Libres:</span>
+              <span class="value success">{{ availableInMapZones().small + availableInMapZones().large + availableInMapZones().city }}</span>
+            </div>
           </div>
-          <div class="info-item">
-            <span class="label">Grandes Tables:</span>
-            <span class="value">{{ zone.large_tables }}</span>
+
+          <!-- Section 2: Unallocated tables (for new MapZone creation) -->
+          <div class="info-section">
+            <h4><mat-icon>add_location</mat-icon> Disponibles pour Nouvelle MapZone</h4>
+            <div class="info-item">
+              <span class="label">Petites Tables:</span>
+              <span class="value info">{{ availableTables().small }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Grandes Tables:</span>
+              <span class="value info">{{ availableTables().large }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Tables Mairie:</span>
+              <span class="value info">{{ availableTables().city }}</span>
+            </div>
+            <div class="info-item total">
+              <span class="label">Total Non Allouées:</span>
+              <span class="value info">{{ availableTables().small + availableTables().large + availableTables().city }}</span>
+            </div>
           </div>
-          <div class="info-item">
-            <span class="label">Tables Mairie:</span>
-            <span class="value">{{ zone.city_tables }}</span>
-=======
-            <span class="label">Small Tables:</span>
-            <span class="value">{{ zone.small_tables - usedTables().small }}/{{ zone.small_tables }}</span>
-          </div>
-          <div class="info-item">
-            <span class="label">Large Tables:</span>
-            <span class="value">{{ zone.large_tables - usedTables().large }}/{{ zone.large_tables }}</span>
-          </div>
-          <div class="info-item">
-            <span class="label">City Tables:</span>
-            <span class="value">{{ zone.city_tables - usedTables().city }}/{{ zone.city_tables }}</span>
->>>>>>> Nabil_back
-          </div>
-          <div class="info-item total">
-            <span class="label">Total Used:</span>
-            <span class="value">{{ usedTables().small + usedTables().large + usedTables().city }} / {{ zone.small_tables + zone.large_tables + zone.city_tables }}</span>
+
+          <!-- Section 3: Summary -->
+          <div class="info-section summary">
+            <h4><mat-icon>assessment</mat-icon> Résumé Global</h4>
+            <div class="info-item">
+              <span class="label">Nombre de MapZones:</span>
+              <span class="value">{{ mapZones().length }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Nombre de Tables:</span>
+              <span class="value">{{ zone.small_tables + zone.large_tables + zone.city_tables }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Nombre de Jeux:</span>
+              <span class="value">{{ games().length }}</span>
+            </div>
           </div>
         </div>
       </mat-card-content>
@@ -151,7 +177,12 @@
               <mat-card-content>
                 <!-- Available Tables Info -->
                 <div class="available-tables-info">
-                  <h4><mat-icon>info</mat-icon> Disponibilité des Tables</h4>
+                  <h4><mat-icon>add_location</mat-icon> Tables Disponibles pour Cette Nouvelle MapZone</h4>
+                  <p class="info-text">
+                    <mat-icon>info</mat-icon>
+                    Ces tables ne sont pas encore assignées à une MapZone. Une fois créée, vous pourrez y assigner des jeux.
+                  </p>
+                  
                   <div class="tables-availability">
                     <div class="table-type-info">
                       <span class="table-type">
@@ -159,10 +190,10 @@
                         <strong>Petites Tables:</strong>
                       </span>
                       <span class="table-numbers">
-                        Disponibles: {{ availableTables().small }} / Total: {{ priceZone()?.small_tables }}
+                        Disponibles: <strong>{{ availableTables().small }}</strong> / Total Zone: {{ priceZone()?.small_tables }}
                       </span>
                       @if (newMapZone().small_tables > 0) {
-                        <span class="remaining">Restantes après: {{ remainingTables().small }}</span>
+                        <span class="remaining">Restantes après création: {{ remainingTables().small }}</span>
                       }
                     </div>
 
@@ -172,10 +203,10 @@
                         <strong>Grandes Tables:</strong>
                       </span>
                       <span class="table-numbers">
-                        Disponibles: {{ availableTables().large }} / Total: {{ priceZone()?.large_tables }}
+                        Disponibles: <strong>{{ availableTables().large }}</strong> / Total Zone: {{ priceZone()?.large_tables }}
                       </span>
                       @if (newMapZone().large_tables > 0) {
-                        <span class="remaining">Restantes après: {{ remainingTables().large }}</span>
+                        <span class="remaining">Restantes après création: {{ remainingTables().large }}</span>
                       }
                     </div>
 
@@ -185,11 +216,25 @@
                         <strong>Tables Mairie:</strong>
                       </span>
                       <span class="table-numbers">
-                        Disponibles: {{ availableTables().city }} / Total: {{ priceZone()?.city_tables }}
+                        Disponibles: <strong>{{ availableTables().city }}</strong> / Total Zone: {{ priceZone()?.city_tables }}
                       </span>
                       @if (newMapZone().city_tables > 0) {
-                        <span class="remaining">Restantes après: {{ remainingTables().city }}</span>
+                        <span class="remaining">Restantes après création: {{ remainingTables().city }}</span>
                       }
+                    </div>
+                  </div>
+
+                  <!-- Add visual comparison -->
+                  <div class="comparison-box">
+                    <div class="comparison-item">
+                      <mat-icon>casino</mat-icon>
+                      <span class="label">Libres dans MapZones existantes:</span>
+                      <span class="value">{{ availableInMapZones().small + availableInMapZones().large + availableInMapZones().city }} tables</span>
+                    </div>
+                    <div class="comparison-item highlight">
+                      <mat-icon>add_location</mat-icon>
+                      <span class="label">Disponibles pour cette nouvelle MapZone:</span>
+                      <span class="value">{{ availableTables().small + availableTables().large + availableTables().city }} tables</span>
                     </div>
                   </div>
                 </div>
@@ -304,11 +349,6 @@
                   </mat-card-header>
                   <mat-card-content>
                     <div class="map-zone-tables">
-<<<<<<< HEAD
-                      <span><mat-icon>grid_view</mat-icon> Petites: {{ mapZone.small_tables }}</span>
-                      <span><mat-icon>table_chart</mat-icon> Grandes: {{ mapZone.large_tables }}</span>
-                      <span><mat-icon>location_city</mat-icon> Ville: {{ mapZone.city_tables }}</span>
-=======
                       @for (tt of mapZone.tableTypes || []; track tt.id) {
                         <span [class.low-availability]="tt.nb_available === 0">
                           @if (tt.name === 'STANDARD') {
@@ -326,18 +366,13 @@
                         <span><mat-icon>table_chart</mat-icon> Large: {{ mapZone.large_tables }}</span>
                         <span><mat-icon>location_city</mat-icon> City: {{ mapZone.city_tables }}</span>
                       }
->>>>>>> Nabil_back
                     </div>
                     @if (mapZone.festivalGames && mapZone.festivalGames.length > 0) {
                       <div class="map-zone-games">
                         <p><strong><mat-icon>casino</mat-icon> Jeux ({{ mapZone.festivalGames.length }}):</strong></p>
                         <ul>
                           @for (fg of mapZone.festivalGames; track fg.id) {
-<<<<<<< HEAD
                             <li>{{ fg.game?.name || 'Inconnu' }}</li>
-=======
-                            <li>{{ fg.game?.name || 'Unknown' }} ({{ fg.allocated_tables }} table{{ fg.allocated_tables > 1 ? 's' : '' }})</li>
->>>>>>> Nabil_back
                           }
                         </ul>
                       </div>

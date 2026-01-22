@@ -66,9 +66,8 @@ export class ReservationCard {
 
   onDelete(event: Event): void {
     event.stopPropagation();
-    if (confirm('Supprimer cette reservation ?')) {
-      this.delete.emit(this.reservation.reservation_id);
-    }
+    // Just emit - dialog is handled in parent (reservation-list)
+    this.delete.emit(this.reservation.reservation_id);
   }
 
   onEdit(event: Event): void {

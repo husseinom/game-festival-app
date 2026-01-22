@@ -13,10 +13,12 @@
             <mat-card-title class="game-name">{{ g.name }}</mat-card-title>
             <mat-card-subtitle class="game-type">{{ g.type }}</mat-card-subtitle>
         </mat-card-content>
-
-		<mat-card-actions class="card-actions">
-			<button mat-raised-button class="delete-btn" (click)="onRemove($event)">Supprimer</button>
-			<button mat-raised-button class="edit-btn" (click)="onEditClick($event)" >Modifier</button>
-		</mat-card-actions>
+        @if (canEdit()) {
+            <mat-card-actions class="card-actions">
+			    <button mat-raised-button class="delete-btn" (click)="onRemove($event)">Supprimer</button>
+			    <button mat-raised-button class="edit-btn" (click)="onEditClick($event)" >Modifier</button>
+		    </mat-card-actions>
+        }
+		
 	</mat-card>
 }

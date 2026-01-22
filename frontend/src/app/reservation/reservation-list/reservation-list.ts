@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, computed } from '@angular/core';
+import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ReservationService } from '../services/reservation.service';
@@ -12,6 +12,8 @@ import {
 } from '../../types/reservation';
 import { ReservationCard } from '../reservation-card/reservation-card';
 import { ReservationForm } from '../reservation-form/reservation-form';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/confirm-dialog-data/confirm-dialog-data';
 
 @Component({
   selector: 'app-reservation-list',
@@ -21,6 +23,10 @@ import { ReservationForm } from '../reservation-form/reservation-form';
   styleUrls: ['./reservation-list.css']
 })
 export class ReservationList implements OnInit {
+  private readonly reservationService = inject(ReservationService);
+  private readonly router = inject(Router);
+  private readonly dialog = inject(MatDialog);
+
   reservations = signal<Reservation[]>([]);
   isLoading = signal(true);
   showForm = signal(false);
@@ -69,11 +75,6 @@ export class ReservationList implements OnInit {
   // Nombre sélectionné
   selectedCount = computed(() => this.selectedIds().size);
   hasSelection = computed(() => this.selectedIds().size > 0);
-
-  constructor(
-    private reservationService: ReservationService,
-    private router: Router
-  ) {}
 
   ngOnInit(): void {
     this.loadReservations();
@@ -157,26 +158,62 @@ export class ReservationList implements OnInit {
   batchUpdateStatus(status: ReservationStatus): void {
     const ids = Array.from(this.selectedIds());
     if (ids.length === 0) return;
-    
-    this.reservationService.updateStatusBatch(ids, status).subscribe({
-      next: (response) => {
-        this.updateReservationsInList(response.data);
-        this.clearSelection();
-      },
-      error: (err) => console.error('Erreur mise à jour statut:', err)
+
+    const dialogData: ConfirmDialogData = {
+      title: '⚠️ Confirmer la mise à jour',
+      message: `Êtes-vous sûr de vouloir changer le statut de ${ids.length} réservation(s) vers "${RESERVATION_STATUS_LABELS[status]}" ?`,
+      confirmText: 'Confirmer',
+      cancelText: 'Annuler'
+    };
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '450px',
+      data: dialogData,
+      enterAnimationDuration: '300ms',
+      exitAnimationDuration: '200ms',
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        this.reservationService.updateStatusBatch(ids, status).subscribe({
+          next: (response) => {
+            this.updateReservationsInList(response.data);
+            this.clearSelection();
+          },
+          error: (err) => console.error('Erreur mise à jour statut:', err)
+        });
+      }
     });
   }
   
   batchUpdateInvoiceStatus(invoiceStatus: InvoiceStatus): void {
     const ids = Array.from(this.selectedIds());
     if (ids.length === 0) return;
-    
-    this.reservationService.updateInvoiceStatusBatch(ids, invoiceStatus).subscribe({
-      next: (response) => {
-        this.updateReservationsInList(response.data);
-        this.clearSelection();
-      },
-      error: (err) => console.error('Erreur mise à jour facturation:', err)
+
+    const dialogData: ConfirmDialogData = {
+      title: '⚠️ Confirmer la mise à jour',
+      message: `Êtes-vous sûr de vouloir changer le statut de facturation de ${ids.length} réservation(s) vers "${INVOICE_STATUS_LABELS[invoiceStatus]}" ?`,
+      confirmText: 'Confirmer',
+      cancelText: 'Annuler'
+    };
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '450px',
+      data: dialogData,
+      enterAnimationDuration: '300ms',
+      exitAnimationDuration: '200ms',
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        this.reservationService.updateInvoiceStatusBatch(ids, invoiceStatus).subscribe({
+          next: (response) => {
+            this.updateReservationsInList(response.data);
+            this.clearSelection();
+          },
+          error: (err) => console.error('Erreur mise à jour facturation:', err)
+        });
+      }
     });
   }
   
@@ -202,38 +239,100 @@ export class ReservationList implements OnInit {
   }
 
   onDeleteReservation(id: number): void {
-    this.reservationService.delete(id).subscribe({
-      next: () => {
-        this.reservations.update(list => list.filter(r => r.reservation_id !== id));
-      },
-      error: (err) => console.error('Erreur suppression:', err)
+    const reservation = this.reservations().find(r => r.reservation_id === id);
+    if (!reservation) return;
+
+    // Get first zone's name if available
+    const zoneName = reservation.zones?.[0]?.priceZone?.name || 'N/A';
+
+    const dialogData: ConfirmDialogData = {
+      title: '⚠️ Confirmer la suppression',
+      message: `Êtes-vous sûr de vouloir supprimer la réservation ?\n\nRéservant: ${reservation.reservant?.name || 'N/A'}\nZone: ${zoneName}\n\n⚠️ Les tables seront libérées.\n⚠️ Cette action est irréversible !`,
+      confirmText: 'Supprimer',
+      cancelText: 'Annuler'
+    };
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '450px',
+      data: dialogData,
+      enterAnimationDuration: '300ms',
+      exitAnimationDuration: '200ms',
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        this.reservationService.delete(id).subscribe({
+          next: () => {
+            this.reservations.update(list => list.filter(r => r.reservation_id !== id));
+          },
+          error: (err) => console.error('Erreur suppression:', err)
+        });
+      }
     });
   }
   
   // Actions rapides depuis la liste
   onStatusChange(id: number, status: ReservationStatus): void {
-    this.reservationService.updateStatus(id, status).subscribe({
-      next: (response) => {
-        this.reservations.update(list => 
-          list.map(r => r.reservation_id === id ? response.data : r)
-        );
-      },
-      error: (err) => console.error('Erreur mise à jour:', err)
+    const dialogData: ConfirmDialogData = {
+      title: '⚠️ Confirmer le changement',
+      message: `Changer le statut de la réservation vers "${RESERVATION_STATUS_LABELS[status]}" ?`,
+      confirmText: 'Confirmer',
+      cancelText: 'Annuler'
+    };
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: dialogData,
+      enterAnimationDuration: '300ms',
+      exitAnimationDuration: '200ms',
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        this.reservationService.updateStatus(id, status).subscribe({
+          next: (response) => {
+            this.reservations.update(list => 
+              list.map(r => r.reservation_id === id ? response.data : r)
+            );
+          },
+          error: (err) => console.error('Erreur mise à jour:', err)
+        });
+      }
     });
   }
   
   onInvoiceAction(id: number, action: 'invoice' | 'paid'): void {
-    const obs = action === 'invoice' 
-      ? this.reservationService.markAsInvoiced(id)
-      : this.reservationService.markAsPaid(id);
-      
-    obs.subscribe({
-      next: (response) => {
-        this.reservations.update(list => 
-          list.map(r => r.reservation_id === id ? response.data : r)
-        );
-      },
-      error: (err) => console.error('Erreur facturation:', err)
+    const actionLabel = action === 'invoice' ? 'facturée' : 'payée';
+    
+    const dialogData: ConfirmDialogData = {
+      title: '⚠️ Confirmer l\'action',
+      message: `Marquer la réservation comme ${actionLabel} ?`,
+      confirmText: 'Confirmer',
+      cancelText: 'Annuler'
+    };
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: dialogData,
+      enterAnimationDuration: '300ms',
+      exitAnimationDuration: '200ms',
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        const obs = action === 'invoice' 
+          ? this.reservationService.markAsInvoiced(id)
+          : this.reservationService.markAsPaid(id);
+          
+        obs.subscribe({
+          next: (response) => {
+            this.reservations.update(list => 
+              list.map(r => r.reservation_id === id ? response.data : r)
+            );
+          },
+          error: (err) => console.error('Erreur facturation:', err)
+        });
+      }
     });
   }
 }

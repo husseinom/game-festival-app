@@ -10,9 +10,7 @@
       <h3>Réservant</h3>
       <p><strong>Nom:</strong> {{ r.reservant?.name || 'Non défini' }}</p>
       <p><strong>Type:</strong> {{ (r.reservant?.type || 'PUBLISHER') | reservantTypeLabel }}</p>
-      @if (isPartner) {
-        <p class="partner-badge">🤝 Partenaire</p>
-      }
+     
       
       <!-- Éditeur -->
       <p class="publisher-row">
@@ -270,11 +268,7 @@
           @if (r.invoice_status === 'PAID') {
             <p class="paid-badge">✅ Payé</p>
           }
-          @if (isPartner && !r.discount_amount) {
-            <button class="btn btn-secondary" (click)="applyPartnerDiscount()" [disabled]="isLoading()">
-              🤝 Appliquer remise partenaire
-            </button>
-          }
+         
         </div>
       </div>
 

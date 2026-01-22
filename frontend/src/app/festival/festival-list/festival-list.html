@@ -1,8 +1,45 @@
 <div class="festival-list-container">
   <!-- Header Section -->
   
+  <!-- Filters Section -->
+  <div class="filters-section">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input 
+        type="text" 
+        class="search-input" 
+        placeholder="Rechercher par nom ou lieu..."
+        [value]="searchQuery()"
+        (input)="onSearchChange($event)"
+      >
+    </div>
+
+    <div class="filter-box">
+      <select 
+        class="filter-select"
+        [value]="dateFilter()"
+        (change)="onDateFilterChange($event)"
+      >
+        <option value="all">Tous les festivals</option>
+        <option value="upcoming">À venir</option>
+        <option value="ongoing">En cours</option>
+        <option value="past">Passés</option>
+      </select>
+    </div>
+
+    @if(searchQuery() || dateFilter() !== 'all') {
+      <button class="clear-btn" (click)="clearFilters()">
+        Réinitialiser
+      </button>
+    }
+
+    <div class="results-count">
+      {{ festivalCount() }} / {{ totalCount() }} festivals
+    </div>
+  </div>
+  
   <div class="button-container">
-    @if(!showform()){
+    @if(!showform() && canManageFestivals()){
         <button (click)="toggleform()" class="action-btn add-btn">Ajouter un festival</button>
     }
     @if(showform()){
@@ -19,19 +56,11 @@
         [editingFestival]="editingFestival()"
       ></app-festival-form>
     </div>
-
-    <!-- Form Section -->
-    @if(showform()){
-      <div class="form-section">
-        <app-festival-form 
-          (newFestival)="add($event)" 
-          (updatedFestival)="update($event)"
-          [editingFestival]="editingFestival()"
-        ></app-festival-form>
-      </div>
-    }
   }
- <!-- Festival Cards Grid -->
+
+  
+
+  <!-- Festival Cards Grid -->
   <div class="festivals-grid">
     @for (festivals of festivals(); track festivals.id){
       <app-festival-card
@@ -40,6 +69,11 @@
         (remove)="remove($event)"
         (edit)="edit($event)"
       > </app-festival-card>
+    } @empty {
+      <div class="no-results">
+        <p>Aucun festival trouvé</p>
+        <p class="hint">Essayez d'ajuster vos filtres</p>
+      </div>
     }
   </div>
 </div>

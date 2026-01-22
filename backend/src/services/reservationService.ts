@@ -117,7 +117,6 @@ export const createReservation = async (data: any) => {
           data: {
             name: publisher.name,
             type: 'PUBLISHER',
-            is_partner: false
           }
         });
         finalReservantId = newReservant.reservant_id;
@@ -377,28 +376,27 @@ export const updateInvoiceStatusBatch = async (ids: number[], invoiceStatus: Inv
   });
 };
 
-export const applyPartnerDiscount = async (id: number) => {
-  const reservation = await prisma.reservation.findUnique({
-    where: { reservation_id: id },
-    include: { reservant: true, zones: { include: { priceZone: true } } }
-  });
+// export const applyPartnerDiscount = async (id: number) => {
+//   const reservation = await prisma.reservation.findUnique({
+//     where: { reservation_id: id },
+//     include: { reservant: true, zones: { include: { priceZone: true } } }
+//   });
 
-  if (!reservation) throw new Error('Réservation introuvable');
-  if (!reservation.reservant.is_partner) throw new Error('Ce réservant n\'est pas un partenaire');
+//   if (!reservation) throw new Error('Réservation introuvable');
 
-  // Calculer le prix total avant remise
-  const totalBeforeDiscount = await calculatePrice(reservation, false);
+//   // Calculer le prix total avant remise
+//   const totalBeforeDiscount = await calculatePrice(reservation, false);
 
-  // Appliquer une remise égale au total pour arriver à 0€
-  return prisma.reservation.update({
-    where: { reservation_id: id },
-    data: {
-      discount_amount: totalBeforeDiscount,
-      final_invoice_amount: 0
-    },
-    include: reservationInclude
-  });
-};
+//   // Appliquer une remise égale au total pour arriver à 0€
+//   return prisma.reservation.update({
+//     where: { reservation_id: id },
+//     data: {
+//       discount_amount: totalBeforeDiscount,
+//       final_invoice_amount: 0
+//     },
+//     include: reservationInclude
+//   });
+// };
 
 // Phase logistique - Liste des jeux
 
@@ -725,7 +723,6 @@ export default {
   markAsInvoiced,
   markAsPaid,
   updateInvoiceStatusBatch,
-  applyPartnerDiscount,
   requestGameList,
   markGameListReceived,
   addGamesToReservation,

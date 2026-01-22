@@ -179,6 +179,126 @@ app-festival-card:nth-child(5) { animation-delay: 0.5s; }
     box-shadow: 0 6px 20px rgba(255, 65, 108, 0.4);
 }
 
+/* Filters Section */
+.filters-section {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.search-box {
+  flex: 1;
+  min-width: 250px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 0 15px;
+}
+
+.search-icon {
+  font-size: 18px;
+  margin-right: 10px;
+}
+
+.search-input {
+  flex: 1;
+  padding: 12px 0;
+  border: none;
+  background: transparent;
+  color: white;
+  font-size: 14px;
+  outline: none;
+}
+
+.search-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.filter-box {
+  min-width: 200px;
+}
+
+.filter-select {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.filter-select:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.filter-select option {
+  background: #1a1a2e;
+  color: white;
+}
+
+.clear-btn {
+  padding: 12px 20px;
+  background: rgba(255, 59, 48, 0.2);
+  border: 1px solid rgba(255, 59, 48, 0.4);
+  border-radius: 8px;
+  color: #ff3b30;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.clear-btn:hover {
+  background: rgba(255, 59, 48, 0.3);
+  border-color: rgba(255, 59, 48, 0.6);
+  transform: translateY(-2px);
+}
+
+.results-count {
+  padding: 12px 20px;
+  background: rgba(76, 217, 100, 0.2);
+  border: 1px solid rgba(76, 217, 100, 0.4);
+  border-radius: 8px;
+  color: #4cd964;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* No Results */
+.no-results {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 60px 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 2px dashed rgba(255, 255, 255, 0.2);
+}
+
+.no-results p {
+  font-size: 24px;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 10px 0;
+}
+
+.no-results .hint {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.4);
+  margin: 0;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .festival-list-container {

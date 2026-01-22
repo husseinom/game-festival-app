@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express';
 import prisma from '../config/prisma.js';
+import { TableConverter } from '../utils/tableConverter.js';
 
 export const getByFestival = async (req: Request, res: Response) => {
   try {
@@ -61,139 +62,28 @@ export const getByPriceZone = async (req: Request, res: Response) => {
 };
 
 export const create = async (req: Request, res: Response) => {
+  const { festival_id, price_zone_id, name, small_tables, large_tables, city_tables } = req.body;
+
   try {
-    const { name, price_zone_id, small_tables, large_tables, city_tables, gameIds } = req.body;
+    const result = await prisma.$transaction(async (tx) => {
+      // Create MapZone
+      const mapZone = await tx.mapZone.create({
+        data: { festival_id, price_zone_id, name }
+      });
 
-    if (!name || !price_zone_id) {
-      return res.status(400).json({ error: 'Name and price_zone_id are required' });
-    }
+      // Auto-convert to TableTypes
+      await TableConverter.createTableTypesFromLegacy(tx, mapZone.id, {
+        small_tables: small_tables || 0,
+        large_tables: large_tables || 0,
+        city_tables: city_tables || 0
+      });
 
-    // Get the price zone to check available tables and get festival_id
-    const priceZone = await prisma.priceZone.findUnique({
-      where: { id: price_zone_id },
-      include: {
-        mapZones: true
-      }
+      return mapZone;
     });
 
-    if (!priceZone) {
-      return res.status(404).json({ error: 'Price zone not found' });
-    }
-
-    // Calculate already allocated tables
-    const allocatedTables = priceZone.mapZones.reduce((acc, zone) => ({
-      small: acc.small + zone.small_tables,
-      large: acc.large + zone.large_tables,
-      city: acc.city + zone.city_tables
-    }), { small: 0, large: 0, city: 0 });
-
-    // Calculate available tables
-    const availableTables = {
-      small: priceZone.small_tables - allocatedTables.small,
-      large: priceZone.large_tables - allocatedTables.large,
-      city: priceZone.city_tables - allocatedTables.city
-    };
-
-    // Validate requested tables
-    const requestedSmall = small_tables || 0;
-    const requestedLarge = large_tables || 0;
-    const requestedCity = city_tables || 0;
-
-    if (requestedSmall > availableTables.small) {
-      return res.status(400).json({
-        error: `Not enough small tables available. Requested: ${requestedSmall}, Available: ${availableTables.small}`
-      });
-    }
-    if (requestedLarge > availableTables.large) {
-      return res.status(400).json({
-        error: `Not enough large tables available. Requested: ${requestedLarge}, Available: ${availableTables.large}`
-      });
-    }
-    if (requestedCity > availableTables.city) {
-      return res.status(400).json({
-        error: `Not enough city tables available. Requested: ${requestedCity}, Available: ${availableTables.city}`
-      });
-    }
-
-    // Create map zone with festival_id
-    const mapZone = await prisma.mapZone.create({
-      data: {
-        name,
-        price_zone_id,
-        festival_id: priceZone.festival_id,
-        small_tables: requestedSmall,
-        large_tables: requestedLarge,
-        city_tables: requestedCity
-      }
-    });
-
-    // Create TableTypes for this map zone
-    const tableTypesToCreate = [];
-    if (requestedSmall > 0) {
-      tableTypesToCreate.push({
-        map_zone_id: mapZone.id,
-        name: 'STANDARD' as const,
-        nb_total: requestedSmall,
-        nb_available: requestedSmall,
-        nb_total_player: 4
-      });
-    }
-    if (requestedLarge > 0) {
-      tableTypesToCreate.push({
-        map_zone_id: mapZone.id,
-        name: 'LARGE' as const,
-        nb_total: requestedLarge,
-        nb_available: requestedLarge,
-        nb_total_player: 6
-      });
-    }
-    if (requestedCity > 0) {
-      tableTypesToCreate.push({
-        map_zone_id: mapZone.id,
-        name: 'CITY' as const,
-        nb_total: requestedCity,
-        nb_available: requestedCity,
-        nb_total_player: 8
-      });
-    }
-
-    if (tableTypesToCreate.length > 0) {
-      await prisma.tableType.createMany({
-        data: tableTypesToCreate
-      });
-    }
-
-    // Assign games to this map zone
-    if (gameIds && gameIds.length > 0) {
-      await prisma.festivalGame.updateMany({
-        where: {
-          id: { in: gameIds },
-          map_zone_id: null
-        },
-        data: { map_zone_id: mapZone.id }
-      });
-    }
-
-    const mapZoneWithGames = await prisma.mapZone.findUnique({
-      where: { id: mapZone.id },
-      include: {
-        festivalGames: {
-          include: {
-            game: true,
-            reservation: {
-              include: {
-                publisher: true
-              }
-            }
-          }
-        }
-      }
-    });
-
-    res.status(201).json(mapZoneWithGames);
-  } catch (error) {
-    console.error('Error creating map zone:', error);
-    res.status(500).json({ message: 'Error creating map zone' });
+    res.status(201).json(result);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
   }
 };
 

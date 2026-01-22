@@ -12,7 +12,7 @@
     <!-- Navigation publique (tous) -->
     <button mat-raised-button color="accent" class="nav-button">
       <a routerLink="/festival-list" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
-        Festivals
+       🎪 Festivals
       </a>
     </button>
 
@@ -28,14 +28,16 @@
       </a>
     </button>
 
+  @if (loggedIn() && (isAdmin())){
     <button mat-raised-button color="accent" class="nav-button">
       <a routerLink="/reservations" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
          📋 Réservations
       </a>
     </button>
+  }
 
     <!-- Bouton Admin (si admin connecté) -->
-    @if (loggedIn() && isAdmin()) {
+    @if (loggedIn() && isAdmin() || isSuperOrganisator()) {
       <button mat-raised-button color="accent" class="nav-button">
         <a routerLink="/admin" routerLinkActive="active">
           ⚙️ Admin

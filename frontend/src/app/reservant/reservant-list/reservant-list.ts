@@ -3,6 +3,8 @@ import { ReservantService } from '../services/reservant-service';
 import { ReservantCard } from '../reservant-card/reservant-card';
 import { ReservantForm } from '../reservant-form/reservant-form';
 import { Reservant } from '../../types/reservant';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/confirm-dialog-data/confirm-dialog-data';
 
 @Component({
   selector: 'app-reservant-list',
@@ -13,6 +15,7 @@ import { Reservant } from '../../types/reservant';
 })
 export class ReservantList {
   private readonly reservantService = inject(ReservantService);
+  private readonly dialog = inject(MatDialog);
 
   readonly reservants = this.reservantService.reservants;
   readonly isLoading = this.reservantService.isLoading;
@@ -46,9 +49,28 @@ export class ReservantList {
   }
 
   onDeleteReservant(reservantId: number) {
-    if (confirm('Êtes-vous sûr de vouloir supprimer ce réservant ?')) {
-      this.reservantService.onDeleteReservant(reservantId);
-    }
+    const reservant = this.reservants().find(r => r.reservant_id === reservantId);
+    if (!reservant) return;
+
+    const dialogData: ConfirmDialogData = {
+      title: '⚠️ Confirmer la suppression',
+      message: `Êtes-vous sûr de vouloir supprimer le réservant "${reservant.name}" ?\n\n⚠️ Cette action supprimera également toutes ses réservations.\n⚠️ Cette action est irréversible !`,
+      confirmText: 'Supprimer',
+      cancelText: 'Annuler'
+    };
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '450px',
+      data: dialogData,
+      enterAnimationDuration: '300ms',
+      exitAnimationDuration: '200ms',
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        this.reservantService.onDeleteReservant(reservantId);
+      }
+    });
   }
 
   refreshReservants() {

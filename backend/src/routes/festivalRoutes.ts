@@ -18,7 +18,7 @@ router.put(
     '/:id',
     verifyToken,
     requireRole(['ADMIN', 'SUPER_ORGANISATOR']),
-    festivalController.updateFestival
+    festivalController.update
 );
 
 // DELETE /api/festivals/:id
@@ -26,7 +26,7 @@ router.delete(
     '/:id',
     verifyToken,
     requireRole(['ADMIN', 'SUPER_ORGANISATOR']),
-    festivalController.deleteFestival
+    festivalController.remove
 );
 
 // GET /api/festivals/all

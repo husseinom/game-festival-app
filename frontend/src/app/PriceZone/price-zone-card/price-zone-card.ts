@@ -5,6 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/confirm-dialog-data/confirm-dialog-data';
+import { RoleService } from '../../shared/services/role.service';
 
 @Component({
   selector: 'app-price-zone-card',
@@ -14,6 +15,7 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/confirm-
 })
 export class PriceZoneCard {
   private readonly dialog = inject(MatDialog);
+  private readonly roleService = inject(RoleService);
 
   public pz = input<PriceZone | null>(null);
   public canEdit = input<boolean>(true); // Can edit if there are 2+ price zones
@@ -23,6 +25,9 @@ export class PriceZoneCard {
   edit = output<number>();
   remove = output<number>();
   isSelected = input<boolean>(false);
+
+  // Role-based permissions
+  readonly canManage = this.roleService.canManageSpaces;
 
   onCardClick(event?: Event): void {
     // Card click -> show details

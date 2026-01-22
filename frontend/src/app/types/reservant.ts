@@ -19,7 +19,6 @@ export const RESERVANT_TYPE_LABELS: Record<ReservantType, string> = {
 };
 
 // Types qui sont considérés comme partenaires (remises possibles)
-export const PARTNER_TYPES: ReservantType[] = ['SHOP', 'ASSOCIATION', 'ANIMATION'];
 
 export interface Reservant {
   reservant_id: number;

@@ -25,12 +25,10 @@
   font-weight: bold;
   color: white;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-<<<<<<< HEAD
   /* background: linear-gradient(45deg, #ff6b6b, #ffd93d); */
   /* -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent; */
-=======
   margin: 0;
 }
 
@@ -138,7 +136,6 @@
 
 .clear-btn:hover {
   background: rgba(255, 107, 107, 0.7);
->>>>>>> Nabil_back
 }
 
 /* Action buttons */

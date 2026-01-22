@@ -2,13 +2,13 @@ import prisma from '../config/prisma.js';
 import { ReservantType } from '@prisma/client';
 
 export const createReservant = async (data: any) => {
-  const { name, type, is_partner } = data;
+  const { name, type } = data;
 
   const newReservant = await prisma.reservant.create({
     data: {
       name,
       type: type || 'PUBLISHER',
-      is_partner: Boolean(is_partner)
+      
     },
   });
 
@@ -46,12 +46,11 @@ export const getReservantById = async (id: number) => {
 };
 
 export const updateReservant = async (id: number, data: any) => {
-  const { name, type, is_partner } = data;
+  const { name, type } = data;
   const updateData: Record<string, any> = {};
 
   if (name !== undefined) updateData.name = name;
   if (type !== undefined) updateData.type = type;
-  if (is_partner !== undefined) updateData.is_partner = Boolean(is_partner);
 
   if (Object.keys(updateData).length === 0) {
     throw new Error('No fields provided for update');
@@ -68,26 +67,26 @@ export const deleteReservant = async (id: number) => {
 };
 
 // Obtenir les partenaires (boutiques, associations)
-export const getPartners = async () => {
-  return prisma.reservant.findMany({
-    where: { is_partner: true },
-    include: {
-      reservations: {
-        select: {
-          reservation_id: true,
-          status: true,
-          festival: { select: { name: true } }
-        }
-      }
-    }
-  });
-};
+// export const getPartners = async () => {
+//   return prisma.reservant.findMany({
+//     where: { is_partner: true },
+//     include: {
+//       reservations: {
+//         select: {
+//           reservation_id: true,
+//           status: true,
+//           festival: { select: { name: true } }
+//         }
+//       }
+//     }
+//   });
+// };
 
 export default {
   createReservant,
   getAllReservants,
   getReservantById,
   updateReservant,
-  deleteReservant,
-  getPartners
+  deleteReservant
+  
 };

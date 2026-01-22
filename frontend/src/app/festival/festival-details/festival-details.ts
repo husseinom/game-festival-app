@@ -6,14 +6,12 @@ import { PriceZoneCard } from '../../PriceZone/price-zone-card/price-zone-card';
 import { PriceZoneEditForm } from '../../PriceZone/price-zone-edit-form/price-zone-edit-form';
 import { Festival } from '../../types/festival';
 import { PriceZone } from '../../types/price-zone';
-<<<<<<< HEAD
 import { MatButtonModule } from '@angular/material/button';
 import { CommonModule } from '@angular/common';
-=======
 import { MapZone } from '../../types/map-zone';
-import { PriceZoneCard } from '../../PriceZone/price-zone-card/price-zone-card';
 import { RoleService } from '../../shared/services/role.service';
->>>>>>> Nabil_back
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/confirm-dialog-data/confirm-dialog-data';
 
 @Component({
   selector: 'app-festival-details',
@@ -23,18 +21,12 @@ import { RoleService } from '../../shared/services/role.service';
   styleUrl: './festival-details.css',
 })
 export class FestivalDetails {
-<<<<<<< HEAD
-  private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
-  private readonly _festivalServices = inject(FestivalServices);
-  private readonly _priceZoneService = inject(PriceZoneServices);
-=======
   private readonly route = inject(ActivatedRoute)
   private readonly router = inject(Router)
   private readonly _festivalServices = inject(FestivalServices)
   private readonly _priceZoneService = inject(PriceZoneServices)
   private readonly roleService = inject(RoleService)
->>>>>>> Nabil_back
+  private readonly dialog = inject(MatDialog)
 
   festivalId = signal<number | null>(null);
   showEditForm = signal(false);
@@ -111,15 +103,38 @@ export class FestivalDetails {
   }
 
   onDeletePriceZone(id: number): void {
-    console.log('onDeletePriceZone called with ID:', id);
-    // Dialog confirmation is now handled in the card component
-    this._priceZoneService.deletePriceZone(id);
+    const priceZone = this.festivalPZ().find(pz => pz.id === id);
+    if (!priceZone) return;
+
+    const mapZoneCount = priceZone.mapZones?.length || 0;
+    const hasMapZones = mapZoneCount > 0;
+
+    const message = hasMapZones
+      ? `Êtes-vous sûr de vouloir supprimer la zone de prix "${priceZone.name}" ?\n\n⚠️ Cette zone contient ${mapZoneCount} map zone(s).\n⚠️ Les map zones et leurs tables seront également supprimées.\n\n⚠️ Cette action est irréversible !`
+      : `Êtes-vous sûr de vouloir supprimer la zone de prix "${priceZone.name}" ?\n\n⚠️ Cette action est irréversible !`;
+
+    const dialogData: ConfirmDialogData = {
+      title: '⚠️ Confirmer la suppression',
+      message: message,
+      confirmText: 'Supprimer',
+      cancelText: 'Annuler'
+    };
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '500px',
+      data: dialogData,
+      enterAnimationDuration: '300ms',
+      exitAnimationDuration: '200ms',
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        this._priceZoneService.deletePriceZone(id);
+      }
+    });
   }
 
   goToPriceZone(id: number): void {
-<<<<<<< HEAD
-    this.router.navigate(['/price-zone', id]);
-=======
     const festId = this.festivalId();
     // SUPER_ORGANISATOR et ADMIN voient la vue de gestion
     if (this.roleService.isSuperOrganisator()) {
@@ -130,7 +145,6 @@ export class FestivalDetails {
         this.router.navigate(['/festival', festId, 'zone', id]);
       }
     }
->>>>>>> Nabil_back
   }
 
   back(): void {

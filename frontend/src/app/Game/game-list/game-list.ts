@@ -8,6 +8,8 @@ import { GameForm } from '../game-form/game-form';
 import { GameCard } from '../game-card/game-card';
 import { GamePubListService } from '../../GamePublisher/service/game-pub-list-service';
 import { RoleService } from '../../shared/services/role.service';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/confirm-dialog-data/confirm-dialog-data';
 
 @Component({
   selector: 'app-game-list',
@@ -17,22 +19,23 @@ import { RoleService } from '../../shared/services/role.service';
   styleUrl: './game-list.css'
 })
 export class GameList {
-  readonly gls = inject(GameListService)
-  readonly allGames = this.gls.games
-  private readonly pubService = inject(GamePubListService)
-  private readonly roleService = inject(RoleService)
-  publishers = this.pubService.gamePubs
-  router = inject(Router)
-  showForm = signal(false)
+  readonly gls = inject(GameListService);
+  readonly allGames = this.gls.games;
+  private readonly pubService = inject(GamePubListService);
+  private readonly roleService = inject(RoleService);
+  private readonly dialog = inject(MatDialog);
+  publishers = this.pubService.gamePubs;
+  router = inject(Router);
+  showForm = signal(false);
 
-  readonly canEdit = this.roleService.canEditGames
+  readonly canEdit = this.roleService.canEditGames;
 
   // Filtres
-  searchQuery = signal('')
-  selectedCategory = signal<string>('')
+  searchQuery = signal('');
+  selectedCategory = signal<string>('');
 
   // Types de jeux (catégories)
-  gameTypes = this.gls.gameTypes
+  gameTypes = this.gls.gameTypes;
 
   // Jeux filtrés
   games = computed(() => {
@@ -54,20 +57,20 @@ export class GameList {
     }
 
     return filtered;
-  })
+  });
 
   // Signaux pour la sélection/édition
-  selectedId = signal<number | null>(null)
-  selectedGame = signal<GameDto | null>(null)
+  selectedId = signal<number | null>(null);
+  selectedGame = signal<GameDto | null>(null);
 
-  gameCount = computed(() => this.games().length)
-  totalCount = computed(() => this.allGames().length)
+  gameCount = computed(() => this.games().length);
+  totalCount = computed(() => this.allGames().length);
 
   constructor(){
     this.gls.getGames();
     this.gls.getGameTypes();
-    this.pubService.getGamePubs(); // Afin d'avoir les éditeurs disponibles
-    // Effect pour mettre à jour selectedGame quand selectedId change
+    this.pubService.getGamePubs();
+    
     effect(() => {
       const id = this.selectedId();
       if (id !== null) {
@@ -76,7 +79,7 @@ export class GameList {
       } else {
         this.selectedGame.set(null);
       }
-    })
+    });
   }
 
   onSearchChange(event: Event): void {
@@ -95,41 +98,58 @@ export class GameList {
   }
 
   toggleForm(){
-    this.showForm.update((s: boolean) => !s)
-    // Réinitialiser la sélection quand on ferme le formulaire
+    this.showForm.update((s: boolean) => !s);
     if (!this.showForm()) {
       this.selectedId.set(null);
     }
   }
 
   onNewGame(game: Omit<GameDto,'id'>): void {
-    this.gls.onNewGame(game)
-    this.showForm.set(false)
-    this.selectedId.set(null)
+    this.gls.onNewGame(game);
+    this.showForm.set(false);
+    this.selectedId.set(null);
   }
 
   onUpdateGame(data: {id: number, game: Omit<GameDto,'id'>}): void {
-    this.gls.updateGame(data.id, data.game)
-    this.showForm.set(false)
-    this.selectedId.set(null)
+    this.gls.updateGame(data.id, data.game);
+    this.showForm.set(false);
+    this.selectedId.set(null);
   }
 
   onEdit(id: number): void {
-    this.selectedId.set(id)
-    this.showForm.set(true)
+    this.selectedId.set(id);
+    this.showForm.set(true);
   }
   
   onDelete(id: number): void {
-    const game = this.gls.findGameById(id)
-    this.gls.onDeleteGame(id)
-    if (this.selectedId() === id) {
-      this.selectedId.set(null)
-    }
+    const game = this.gls.findGameById(id);
+    if (!game) return;
+
+    const dialogData: ConfirmDialogData = {
+      title: '⚠️ Confirmer la suppression',
+      message: `Êtes-vous sûr de vouloir supprimer le jeu "${game.name}" ?\n\n⚠️ Cette action est irréversible !`,
+      confirmText: 'Supprimer',
+      cancelText: 'Annuler'
+    };
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '450px',
+      data: dialogData,
+      enterAnimationDuration: '300ms',
+      exitAnimationDuration: '200ms',
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        this.gls.onDeleteGame(id);
+        if (this.selectedId() === id) {
+          this.selectedId.set(null);
+        }
+      }
+    });
   }
 
   goToGame(id: number){
-    this.router.navigate(['/game', id])
+    this.router.navigate(['/game', id]);
   }
-
-
 }

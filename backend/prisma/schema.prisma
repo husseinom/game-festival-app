@@ -56,9 +56,6 @@ model Festival {
     
     name            String
     location        String
-    small_tables    Int         @default(0)
-    large_tables    Int         @default(0)
-    city_tables     Int         @default(0)
     startDate       DateTime
     endDate         DateTime
     priceZoneTypeId  Int?
@@ -92,19 +89,16 @@ model GameType {
     games Game[]
 }
 
-model MapZone{
-    id            Int  @id @default(autoincrement())
-    festival_id   Int
-    festival      Festival  @relation(fields: [festival_id], references: [id], onDelete: Cascade)
-    price_zone_id Int
-    price_zone    PriceZone @relation(fields: [price_zone_id], references: [id])
-    name          String
-    small_tables  Int       @default(0)
-    large_tables  Int       @default(0)
-    city_tables   Int       @default(0)
-
-    festivalGames FestivalGame[]
-    tableTypes    TableType[]
+model MapZone {
+  id            Int  @id @default(autoincrement())
+  festival_id   Int
+  festival      Festival  @relation(fields: [festival_id], references: [id], onDelete: Cascade)
+  price_zone_id Int
+  price_zone    PriceZone @relation(fields: [price_zone_id], references: [id])
+  name          String
+  
+  festivalGames FestivalGame[]
+  tableTypes    TableType[]
 }
 
 model PriceZoneType{
@@ -114,19 +108,15 @@ model PriceZoneType{
     festivals Festival[]
 }
 
-model PriceZone{
-    id            Int   @id @default(autoincrement())
-    festival_id   Int
-    festival      Festival @relation(fields: [festival_id], references: [id], onDelete: Cascade)
-    name          String
-    table_price   Float
-    small_tables  Int   @default(0)
-    large_tables  Int   @default(0)
-    city_tables   Int   @default(0)
-    total_tables  Int?
+model PriceZone {
+  id            Int   @id @default(autoincrement())
+  festival_id   Int
+  festival      Festival @relation(fields: [festival_id], references: [id], onDelete: Cascade)
+  name          String
+  table_price   Float
 
-    mapZones         MapZone[]
-    zoneReservations ZoneReservation[]
+  mapZones         MapZone[]
+  zoneReservations ZoneReservation[]
 }
 
 model GameMechanism {

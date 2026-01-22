@@ -13,11 +13,13 @@
             <mat-card-title class="game-pub-name">{{ gp.name }}</mat-card-title>
             <mat-card-subtitle class="game-pub-details">{{ gameCount() }} jeux</mat-card-subtitle>
         </mat-card-content>
-
-        <mat-card-actions class="card-actions">
-            <button mat-raised-button class="delete-btn" (click)="onRemove($event)">Supprimer</button>
-            <button mat-raised-button class="edit-btn" (click)="onEditClick($event)">Modifier</button>
-        </mat-card-actions>
+        @if (canEdit()) {
+            <mat-card-actions class="card-actions">
+                <button mat-raised-button class="delete-btn" (click)="onRemove($event)">Supprimer</button>
+                <button mat-raised-button class="edit-btn" (click)="onEditClick($event)">Modifier</button>
+            </mat-card-actions>
+        }
+        
     </mat-card>
 }
 

@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express';
 import prisma from '../config/prisma.js';
+import { TableConverter } from '../utils/tableConverter.js';
 
 export const getAllTypes = async (_req: Request, res: Response) => {
   try {
@@ -11,15 +12,53 @@ export const getAllTypes = async (_req: Request, res: Response) => {
   }
 };
 
-export const getAllZones = async(_req: Request, res: Response)=>{
-  try{
-    const zones = await prisma.priceZone.findMany({orderBy: {name: 'asc'}});
-    res.status(200).json(zones);
+export const getAllZones = async(_req: Request, res: Response) => {
+  try {
+    const zones = await prisma.priceZone.findMany({
+      orderBy: { name: 'asc' },
+      include: {
+        mapZones: {
+          include: {
+            tableTypes: true // Include TableTypes to calculate totals
+          }
+        }
+      }
+    });
+
+    // Calculate actual table totals from MapZone TableTypes
+    const zonesWithCalculatedTotals = await Promise.all(
+      zones.map(async (zone) => {
+        let small_tables = 0;
+        let large_tables = 0;
+        let city_tables = 0;
+
+        // Calculate from MapZone TableTypes
+        for (const mapZone of zone.mapZones) {
+          if (mapZone.tableTypes && mapZone.tableTypes.length > 0) {
+            for (const tt of mapZone.tableTypes) {
+              if (tt.name === 'STANDARD') small_tables += tt.nb_total;
+              else if (tt.name === 'LARGE') large_tables += tt.nb_total;
+              else if (tt.name === 'CITY') city_tables += tt.nb_total;
+            }
+          }
+        }
+
+        return {
+          ...zone,
+          small_tables,
+          large_tables,
+          city_tables,
+          total_tables: small_tables + large_tables + city_tables
+        };
+      })
+    );
+
+    res.status(200).json(zonesWithCalculatedTotals);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to load price zones' });
   }
-}
+};
 
 export const getZonesByFestival = async (req: Request, res: Response) => {
   try {
@@ -31,10 +70,41 @@ export const getZonesByFestival = async (req: Request, res: Response) => {
     const zones = await prisma.priceZone.findMany({
       where: { festival_id: festivalId },
       orderBy: { name: 'asc' },
-      include: { mapZones: true } // optional
+      include: { 
+        mapZones: {
+          include: {
+            tableTypes: true // Include TableTypes
+          }
+        }
+      }
     });
 
-    res.status(200).json(zones);
+    // Calculate totals from MapZone TableTypes
+    const zonesWithCalculatedTotals = zones.map(zone => {
+      let small_tables = 0;
+      let large_tables = 0;
+      let city_tables = 0;
+
+      for (const mapZone of zone.mapZones) {
+        if (mapZone.tableTypes && mapZone.tableTypes.length > 0) {
+          for (const tt of mapZone.tableTypes) {
+            if (tt.name === 'STANDARD') small_tables += tt.nb_total;
+            else if (tt.name === 'LARGE') large_tables += tt.nb_total;
+            else if (tt.name === 'CITY') city_tables += tt.nb_total;
+          }
+        }
+      }
+
+      return {
+        ...zone,
+        small_tables,
+        large_tables,
+        city_tables,
+        total_tables: small_tables + large_tables + city_tables
+      };
+    });
+
+    res.status(200).json(zonesWithCalculatedTotals);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to load price zones for festival' });
@@ -52,14 +122,30 @@ export const updatePriceZone = async (req: Request, res: Response) => {
 
     // Start transaction
     const updated = await prisma.$transaction(async (tx) => {
-      // Get current zone
+      // Get current zone with MapZones and TableTypes
       const currentZone = await tx.priceZone.findUnique({ 
         where: { id },
-        include: { mapZones: true }
+        include: { 
+          mapZones: {
+            include: {
+              tableTypes: true
+            }
+          }
+        }
       });
       
       if (!currentZone) {
         throw new Error('Price zone not found');
+      }
+
+      // Calculate current totals from TableTypes
+      let currentSmall = 0, currentLarge = 0, currentCity = 0;
+      for (const mapZone of currentZone.mapZones) {
+        for (const tt of mapZone.tableTypes || []) {
+          if (tt.name === 'STANDARD') currentSmall += tt.nb_total;
+          else if (tt.name === 'LARGE') currentLarge += tt.nb_total;
+          else if (tt.name === 'CITY') currentCity += tt.nb_total;
+        }
       }
 
       // Find other price zone in same festival
@@ -67,47 +153,33 @@ export const updatePriceZone = async (req: Request, res: Response) => {
         where: {
           festival_id: currentZone.festival_id,
           id: { not: id }
+        },
+        include: {
+          mapZones: {
+            include: {
+              tableTypes: true
+            }
+          }
         }
       });
 
-      // Calculate new table values for this zone
-      const newSmallTables = small_tables !== undefined ? small_tables : currentZone.small_tables;
-      const newLargeTables = large_tables !== undefined ? large_tables : currentZone.large_tables;
-      const newCityTables = city_tables !== undefined ? city_tables : currentZone.city_tables;
-      
-      // Calculate total tables for this zone
-      const newTotalTables = newSmallTables + newLargeTables + newCityTables;
-
-      // If tables are being updated and there's another zone, adjust it
+      // If updating tables and there's another zone
       if ((small_tables !== undefined || large_tables !== undefined || city_tables !== undefined) && otherZone) {
-        // Calculate the differences (positive means adding to this zone, negative means removing)
-        const smallDiff = newSmallTables - currentZone.small_tables;
-        const largeDiff = newLargeTables - currentZone.large_tables;
-        const cityDiff = newCityTables - currentZone.city_tables;
+        const newSmallTables = small_tables !== undefined ? small_tables : currentSmall;
+        const newLargeTables = large_tables !== undefined ? large_tables : currentLarge;
+        const newCityTables = city_tables !== undefined ? city_tables : currentCity;
 
-        // Calculate new values for other zone (subtract the difference)
-        const otherNewSmall = otherZone.small_tables - smallDiff;
-        const otherNewLarge = otherZone.large_tables - largeDiff;
-        const otherNewCity = otherZone.city_tables - cityDiff;
-
-        // Validate that other zone doesn't go negative
-        if (otherNewSmall < 0 || otherNewLarge < 0 || otherNewCity < 0) {
-          throw new Error('Cannot update: would result in negative tables in other zone');
+        // Note: With TableTypes, you can't directly "move" tables between price zones
+        // Tables are allocated at MapZone level via TableTypes
+        // This validation ensures you're not exceeding festival totals
+        
+        const festivalTotals = await TableConverter.calculateFestivalTotals(tx, currentZone.festival_id);
+        
+        if (newSmallTables > festivalTotals.small_tables || 
+            newLargeTables > festivalTotals.large_tables || 
+            newCityTables > festivalTotals.city_tables) {
+          throw new Error('Cannot allocate more tables than festival total');
         }
-
-        // Calculate total for other zone
-        const otherNewTotal = otherNewSmall + otherNewLarge + otherNewCity;
-
-        // Update other zone
-        await tx.priceZone.update({
-          where: { id: otherZone.id },
-          data: {
-            small_tables: otherNewSmall,
-            large_tables: otherNewLarge,
-            city_tables: otherNewCity,
-            total_tables: otherNewTotal
-          }
-        });
       }
 
       // Handle map zone reassignment
@@ -135,29 +207,46 @@ export const updatePriceZone = async (req: Request, res: Response) => {
         }
       }
 
-      // Update this price zone with total_tables
-      return await tx.priceZone.update({
+      // Update price zone (only table_price, not table counts)
+      const updatedZone = await tx.priceZone.update({
         where: { id },
         data: {
-          ...(table_price !== undefined && { table_price }),
-          ...(small_tables !== undefined && { small_tables: newSmallTables }),
-          ...(large_tables !== undefined && { large_tables: newLargeTables }),
-          ...(city_tables !== undefined && { city_tables: newCityTables }),
-          total_tables: newTotalTables
+          ...(table_price !== undefined && { table_price })
+          // Don't update small_tables, large_tables, city_tables
+          // They're calculated from MapZone TableTypes
         },
-        include: { mapZones: true }
+        include: { 
+          mapZones: {
+            include: {
+              tableTypes: true
+            }
+          }
+        }
       });
+
+      // Calculate totals from TableTypes
+      let small = 0, large = 0, city = 0;
+      for (const mapZone of updatedZone.mapZones) {
+        for (const tt of mapZone.tableTypes || []) {
+          if (tt.name === 'STANDARD') small += tt.nb_total;
+          else if (tt.name === 'LARGE') large += tt.nb_total;
+          else if (tt.name === 'CITY') city += tt.nb_total;
+        }
+      }
+
+      return {
+        ...updatedZone,
+        small_tables: small,
+        large_tables: large,
+        city_tables: city,
+        total_tables: small + large + city
+      };
     });
 
     res.json(updated);
   } catch (err: any) {
     console.error('Error updating price zone:', err);
-    
-    if (err.message === 'Cannot update: would result in negative tables in other zone') {
-      return res.status(400).json({ error: 'Cannot update: insufficient tables in other zone' });
-    }
-    
-    res.status(500).json({ error: 'Failed to update price zone' });
+    res.status(500).json({ error: err.message || 'Failed to update price zone' });
   }
 };
 

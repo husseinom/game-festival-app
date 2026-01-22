@@ -4,6 +4,8 @@ import { Role } from '../../types/user-dto';
 import { UserCard } from '../user-card/user-card';
 import { UserForm } from '../user-form/user-form';
 import { AuthService } from '../../shared/auth/auth-service';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/confirm-dialog-data/confirm-dialog-data';
 
 @Component({
   selector: 'app-user-list',
@@ -15,6 +17,7 @@ import { AuthService } from '../../shared/auth/auth-service';
 export class UserList {
   private readonly adminService = inject(AdminService);
   private readonly authService = inject(AuthService);
+  private readonly dialog = inject(MatDialog);
 
   readonly users = this.adminService.users;
   readonly isLoading = this.adminService.isLoading;
@@ -43,9 +46,28 @@ export class UserList {
   }
 
   onDeleteUser(userId: number) {
-    if (confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
-      this.adminService.deleteUser(userId);
-    }
+    const user = this.users().find(u => u.id === userId);
+    if (!user) return;
+
+    const dialogData: ConfirmDialogData = {
+      title: '⚠️ Confirmer la suppression',
+      message: `Êtes-vous sûr de vouloir supprimer l'utilisateur "${user.name}" ?\n\nEmail: ${user.email}\nRôle: ${user.role}\n\n⚠️ Cette action est irréversible !`,
+      confirmText: 'Supprimer',
+      cancelText: 'Annuler'
+    };
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '450px',
+      data: dialogData,
+      enterAnimationDuration: '300ms',
+      exitAnimationDuration: '200ms',
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        this.adminService.deleteUser(userId);
+      }
+    });
   }
 
   refreshUsers() {

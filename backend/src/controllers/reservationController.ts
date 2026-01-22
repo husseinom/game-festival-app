@@ -174,16 +174,7 @@ export const updateInvoiceStatusBatch = async (req: Request, res: Response) => {
   }
 };
 
-export const applyPartnerDiscount = async (req: Request, res: Response) => {
-  const id = Number(req.params.id);
-  try {
-    const updated = await reservationService.applyPartnerDiscount(id);
-    res.status(200).json({ message: 'Remise partenaire appliquée', data: updated });
-  } catch (error: any) {
-    console.error(error);
-    res.status(400).json({ error: error.message || 'Erreur lors de l\'application de la remise' });
-  }
-};
+
 
 export const recalculatePrice = async (req: Request, res: Response) => {
   const id = Number(req.params.id);
@@ -366,4 +357,5 @@ export const getStats = async (req: Request, res: Response) => {
     console.error(error);
     res.status(500).json({ error: 'Erreur serveur' });
   }
+  
 };

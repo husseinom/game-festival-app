@@ -23,6 +23,9 @@ import { GameDto } from '../../types/game-dto';
 import { GameService } from '../../Game/services/game-service';
 import { MapZoneService } from '../../MapZone/services/map-zone-services';
 import { MapZone } from '../../types/map-zone';
+import { Location } from '@angular/common';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/confirm-dialog-data/confirm-dialog-data';
 
 @Component({
   selector: 'app-reservation-detail',
@@ -38,6 +41,7 @@ export class ReservationDetail {
   private readonly mapZoneService = inject(MapZoneService);
   private readonly location = inject(Location);
   private readonly router = inject(Router);
+  private readonly dialog = inject(MatDialog);
 
   // Signal pour rafraîchir la réservation
   private readonly refresh$ = new BehaviorSubject<void>(undefined);
@@ -137,17 +141,6 @@ export class ReservationDetail {
     }
   }
 
-<<<<<<< HEAD
-
-  getStatusLabel(status?: string): string {
-    const statusMap: Record<string, string> = {
-      'pending': 'En attente',
-      'confirmed': 'Confirmée',
-      'cancelled': 'Annulée',
-      'completed': 'Complétée'
-    };
-    return status ? statusMap[status] || status : 'Non défini';
-=======
   goToEdit(): void {
     const r = this.reservation();
     if (r) {
@@ -238,22 +231,7 @@ export class ReservationDetail {
     });
   }
 
-  applyPartnerDiscount(): void {
-    const r = this.reservation();
-    if (!r) return;
-    
-    this.isLoading.set(true);
-    this.reservationService.applyPartnerDiscount(r.reservation_id).subscribe({
-      next: () => {
-        this.refreshReservation();
-        this.isLoading.set(false);
-      },
-      error: (err: any) => {
-        console.error('Erreur remise partenaire:', err);
-        this.isLoading.set(false);
-      }
-    });
-  }
+  
 
   // ============================================
   // Phase logistique - Gestion des jeux
@@ -430,18 +408,71 @@ export class ReservationDetail {
   }
 
   removeGameFromReservation(festivalGameId: number): void {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer ce jeu de la réservation ?')) {
-      return;
-    }
-    this.isLoading.set(true);
-    this.reservationService.removeGame(festivalGameId).subscribe({
-      next: () => {
-        this.refreshReservation();
-        this.isLoading.set(false);
-      },
-      error: (err: any) => {
-        console.error('Erreur suppression jeu:', err);
-        this.isLoading.set(false);
+    const game = this.reservation()?.games?.find(g => g.id === festivalGameId);
+    if (!game) return;
+
+    const dialogData: ConfirmDialogData = {
+      title: '⚠️ Confirmer le retrait',
+      message: `Êtes-vous sûr de vouloir retirer le jeu "${game.game?.name || 'ce jeu'}" de la réservation ?\n\n⚠️ Le jeu sera désassigné de sa map zone si placé.\n⚠️ Cette action est irréversible !`,
+      confirmText: 'Retirer',
+      cancelText: 'Annuler'
+    };
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '450px',
+      data: dialogData,
+      enterAnimationDuration: '300ms',
+      exitAnimationDuration: '200ms',
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        this.isLoading.set(true);
+        this.reservationService.removeGame(festivalGameId).subscribe({
+          next: () => {
+            this.refreshReservation();
+            this.isLoading.set(false);
+          },
+          error: (err: any) => {
+            console.error('Erreur suppression jeu:', err);
+            this.isLoading.set(false);
+          }
+        });
+      }
+    });
+  }
+
+  unplaceGame(festivalGameId: number): void {
+    const game = this.reservation()?.games?.find(g => g.id === festivalGameId);
+    if (!game) return;
+
+    const dialogData: ConfirmDialogData = {
+      title: '⚠️ Confirmer le retrait',
+      message: `Êtes-vous sûr de vouloir retirer "${game.game?.name || 'ce jeu'}" de sa zone ?\n\n✅ Le jeu restera dans la réservation mais sera désassigné de sa map zone.\n✅ Les tables seront libérées.`,
+      confirmText: 'Retirer de la zone',
+      cancelText: 'Annuler'
+    };
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '450px',
+      data: dialogData,
+      enterAnimationDuration: '300ms',
+      exitAnimationDuration: '200ms',
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        this.isLoading.set(true);
+        this.reservationService.unplaceGame(festivalGameId).subscribe({
+          next: () => {
+            this.refreshReservation();
+            this.isLoading.set(false);
+          },
+          error: (err: any) => {
+            console.error('Erreur retrait jeu:', err);
+            this.isLoading.set(false);
+          }
+        });
       }
     });
   }
@@ -470,10 +501,10 @@ export class ReservationDetail {
     return !!r && !!r.games && r.games.length > 0 && r.games_received === false;
   }
 
-  get isPartner(): boolean {
-    const r = this.reservation();
-    return !!r?.reservant?.is_partner;
-  }
+  // get isPartner(): boolean {
+  //   const r = this.reservation();
+  //   return !!r?.reservant?.is_partner;
+  // }
 
   getTotalAllocatedTables(): number {
     const r = this.reservation();
@@ -551,39 +582,31 @@ export class ReservationDetail {
     });
   }
 
-  // Retirer un jeu d'une zone
-  unplaceGame(festivalGameId: number): void {
-    if (!confirm('Retirer ce jeu de sa zone ?')) return;
-    
-    this.isLoading.set(true);
-    this.reservationService.unplaceGame(festivalGameId).subscribe({
-      next: () => {
-        this.refreshReservation();
-        this.isLoading.set(false);
-      },
-      error: (err: any) => {
-        console.error('Erreur retrait jeu:', err);
-        this.isLoading.set(false);
-      }
-    });
-  }
 
   // Vérifier que le nombre de tables demandées ne dépasse pas les limites de la zone
   private checkTableLimits(festivalGame: FestivalGame, mapZoneId: number): boolean {
-    const r = this.reservation();
     const mapZone = this.availableMapZones().find(z => z.id === mapZoneId);
     
-    if (!r || !mapZone) return false;
+    if (!mapZone) return false;
 
     // Obtenir le type de table sélectionné
     const tableSize = this.selectedTableSize();
     
-    // Compter les tables déjà placées dans cette zone (du même type)
-    const tablesAlreadyInZone = (r.games || [])
-      .filter((g: FestivalGame) => g.map_zone_id === mapZoneId && g.id !== festivalGame.id && g.table_size === tableSize)
-      .reduce((sum: number, g: FestivalGame) => sum + (g.allocated_tables || 0), 0);
+    // ✅ Check nb_available from TableTypes (real-time availability)
+    if (mapZone.tableTypes && mapZone.tableTypes.length > 0) {
+      const tableType = mapZone.tableTypes.find(tt => tt.name === tableSize);
+      
+      if (!tableType) {
+        console.warn(`No TableType found for ${tableSize} in MapZone ${mapZoneId}`);
+        return false;
+      }
 
-    // Récupérer le nombre de tables disponibles dans la MapZone selon le type
+      // Check if there's enough available capacity
+      return (festivalGame.allocated_tables || 1) <= tableType.nb_available;
+    }
+
+    // ❌ Fallback for legacy MapZones without TableTypes (shouldn't happen with new system)
+    console.warn('MapZone without TableTypes, using legacy fields');
     let maxTables = 0;
     switch (tableSize) {
       case 'STANDARD':
@@ -597,9 +620,7 @@ export class ReservationDetail {
         break;
     }
 
-    const newTotal = tablesAlreadyInZone + (festivalGame.allocated_tables || 1);
-    
-    return newTotal <= maxTables;
+    return (festivalGame.allocated_tables || 1) <= maxTables;
   }
 
   // Obtenir un résumé des tables utilisées par MapZone
@@ -679,6 +700,5 @@ export class ReservationDetail {
     const r = this.reservation();
     if (!r?.games) return 0;
     return r.games.filter((g: FestivalGame) => g.map_zone_id !== null && g.map_zone_id !== undefined).length;
->>>>>>> Nabil_back
   }
 }
