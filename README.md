@@ -42,3 +42,6 @@ docker compose up --build
 ### Importer les données CSV
 
 L'import se fait automatiquement au premier lancement via le service `importer`.
+
+### Accés au site deployé
+https://162.38.111.36
