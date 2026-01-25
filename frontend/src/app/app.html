@@ -28,7 +28,7 @@
       </a>
     </button>
 
-  @if (loggedIn() && (isAdmin())){
+  @if (loggedIn() && (isAdmin() || isSuperOrganisator())){
     <button mat-raised-button color="accent" class="nav-button">
       <a routerLink="/reservations" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
          📋 Réservations
@@ -37,7 +37,7 @@
   }
 
     <!-- Bouton Admin (si admin connecté) -->
-    @if (loggedIn() && isAdmin() || isSuperOrganisator()) {
+    @if (loggedIn() && isAdmin()) {
       <button mat-raised-button color="accent" class="nav-button">
         <a routerLink="/admin" routerLinkActive="active">
           ⚙️ Admin

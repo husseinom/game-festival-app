@@ -6,18 +6,17 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Début du seeding des données de test...');
 
-  // --- 1. Nettoyage (Optionnel : commentez si vous voulez garder les anciennes données) ---
   console.log('🧹 Nettoyage des données existantes (hors Jeux/Éditeurs)...');
-  await prisma.tableType.deleteMany(); // ✅ Added
-  await prisma.zoneReservation.deleteMany();
-  await prisma.contactLog.deleteMany();
-  await prisma.festivalGame.deleteMany();
-  await prisma.reservation.deleteMany();
-  await prisma.mapZone.deleteMany();
-  await prisma.priceZone.deleteMany();
-  await prisma.festival.deleteMany();
-  await prisma.reservant.deleteMany();
-  await prisma.user.deleteMany();
+  // await prisma.tableType.deleteMany(); // ✅ Added
+  // await prisma.zoneReservation.deleteMany();
+  // await prisma.contactLog.deleteMany();
+  // await prisma.festivalGame.deleteMany();
+  // await prisma.reservation.deleteMany();
+  // await prisma.mapZone.deleteMany();
+  // await prisma.priceZone.deleteMany();
+  // await prisma.festival.deleteMany();
+  // await prisma.reservant.deleteMany();
+  // await prisma.user.deleteMany();
 
   // --- 2. Création des Utilisateurs (Tous les rôles) ---
   console.log('👤 Création des utilisateurs...');
